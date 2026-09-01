@@ -1,0 +1,180 @@
+<title>Katlego Bill of Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --paper: #f4f6f2;
+    --card: #ffffff;
+    --ink: #17241d;
+    --muted: #55665c;
+    --line: #d8e0d9;
+    --green: #0b6e4f;
+    --gold: #c98a1b;
+    --placeholder-bg: #fdf6e7;
+    --free: #0b6e4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #101713;
+      --card: #182119;
+      --ink: #e8ede8;
+      --muted: #9cab9f;
+      --line: #2b372e;
+      --green: #3fae85;
+      --gold: #e0aa45;
+      --placeholder-bg: #241d0e;
+      --free: #3fae85;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #101713;
+    --card: #182119;
+    --ink: #e8ede8;
+    --muted: #9cab9f;
+    --line: #2b372e;
+    --green: #3fae85;
+    --gold: #e0aa45;
+    --placeholder-bg: #241d0e;
+    --free: #3fae85;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px; line-height: 1.6;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 52px 24px 80px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--green);
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(32px, 5vw, 44px); font-weight: 700; line-height: 1.1;
+    text-wrap: balance; margin: 10px 0 14px;
+  }
+  .standfirst { font-size: 17.5px; color: var(--muted); max-width: 62ch; }
+  h2 {
+    font-family: "Fraunces", Georgia, serif; font-size: 24px; font-weight: 600;
+    margin: 0 0 6px; text-wrap: balance;
+  }
+  .sub { color: var(--muted); font-size: 14.5px; max-width: 68ch; }
+  section { margin-top: 52px; }
+  .tablewrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; background: var(--card); font-size: 14.5px; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.n { font-family: "Fraunces", Georgia, serif; font-weight: 700; color: var(--green); }
+  td.cost { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td small { color: var(--muted); display: block; margin-top: 2px; }
+  .free { color: var(--free); font-weight: 600; }
+  .ph {
+    background: var(--placeholder-bg); border: 1px dashed var(--gold);
+    border-radius: 6px; padding: 0 7px; color: var(--gold); font-weight: 600;
+    font-size: .95em; white-space: nowrap;
+  }
+  .totals {
+    margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 620px) { .totals { grid-template-columns: 1fr; } }
+  .total-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .total-card .label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .total-card .num {
+    font-family: "Fraunces", Georgia, serif; font-size: 30px; font-weight: 700;
+    color: var(--green); margin-top: 4px; font-variant-numeric: tabular-nums;
+  }
+  .total-card p { font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+  .callout {
+    margin-top: 18px; padding: 16px 20px; background: var(--card);
+    border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; font-size: 15px;
+    max-width: 72ch;
+  }
+  ul.plain { margin: 14px 0 0; padding-left: 20px; font-size: 15px; }
+  ul.plain li { margin-bottom: 8px; max-width: 68ch; }
+  ul.plain li strong { font-weight: 600; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Katlego · Third-Party Costs · Minimal Viable Path · August 2026</div>
+    <h1>What we actually need to pay for</h1>
+    <p class="standfirst">Every third-party subscription and purchase required to take the working proof-of-concept live, in the order we need them. Estimates are for planning (Aug 2026 pricing), not quotes. The engineering is already built to swap these in by configuration — no rebuild costs.</p>
+  </header>
+
+  <section>
+    <h2>Phase 0 — required to go live with a pilot</h2>
+    <p class="sub">Ordered by when to start each one. Item 1 gates everything: Meta's business verification takes days to weeks, so it begins on day one.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>#</th><th>Item</th><th>Provider</th><th>One-off</th><th>Monthly</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1</td><td>Meta Business Manager account + <strong>business verification</strong><small>Needs company registration documents. Start immediately — it gates WhatsApp API access.</small></td><td>business.facebook.com</td><td class="cost free">Free</td><td class="cost free">—</td></tr>
+          <tr><td class="n">2</td><td>Dedicated phone number for the bot<small>SA SIM or virtual number. Must not be attached to an existing WhatsApp. This number becomes the product's identity.</small></td><td>Any SA carrier</td><td class="cost">~R100</td><td class="cost">airtime</td></tr>
+          <tr><td class="n">3</td><td>WhatsApp Business Platform (Cloud API)<small>Free platform access, direct from Meta — no BSP middleman fees. We pay per template message only; learner-initiated chat is free inside the 24-hour window.</small></td><td>developers.facebook.com</td><td class="cost free">Free</td><td class="cost">usage (near zero at pilot)</td></tr>
+          <tr><td class="n">4</td><td>Domain name + TLS<small>Meta requires an HTTPS webhook endpoint.</small></td><td>Any registrar</td><td class="cost">—</td><td class="cost">R150–300 /yr</td></tr>
+          <tr><td class="n">5</td><td>Cloud hosting, <strong>af-south-1</strong> (Cape Town)<small>One container host + managed Postgres (pgvector) + Redis. SA region gives the clean POPIA data-residency story for schools and government.</small></td><td>AWS or DigitalOcean</td><td class="cost">—</td><td class="cost">R600–1,400</td></tr>
+          <tr><td class="n">6</td><td>LLM API<small>Two-tier: cheap router model + frontier reasoner for maths. Usage-based; the intent router keeps per-session cost in the cents.</small></td><td>Anthropic</td><td class="cost">—</td><td class="cost">R2,000–5,000 (pilot)</td></tr>
+          <tr><td class="n">7</td><td>Speech-to-text API<small>Voice notes. Sign-up free; cents per audio minute. The POC's local Whisper covers development at R0 — this is for production scale.</small></td><td>OpenAI (Whisper)</td><td class="cost free">Free sign-up</td><td class="cost">usage (cents/min)</td></tr>
+          <tr><td class="n">8</td><td>POPIA compliance<small>Information Officer registration (free) + legal review of the guardian-consent flow and privacy notice. Launch blocker — our users are minors.</small></td><td>Information Regulator + attorneys</td><td class="cost">R10,000–20,000</td><td class="cost free">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals">
+      <div class="total-card">
+        <div class="label">One-off to launch</div>
+        <div class="num">≈ R10k–20k</div>
+        <p>Almost entirely the POPIA legal review. Everything else one-off is under R300.</p>
+      </div>
+      <div class="total-card">
+        <div class="label">Monthly pilot run-rate</div>
+        <div class="num">≈ R2.7k–6.5k</div>
+        <p>Dominated by LLM tokens — the one cost that scales with usage, and the one our router architecture actively controls.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Why the number is this small:</strong> the proof-of-concept was built mock-first. Every paid service sits behind an adapter that swaps in with an API key — there is no integration engineering left to fund, and there are no platform middleman fees (no BSP, no per-seat SaaS) on the minimal path.
+    </div>
+  </section>
+
+  <section>
+    <h2>Deferred — buy only when a trigger is hit</h2>
+    <p class="sub">Each has a defined trigger, so spend follows proof, not hope.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Item</th><th>Provider</th><th>Est. cost</th><th>Trigger to buy</th></tr></thead>
+        <tbody>
+          <tr><td>Error tracking / observability</td><td>Sentry</td><td class="cost">Free tier → ~R500/mo</td><td>First 100 weekly-active learners</td></tr>
+          <tr><td>Airtime/data micro-rewards API</td><td>Reloadly / Flickswitch</td><td class="cost">R5–10 per voucher</td><td>Streak mechanics ship (P2)</td></tr>
+          <tr><td>Journey tooling &amp; analytics</td><td>Turn.io</td><td class="cost">Social-impact pricing</td><td>Only if it beats maintaining our own template ops</td></tr>
+          <tr><td>#datafree channel partnership</td><td>Moya / biNu</td><td class="cost">Negotiated reverse-billing</td><td>P2 — the "data ran out at 10pm" lifeline</td></tr>
+          <tr><td>USSD code + aggregator</td><td>Africa's Talking or SA aggregator</td><td class="cost">Setup + per-session</td><td>P3 — formula-lookup fallback</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Explicitly not buying</h2>
+    <ul class="plain">
+      <li><strong>BSP platform fees</strong> (Twilio, Infobip, MessageBird) — we go direct to Meta's Cloud API, which is free.</li>
+      <li><strong>A dedicated vector database</strong> (Pinecone, Weaviate) — pgvector inside our existing Postgres covers retrieval until scale actually hurts.</li>
+      <li><strong>GPUs or model fine-tuning</strong> — prompted frontier models + curriculum RAG beat a fine-tune on accuracy per rand; revisit only if measured vernacular performance demands it (P2+).</li>
+      <li><strong>Textbook licences</strong> — our corpus is free, public DBE material (CAPS, ATPs, NSC papers with memos). That is a feature, not a gap.</li>
+      <li><strong>Native app development</strong> — the product lives in WhatsApp; that's the thesis.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Katlego</strong> (working title TutoBuddy) · Prepared <span class="ph">[date]</span> for <span class="ph">[investor name]</span> · Contact: <span class="ph">[name · email · phone]</span>. Figures derive from the project's technical blueprint (verified Aug 2026); the runnable proof-of-concept and full blueprint are available on request.</p>
+  </footer>
+</div>
