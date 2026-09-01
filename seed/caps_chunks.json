@@ -1,0 +1,146 @@
+[
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Factorising quadratic trinomials",
+    "doc_type": "CAPS note",
+    "content": "To factorise a quadratic trinomial x² + bx + c, find two numbers whose product is c and whose sum is b. Write the trinomial as (x + m)(x + n) where m·n = c and m + n = b. Always check the factorisation by expanding the brackets. Example: x² + 5x + 6 = (x + 2)(x + 3) because 2 × 3 = 6 and 2 + 3 = 5."
+  },
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Factorising: common factor and grouping",
+    "doc_type": "CAPS note",
+    "content": "Always take out the highest common factor first before any other factorisation. For four-term expressions, group terms in pairs and take a common factor from each pair, then factor out the common bracket. Example: ax + ay + bx + by = a(x + y) + b(x + y) = (a + b)(x + y)."
+  },
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Difference of two squares",
+    "doc_type": "CAPS note",
+    "content": "A difference of two squares factorises as a² − b² = (a − b)(a + b). This only works for a difference, never a sum, of squares. Look for it after removing common factors. Example: 9x² − 25 = (3x − 5)(3x + 5)."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Quadratic formula",
+    "doc_type": "CAPS note",
+    "content": "When a quadratic equation ax² + bx + c = 0 cannot be factorised easily, use the quadratic formula: x = (−b ± √(b² − 4ac)) / (2a). First write the equation in standard form, identify a, b and c with their signs, then substitute. The discriminant Δ = b² − 4ac tells you the nature of the roots: Δ > 0 gives two real roots, Δ = 0 one repeated real root, Δ < 0 no real roots."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Completing the square",
+    "doc_type": "CAPS note",
+    "content": "To complete the square for x² + bx, add and subtract (b/2)²: x² + bx = (x + b/2)² − (b/2)². Used to solve quadratics, find turning points of parabolas, and derive the quadratic formula. If the coefficient of x² is not 1, first divide the whole equation by it."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Exponents and surds",
+    "doc_type": "CAPS note",
+    "content": "Laws of exponents: aᵐ × aⁿ = aᵐ⁺ⁿ; aᵐ ÷ aⁿ = aᵐ⁻ⁿ; (aᵐ)ⁿ = aᵐⁿ; a⁰ = 1; a⁻ⁿ = 1/aⁿ. For equations with the unknown in the exponent, write both sides with the same base and equate exponents. Rational exponents link to surds: a^(m/n) = ⁿ√(aᵐ)."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Sequences and series",
+    "doc_type": "CAPS note",
+    "content": "Arithmetic sequence: constant difference d, general term Tₙ = a + (n − 1)d, sum Sₙ = n/2 (2a + (n − 1)d). Geometric sequence: constant ratio r, general term Tₙ = arⁿ⁻¹, sum Sₙ = a(rⁿ − 1)/(r − 1). An infinite geometric series converges only when −1 < r < 1, with sum S∞ = a/(1 − r)."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Differentiation from first principles",
+    "doc_type": "CAPS note",
+    "content": "The derivative from first principles is f′(x) = lim(h→0) [f(x + h) − f(x)] / h. Substitute f(x + h), expand, simplify until h can be cancelled from the fraction, then let h → 0. For f(x) = x², f′(x) = lim(h→0)(2xh + h²)/h = lim(h→0)(2x + h) = 2x."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Rules of differentiation and applications",
+    "doc_type": "CAPS note",
+    "content": "Power rule: if f(x) = axⁿ then f′(x) = naxⁿ⁻¹. Differentiate term by term. The derivative gives the gradient of the tangent, so stationary points occur where f′(x) = 0. Use the sign of f′ or the shape of the cubic to classify maxima and minima in curve sketching and optimisation problems."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Financial mathematics: compound interest and depreciation",
+    "doc_type": "CAPS note",
+    "content": "Compound growth: A = P(1 + i)ⁿ where i is the interest rate per period and n the number of periods. Depreciation on a reducing balance: A = P(1 − i)ⁿ. For interest compounded monthly, divide the annual rate by 12 and multiply the years by 12. Solve for n using logarithms: n = log(A/P) / log(1 + i)."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Functions: the parabola",
+    "doc_type": "CAPS note",
+    "content": "The parabola y = a(x − p)² + q has turning point (p; q) and axis of symmetry x = p. If a > 0 it opens upwards (minimum q); if a < 0 it opens downwards (maximum q). From standard form y = ax² + bx + c, the axis of symmetry is x = −b/(2a) and the y-intercept is c. x-intercepts are found by setting y = 0."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Functions: hyperbola and exponential",
+    "doc_type": "CAPS note",
+    "content": "The hyperbola y = a/(x − p) + q has asymptotes x = p and y = q. The exponential function y = a·bˣ⁻ᵖ + q (b > 0, b ≠ 1) has horizontal asymptote y = q; it grows when b > 1 and decays when 0 < b < 1. Sketch by finding asymptotes, intercepts and one extra point."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Trigonometric identities",
+    "doc_type": "CAPS note",
+    "content": "Fundamental identities: tan θ = sin θ / cos θ and sin²θ + cos²θ = 1. To prove an identity, work with the more complicated side, write everything in terms of sin and cos, and simplify using these identities. State restrictions where denominators would be zero, e.g. cos θ ≠ 0 for tan θ."
+  },
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Trigonometric ratios in right-angled triangles",
+    "doc_type": "CAPS note",
+    "content": "In a right-angled triangle: sin θ = opposite/hypotenuse, cos θ = adjacent/hypotenuse, tan θ = opposite/adjacent (SOH-CAH-TOA). Use these to find unknown sides and angles. The hypotenuse is always opposite the right angle and is the longest side."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Probability: counting and rules",
+    "doc_type": "CAPS note",
+    "content": "For any events, P(A or B) = P(A) + P(B) − P(A and B). Mutually exclusive events cannot happen together, so P(A and B) = 0. Independent events satisfy P(A and B) = P(A) × P(B). The complementary rule: P(not A) = 1 − P(A). The fundamental counting principle: if one choice can be made in m ways and a second in n ways, together they can be made in m × n ways."
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "term": 4,
+    "topic": "Statistics: measures of central tendency and spread",
+    "doc_type": "CAPS note",
+    "content": "The mean is the sum of values divided by the count; the median is the middle value of ordered data; the mode is the most frequent value. The five-number summary (minimum, Q1, median, Q3, maximum) draws a box-and-whisker plot. The interquartile range IQR = Q3 − Q1 measures spread and is resistant to outliers."
+  },
+  {
+    "grade": 11,
+    "subject": "Accounting",
+    "term": 1,
+    "topic": "Accounting equation",
+    "doc_type": "CAPS note",
+    "content": "The accounting equation is Assets = Owner's Equity + Liabilities (A = OE + L). Every transaction affects the equation but keeps it balanced. Analyse each transaction by asking which accounts are affected, whether each is an asset, equity or liability, and whether it increases or decreases. Income increases equity; expenses and drawings decrease equity."
+  },
+  {
+    "grade": 12,
+    "subject": "Accounting",
+    "term": 2,
+    "topic": "Financial ratios and interpretation",
+    "doc_type": "CAPS note",
+    "content": "Key ratios: gross profit percentage on sales = gross profit / sales × 100; current ratio = current assets : current liabilities; acid-test ratio excludes inventory from current assets. The current ratio tests short-term liquidity — around 2:1 is generally healthy, while below 1:1 signals the business may struggle to pay short-term debts."
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "topic": "Factorising quadratic trinomials",
+    "question": "Factorise fully: x² + 5x + 6",
+    "memo_answer": "(x + 2)(x + 3)",
+    "marks": 2,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 10,
+    "subject": "Mathematics",
+    "topic": "Difference of two squares",
+    "question": "Factorise fully: 9x² − 25",
+    "memo_answer": "(3x − 5)(3x + 5)",
+    "marks": 2,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "topic": "Quadratic formula",
+    "question": "Solve for x, correct to two decimal places: 2x² + 3x − 4 = 0",
+    "memo_answer": "x = (−3 ± √(9 + 32)) / 4 = (−3 ± √41) / 4, so x ≈ 0.85 or x ≈ −2.35",
+    "marks": 4,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "topic": "Exponents and surds",
+    "question": "Solve for x: 3^(x+1) = 81",
+    "memo_answer": "81 = 3⁴, so x + 1 = 4, therefore x = 3",
+    "marks": 3,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "topic": "Sequences and series",
+    "question": "The first term of an arithmetic sequence is 5 and the common difference is 3. Determine the 20th term.",
+    "memo_answer": "T₂₀ = a + 19d = 5 + 19(3) = 5 + 57 = 62",
+    "marks": 2,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "topic": "Differentiation from first principles",
+    "question": "Determine f′(x) from first principles if f(x) = x² − 4.",
+    "memo_answer": "f′(x) = lim(h→0)[(x+h)² − 4 − (x² − 4)]/h = lim(h→0)(2xh + h²)/h = lim(h→0)(2x + h) = 2x",
+    "marks": 5,
+    "cognitive_level": "complex procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "topic": "Rules of differentiation and applications",
+    "question": "Determine dy/dx if y = 4x³ − 2x + 7.",
+    "memo_answer": "dy/dx = 12x² − 2",
+    "marks": 2,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "topic": "Financial mathematics: compound interest and depreciation",
+    "question": "R10 000 is invested at 8% p.a. compounded annually. Calculate the value of the investment after 5 years.",
+    "memo_answer": "A = P(1 + i)ⁿ = 10000(1.08)⁵ = R14 693.28",
+    "marks": 3,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "topic": "Probability: counting and rules",
+    "question": "A and B are independent events with P(A) = 0.4 and P(B) = 0.5. Calculate P(A or B).",
+    "memo_answer": "P(A and B) = 0.4 × 0.5 = 0.2; P(A or B) = 0.4 + 0.5 − 0.2 = 0.7",
+    "marks": 3,
+    "cognitive_level": "complex procedure",
+    "source": "NSC-style (authored for POC)"
+  },
+  {
+    "grade": 11,
+    "subject": "Mathematics",
+    "topic": "Functions: the parabola",
+    "question": "Determine the coordinates of the turning point of f(x) = x² − 6x + 5.",
+    "memo_answer": "x = −b/(2a) = 6/2 = 3; f(3) = 9 − 18 + 5 = −4; turning point (3; −4)",
+    "marks": 3,
+    "cognitive_level": "routine procedure",
+    "source": "NSC-style (authored for POC)"
+  }
+]

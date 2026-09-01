@@ -1,0 +1,112 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: katlego
+      POSTGRES_PASSWORD: katlego
+      POSTGRES_DB: katlego
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U katlego"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # Gateway: webhook receiver (verify, dedupe, fast-ack) + demo chat simulator UI
+  gateway:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker: consumes the Redis stream, runs safety → consent → intent → RAG → reply
+  worker:
+    build: .
+    command: python -m app.worker
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mockwa:
+        condition: service_started
+
+  # Fake WhatsApp Cloud (Graph) API: captures outbound sends, serves uploaded media
+  mockwa:
+    build: .
+    command: uvicorn mockwa.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+
+  # Local speech-to-text (faster-whisper, CPU) — no API key needed
+  stt:
+    build: ./stt
+    environment:
+      WHISPER_MODEL: base
+    ports:
+      - "9000:9000"
+    volumes:
+      - whisper-cache:/root/.cache
+
+  # One-off: seed the CAPS corpus + question bank →  docker compose run --rm seed
+  seed:
+    build: .
+    command: python -m seed.seed
+    env_file: .env
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-off: eval harness →  docker compose run --rm evals
+  evals:
+    build: .
+    command: python -m evals.run_eval
+    env_file: .env
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # E2E tests →  docker compose run --rm tests
+  tests:
+    build: .
+    command: pytest -q tests
+    env_file: .env
+    environment:
+      GATEWAY_URL: http://gateway:8000
+      MOCKWA_URL: http://mockwa:8001
+    profiles: ["test"]
+    depends_on:
+      gateway:
+        condition: service_started
+      worker:
+        condition: service_started
+      mockwa:
+        condition: service_started
+
+volumes:
+  pgdata:
+  whisper-cache:

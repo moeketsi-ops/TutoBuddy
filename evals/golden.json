@@ -1,0 +1,62 @@
+[
+  {
+    "grade": 10,
+    "question": "Factorise fully: x² + 5x + 6",
+    "memo_answer": "(x + 2)(x + 3)",
+    "memo_keywords": ["(x + 2)", "(x + 3)"]
+  },
+  {
+    "grade": 10,
+    "question": "Factorise fully: 9x² − 25",
+    "memo_answer": "(3x − 5)(3x + 5)",
+    "memo_keywords": ["3x", "5)", "difference"]
+  },
+  {
+    "grade": 11,
+    "question": "Solve for x, correct to two decimal places: 2x² + 3x − 4 = 0",
+    "memo_answer": "x = (−3 ± √41)/4 ≈ 0.85 or −2.35",
+    "memo_keywords": ["0.85", "-2.35", "41"]
+  },
+  {
+    "grade": 11,
+    "question": "Solve for x: 3^(x+1) = 81",
+    "memo_answer": "x = 3",
+    "memo_keywords": ["x = 3"]
+  },
+  {
+    "grade": 12,
+    "question": "The first term of an arithmetic sequence is 5 and the common difference is 3. Determine the 20th term.",
+    "memo_answer": "T20 = 5 + 19(3) = 62",
+    "memo_keywords": ["62"]
+  },
+  {
+    "grade": 12,
+    "question": "Determine f′(x) from first principles if f(x) = x² − 4.",
+    "memo_answer": "f′(x) = 2x via lim(h→0)[f(x+h) − f(x)]/h",
+    "memo_keywords": ["2x", "lim", "h"]
+  },
+  {
+    "grade": 12,
+    "question": "Determine dy/dx if y = 4x³ − 2x + 7.",
+    "memo_answer": "dy/dx = 12x² − 2",
+    "memo_keywords": ["12x", "2"]
+  },
+  {
+    "grade": 12,
+    "question": "R10 000 is invested at 8% p.a. compounded annually. Calculate the value of the investment after 5 years.",
+    "memo_answer": "A = 10000(1.08)^5 = R14 693.28",
+    "memo_keywords": ["14 693", "1.08"]
+  },
+  {
+    "grade": 12,
+    "question": "A and B are independent events with P(A) = 0.4 and P(B) = 0.5. Calculate P(A or B).",
+    "memo_answer": "0.4 + 0.5 − 0.2 = 0.7",
+    "memo_keywords": ["0.7", "0.2"]
+  },
+  {
+    "grade": 11,
+    "question": "Determine the coordinates of the turning point of f(x) = x² − 6x + 5.",
+    "memo_answer": "(3; −4)",
+    "memo_keywords": ["3", "-4"]
+  }
+]

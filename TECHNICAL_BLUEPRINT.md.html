@@ -1,0 +1,229 @@
+<html>
+<head>
+<title>TECHNICAL_BLUEPRINT.md</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #6aab73;}
+.s4 { color: #56a8f5;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+TECHNICAL_BLUEPRINT.md</font>
+</center></td></tr></table>
+<pre><span class="s0"># </span><span class="s2">TutoBuddy — Technical Blueprint &amp; Build Guide</span>
+
+<span class="s1">**</span><span class="s2">A CAPS-aligned AI tutor that lives in WhatsApp</span><span class="s1">**</span>
+<span class="s2">Version 1.0 · August 2026 · Prepared from the original whiteboard sketch </span><span class="s1">(</span><span class="s2">`TutoBuddy.pdf`</span><span class="s1">) </span><span class="s2">plus independently verified research.</span>
+
+<span class="s0">&gt; </span><span class="s2">This document is the single source of truth for what we are building, why it is different, what we need to buy/sign up for </span><span class="s1">(</span><span class="s2">in order</span><span class="s1">)</span><span class="s2">, and how the system fits together. It lives in the project root so it can also serve as reference context for AI coding tools </span><span class="s1">(</span><span class="s2">Claude Code etc.</span><span class="s1">) </span><span class="s2">working in this repo.</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">1. Product thesis — read this first</span>
+
+<span class="s2">Everyone now has </span><span class="s1">&quot;</span><span class="s2">AI on WhatsApp.</span><span class="s1">&quot; </span><span class="s2">Maski </span><span class="s1">(</span><span class="s2">100k+ users, R55m funding, Maskew Miller textbook licence</span><span class="s1">)</span><span class="s2">, Sammo </span><span class="s1">(</span><span class="s2">CSR-funded, grades 1–12</span><span class="s1">)</span><span class="s2">, and </span><span class="s1">**</span><span class="s2">Meta AI itself</span><span class="s1">** </span><span class="s2">— free and pre-installed in every South African learner's WhatsApp — already answer questions. Answering questions is a commodity. We cannot win on it.</span>
+
+<span class="s1">**</span><span class="s2">Our bet</span><span class="s1">: </span><span class="s2">a </span><span class="s1">*</span><span class="s2">stateful</span><span class="s1">* </span><span class="s2">tutor.</span><span class="s1">**</span>
+
+<span class="s0">- </span><span class="s2">A persistent </span><span class="s1">**</span><span class="s2">per-learner mastery model</span><span class="s1">** (&quot;</span><span class="s2">you struggled with factorisation in March — let's revise it before Friday</span><span class="s1">'</span><span class="s2">s quiz</span><span class="s1">&quot;)</span><span class="s2">.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Assessment with real marks</span><span class="s1">**</span><span class="s2">, graded against official NSC marking memos, with PDF report cards.</span>
+<span class="s0">- </span><span class="s2">Engagement engineered around WhatsApp's </span><span class="s1">**</span><span class="s2">free 24-hour service window</span><span class="s1">**</span><span class="s2">, so the marginal messaging cost of a tutoring session is close to zero.</span>
+
+<span class="s2">Positioning sentence</span><span class="s1">: **&quot;</span><span class="s2">Maski answers your question. TutoBuddy knows your marks.</span><span class="s1">&quot;**</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">2. Verified market facts </span><span class="s1">(</span><span class="s2">and corrections to earlier research</span><span class="s1">)</span>
+
+<span class="s2">The AI research brief that inspired the original sketch contained three load-bearing errors. Build decisions below account for them.</span>
+
+<span class="s0">### </span><span class="s2">2.1 Corrections</span>
+
+<span class="s0">| </span><span class="s1">Earlier claim </span><span class="s0">| </span><span class="s1">Verified reality (Aug 2026) </span><span class="s0">| </span><span class="s1">What we do instead </span><span class="s0">|</span>
+<span class="s0">|---|---|---|</span>
+<span class="s0">| </span><span class="s1">&quot;Add the bot to students' WhatsApp group chats&quot; </span><span class="s0">| </span><span class="s1">The official WhatsApp Business API **cannot** join a user's existing group. Meta's Groups API only covers **groups the business creates programmatically**, is eligibility-gated, and members join via invite link. Unofficial libraries (Baileys, whatsapp-web.js) risk a permanent number ban. </span><span class="s0">| </span><span class="s1">**Study Squads**: TutoBuddy *hosts* the group (Groups API when eligible) or runs squad leaderboards across 1-to-1 chats. Same social loop, zero ban risk. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">&quot;Partner with MTN/Vodacom to zero-rate your bot's data&quot; </span><span class="s0">| </span><span class="s1">Impossible per-bot: WhatsApp traffic terminates at Meta's servers, so carriers can only zero-rate WhatsApp wholesale. </span><span class="s0">| </span><span class="s1">Data-free access via **Moya Messenger / biNu #datafree** as a second channel (reverse-billed, genuinely free to users), plus a **USSD** formula/definition lookup fallback. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Per-conversation pricing assumptions </span><span class="s0">| </span><span class="s1">Since **1 July 2025** Meta charges **per template message**. Free-form replies inside the 24-hour customer-service window (opened whenever the *learner* messages us) are **free**. Utility templates sent as replies inside the window are also free. We pay only for messages **we** initiate outside the window. </span><span class="s0">| </span><span class="s1">Design every engagement loop so the **learner sends the first message** (streak missions, &quot;reply START for today's quiz&quot;). Reserve paid templates for the weekly parent digest. </span><span class="s0">|</span>
+
+<span class="s0">### </span><span class="s2">2.2 Other verified facts that shape the build</span>
+
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Maski</span><span class="s1">** (</span><span class="s2">Bytefuse × Maskew Miller, launched Mar 2025, R55m from Novus</span><span class="s1">): </span><span class="s2">grades 7–12, multimodal input, but currently </span><span class="s1">**</span><span class="s2">replies in English only</span><span class="s1">** </span><span class="s2">— the multilingual gap is wide open. Its textbook licence is a moat we legally cannot copy.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Textbooks are copyrighted.</span><span class="s1">** </span><span class="s2">Our corpus must be DBE-published material</span><span class="s1">: </span><span class="s2">CAPS statements, ATPs </span><span class="s1">(</span><span class="s2">Annual Teaching Plans</span><span class="s1">)</span><span class="s2">, and NSC past papers </span><span class="s1">**</span><span class="s2">with marking memos</span><span class="s1">** </span><span class="s2">— all free downloads from education.gov.za.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Adesua</span><span class="s1">** (</span><span class="s2">ETH Zurich / Kwame AI, Ghana</span><span class="s1">) </span><span class="s2">proved timed in-chat assessments with auto-generated PDF report cards work on WhatsApp. We adopt that pattern learner-side.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Meta AI is the invisible competitor</span><span class="s1">**: </span><span class="s2">free, zero-friction, generic. Our defence is curriculum grounding + marks + memory, not chat quality.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">POPIA</span><span class="s1">**: </span><span class="s2">our users are minors. Sections 34–35 require consent from a </span><span class="s1">**&quot;</span><span class="s2">competent person</span><span class="s1">&quot;** (</span><span class="s2">parent/guardian</span><span class="s1">) </span><span class="s2">before processing a child's personal information. This is a launch blocker, not a nice-to-have.</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">3. Purchases &amp; sign-ups, in the order we need them</span>
+
+<span class="s2">Costs are estimates </span><span class="s1">(</span><span class="s2">Aug 2026</span><span class="s1">) </span><span class="s2">for planning, not quotes. Phase labels match the roadmap in §7.</span>
+
+<span class="s0">### </span><span class="s2">Phase 0 — needed before the first line of production code</span>
+
+<span class="s0">| </span><span class="s1"># </span><span class="s0">| </span><span class="s1">Item </span><span class="s0">| </span><span class="s1">Provider / where </span><span class="s0">| </span><span class="s1">Est. cost </span><span class="s0">| </span><span class="s1">Notes </span><span class="s0">|</span>
+<span class="s0">|---|---|---|---|---|</span>
+<span class="s0">| </span><span class="s1">1 </span><span class="s0">| </span><span class="s1">Company Meta Business Manager account + **business verification** </span><span class="s0">| </span><span class="s1">business.facebook.com </span><span class="s0">| </span><span class="s1">Free </span><span class="s0">| </span><span class="s1">Verification takes days–weeks; start immediately. Needs company registration docs. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">2 </span><span class="s0">| </span><span class="s1">**Dedicated phone number** for the bot </span><span class="s0">| </span><span class="s1">Any SA SIM / virtual number </span><span class="s0">| </span><span class="s1">~R100 once + airtime </span><span class="s0">| </span><span class="s1">Must NOT be attached to an existing personal/business WhatsApp. This number becomes the product's identity — guard it. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">3 </span><span class="s0">| </span><span class="s1">**WhatsApp Business Platform (Cloud API)** access + payment method on the Meta account </span><span class="s0">| </span><span class="s1">developers.facebook.com </span><span class="s0">| </span><span class="s1">Free platform; pay per template message only </span><span class="s0">| </span><span class="s1">Direct Cloud API for P0 — skip BSP fees. New numbers start at ~1k business-initiated conversations/day and scale up with quality rating. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">4 </span><span class="s0">| </span><span class="s1">**Domain name** + TLS </span><span class="s0">| </span><span class="s1">Any registrar </span><span class="s0">| </span><span class="s1">~R150–300/yr </span><span class="s0">| </span><span class="s1">Needed for the webhook endpoint (Meta requires HTTPS) and later for a zero-ratable companion web app. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">5 </span><span class="s0">| </span><span class="s1">**Cloud hosting** </span><span class="s0">| </span><span class="s1">AWS `af-south-1` (Cape Town) or DigitalOcean </span><span class="s0">| </span><span class="s1">~R400–1,000/mo to start </span><span class="s0">| </span><span class="s1">One VM/container host + managed Postgres. `af-south-1` gives the clean POPIA data-residency story for school/government conversations. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">6 </span><span class="s0">| </span><span class="s1">**LLM API account(s)** </span><span class="s0">| </span><span class="s1">Anthropic and/or OpenAI </span><span class="s0">| </span><span class="s1">Usage-based; budget ~R2,000–5,000/mo for pilot </span><span class="s0">| </span><span class="s1">Two tiers: a small/cheap model for intent routing, a frontier model for maths reasoning. No GPU purchases, no fine-tuning at this stage. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">7 </span><span class="s0">| </span><span class="s1">**Speech-to-text API** </span><span class="s0">| </span><span class="s1">OpenAI (Whisper) or equivalent </span><span class="s0">| </span><span class="s1">Usage-based (cents per audio minute) </span><span class="s0">| </span><span class="s1">Voice notes are a P1 feature but sign-up is free; benchmark early on real code-switched audio. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">8 </span><span class="s0">| </span><span class="s1">**Postgres + Redis** </span><span class="s0">| </span><span class="s1">Managed add-ons on the host above </span><span class="s0">| </span><span class="s1">Included / ~R200–400/mo </span><span class="s0">| </span><span class="s1">Postgres with the **pgvector** extension — we do NOT buy Pinecone/Weaviate at this stage. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">9 </span><span class="s0">| </span><span class="s1">**POPIA basics** </span><span class="s0">| </span><span class="s1">Information Regulator portal + legal review </span><span class="s0">| </span><span class="s1">Registration free; budget ~R10–20k once for legal review </span><span class="s0">| </span><span class="s1">Register an Information Officer; review the guardian-consent onboarding flow and privacy notice. </span><span class="s0">|</span>
+
+<span class="s0">### </span><span class="s2">Phase 1–2 — buy only when the loop is proven</span>
+
+<span class="s0">| </span><span class="s1"># </span><span class="s0">| </span><span class="s1">Item </span><span class="s0">| </span><span class="s1">Provider </span><span class="s0">| </span><span class="s1">Est. cost </span><span class="s0">| </span><span class="s1">Trigger to buy </span><span class="s0">|</span>
+<span class="s0">|---|---|---|---|---|</span>
+<span class="s0">| </span><span class="s1">10 </span><span class="s0">| </span><span class="s1">Error tracking / observability </span><span class="s0">| </span><span class="s1">Sentry + basic dashboards </span><span class="s0">| </span><span class="s1">Free tier → ~R500/mo </span><span class="s0">| </span><span class="s1">First 100 weekly-active learners. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">11 </span><span class="s0">| </span><span class="s1">**Airtime/data micro-rewards API** </span><span class="s0">| </span><span class="s1">e.g. Reloadly, Flickswitch or aggregator </span><span class="s0">| </span><span class="s1">Per-voucher cost (R5–10 each) + small fees </span><span class="s0">| </span><span class="s1">When streak mechanics ship (P2 gamification). </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">12 </span><span class="s0">| </span><span class="s1">**Turn.io** subscription (optional) </span><span class="s0">| </span><span class="s1">turn.io </span><span class="s0">| </span><span class="s1">Nonprofit/social-impact pricing </span><span class="s0">| </span><span class="s1">If we want their journey tooling &amp; analytics instead of maintaining our own template/flow ops. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">13 </span><span class="s0">| </span><span class="s1">**Moya / biNu #datafree** partnership </span><span class="s0">| </span><span class="s1">moya.app (biNu) </span><span class="s0">| </span><span class="s1">Negotiated reverse-billing (we pay the data) </span><span class="s0">| </span><span class="s1">P2 — the real &quot;data ran out at 10pm&quot; lifeline. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">14 </span><span class="s0">| </span><span class="s1">**USSD code + aggregator** </span><span class="s0">| </span><span class="s1">e.g. Africa's Talking or SA aggregator </span><span class="s0">| </span><span class="s1">Setup + per-session fees </span><span class="s0">| </span><span class="s1">P3 — formula/definition lookup fallback. </span><span class="s0">|</span>
+
+<span class="s1">**</span><span class="s2">Explicitly NOT purchasing now</span><span class="s1">:** </span><span class="s2">BSP platform fees </span><span class="s1">(</span><span class="s2">Twilio/Infobip/MessageBird</span><span class="s1">)</span><span class="s2">, a dedicated vector database </span><span class="s1">(</span><span class="s2">Pinecone/Weaviate</span><span class="s1">)</span><span class="s2">, GPUs or model fine-tuning, native app development. Each has a revisit trigger noted above or in §8.</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">4. Architecture</span>
+
+<span class="s0">### </span><span class="s2">4.1 Overview</span>
+
+<span class="s0">```</span>
+<span class="s3">┌─────────────────────────── CHANNELS ────────────────────────────┐</span>
+<span class="s3">│  WhatsApp Cloud API   ·   Moya #datafree (P2)   ·   USSD/SMS (P3) │</span>
+<span class="s3">└──────────────────────────────┬──────────────────────────────────┘</span>
+                               <span class="s3">│ webhooks (must ACK &lt; ~3s)</span>
+<span class="s3">┌──────────────────────────────▼──────────────────────────────────┐</span>
+<span class="s3">│ GATEWAY: webhook receiver (verify, dedupe, fast-ack)             │</span>
+<span class="s3">│          message queue (ordering, retries, back-pressure)        │</span>
+<span class="s3">│          template manager (paid sends, quality-rating watch)     │</span>
+<span class="s3">└──────────────────────────────┬──────────────────────────────────┘</span>
+<span class="s3">┌──────────────────────────────▼──────────────────────────────────┐</span>
+<span class="s3">│ ORCHESTRATOR:                                                    │</span>
+<span class="s3">│   1. safety filter  → self-harm/abuse disclosure → referral path │</span>
+<span class="s3">│   2. intent router (cheap LLM): homework · quiz · past-paper ·   │</span>
+<span class="s3">│      admin · smalltalk                                           │</span>
+<span class="s3">│   3. session manager (Redis): active profile, mid-quiz state,    │</span>
+<span class="s3">│      awaiting-photo state                                        │</span>
+<span class="s3">└──────────────────────────────┬──────────────────────────────────┘</span>
+<span class="s3">┌──────────────────────────────▼──────────────────────────────────┐</span>
+<span class="s3">│ PROCESSING WORKERS (async, off the webhook path):                │</span>
+<span class="s3">│   STT worker (voice notes)  ·  Vision worker (homework photos)   │</span>
+<span class="s3">│   TUTOR ENGINE: tiered LLMs — small router model + frontier      │</span>
+<span class="s3">│   reasoner for maths; Socratic policy; versioned prompts         │</span>
+<span class="s3">└───────────────┬───────────────────────────────┬─────────────────┘</span>
+                <span class="s3">│ RAG                           │ read/write</span>
+<span class="s3">┌───────────────▼────────────────┐  ┌───────────▼─────────────────┐</span>
+<span class="s3">│ KNOWLEDGE (Postgres+pgvector): │  │ LEARNER DATA (Postgres):    │</span>
+<span class="s3">│  CAPS/ATP corpus, chunked +    │  │  profiles (multi-learner    │</span>
+<span class="s3">│  tagged grade·subject·term·    │  │  per phone number!)         │</span>
+<span class="s3">│  topic                         │  │  mastery graph (per-topic,  │</span>
+<span class="s3">│  NSC question bank: past       │  │  time-decayed)              │</span>
+<span class="s3">│  papers + marking memos as     │  │  POPIA: consent records,    │</span>
+<span class="s3">│  STRUCTURED data               │  │  minimisation, af-south-1   │</span>
+<span class="s3">└────────────────────────────────┘  └─────────────────────────────┘</span>
+<span class="s3">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="s3">│ QUALITY: eval harness (golden set graded vs NSC memos, runs on   │</span>
+<span class="s3">│ every prompt/model change) · analytics (mastery, funnel, cost    │</span>
+<span class="s3">│ per learner) · weekly parent/teacher digest (the one paid send)  │</span>
+<span class="s3">└─────────────────────────────────────────────────────────────────┘</span>
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">4.2 Why each layer exists</span>
+
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Gateway.</span><span class="s1">** </span><span class="s2">WhatsApp webhooks are stateless and must be acknowledged within seconds, while a full voice-note → STT → RAG → frontier-model response can take 10–30s. Fast-ack + queue + workers is non-negotiable. Send typing indicators while workers run. Dedupe on WhatsApp message IDs </span><span class="s1">(</span><span class="s2">Meta redelivers</span><span class="s1">)</span><span class="s2">.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Safety filter first, always.</span><span class="s1">** </span><span class="s2">A learner disclosing abuse or a self-harm crisis at 23</span><span class="s1">:</span><span class="s2">00 must hit a referral script </span><span class="s1">(</span><span class="s2">Childline SA 116</span><span class="s1">) </span><span class="s2">— never a maths prompt. This runs before intent routing.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Intent router = cost control.</span><span class="s1">** </span><span class="s2">A cheap model classifies each message; only genuine reasoning work reaches the expensive model. This single decision roughly halves LLM spend.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Session manager.</span><span class="s1">** </span><span class="s2">One phone number ≠ one learner in our market — </span><span class="s1">**</span><span class="s2">family phones are shared</span><span class="s1">**</span><span class="s2">. Profile switching </span><span class="s1">(&quot;</span><span class="s2">Who's studying? Thabo Gr 11 / Lerato Gr 9</span><span class="s1">&quot;) </span><span class="s2">with per-profile mastery is cheap to build and no competitor handles it.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Knowledge = structure, not just embeddings.</span><span class="s1">** </span><span class="s2">Raw PDF embeddings give mushy answers. CAPS/ATP content is chunked and tagged </span><span class="s1">(</span><span class="s2">grade, subject, term, topic</span><span class="s1">)</span><span class="s2">. Past papers are parsed into a structured question bank with memo-linked marking guidance — this powers real quizzes and real marks.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Mastery graph.</span><span class="s1">** </span><span class="s2">Per-topic strength scores, decaying over time, drive daily revision missions and the parent digest. This layer </span><span class="s1">*</span><span class="s2">is</span><span class="s1">* </span><span class="s2">the moat; everything else is plumbing around it.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Eval harness from day one.</span><span class="s1">** </span><span class="s2">Golden set of </span><span class="s1">~</span><span class="s2">50+ past-paper questions with official memos as ground truth; auto-grade on every prompt/model change; publish the accuracy number. </span><span class="s1">&quot;</span><span class="s2">The tutor that shows its marks</span><span class="s1">&quot; </span><span class="s2">is also the trust story for schools and sponsors.</span>
+
+<span class="s0">### </span><span class="s2">4.3 Recommended stack </span><span class="s1">(</span><span class="s2">P0</span><span class="s1">)</span>
+
+<span class="s0">| </span><span class="s1">Concern </span><span class="s0">| </span><span class="s1">Choice </span><span class="s0">| </span><span class="s1">Rationale </span><span class="s0">|</span>
+<span class="s0">|---|---|---|</span>
+<span class="s0">| </span><span class="s1">Language/runtime </span><span class="s0">| </span><span class="s1">Python (FastAPI) or Node/TypeScript — team's call </span><span class="s0">| </span><span class="s1">Both have mature WhatsApp Cloud API + LLM SDKs. Pick one, document it here. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Queue </span><span class="s0">| </span><span class="s1">Redis Streams (or BullMQ if Node) </span><span class="s0">| </span><span class="s1">Already running Redis for sessions; no new infra. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">DB </span><span class="s0">| </span><span class="s1">Postgres 16 + pgvector </span><span class="s0">| </span><span class="s1">One database for profiles, mastery, embeddings, question bank. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Cache/session </span><span class="s0">| </span><span class="s1">Redis </span><span class="s0">| </span><span class="s1">Live session state, rate limiting. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">LLMs </span><span class="s0">| </span><span class="s1">Managed APIs, two-tier </span><span class="s0">| </span><span class="s1">Router: small/cheap model. Reasoner: frontier model. Wrap behind an internal interface so providers are swappable. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">STT </span><span class="s0">| </span><span class="s1">Whisper API (benchmark first) </span><span class="s0">| </span><span class="s1">Measure word-error-rate on real code-switched voice notes before considering anything custom. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Hosting </span><span class="s0">| </span><span class="s1">AWS af-south-1 or DO </span><span class="s0">| </span><span class="s1">Data residency + latency. Single region, containerised. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">WhatsApp </span><span class="s0">| </span><span class="s1">Meta Cloud API direct </span><span class="s0">| </span><span class="s1">Free platform access; revisit Turn.io at P2 for journey tooling. </span><span class="s0">|</span>
+
+<span class="s0">---</span>
+
+<span class="s0">## </span><span class="s2">5. Content pipeline </span><span class="s1">(</span><span class="s2">a product in itself, not a setup step</span><span class="s1">)</span>
+
+<span class="s0">1. </span><span class="s1">**</span><span class="s2">Acquire</span><span class="s1">**: </span><span class="s2">download CAPS statements + ATPs per subject/grade, and 5 years of NSC papers + marking memos from education.gov.za. All public. </span><span class="s1">**</span><span class="s2">Do not ingest textbooks</span><span class="s1">** </span><span class="s2">— copyrighted </span><span class="s1">(</span><span class="s2">that's Maski</span><span class="s1">'</span><span class="s2">s licensed moat</span><span class="s1">)</span><span class="s2">.</span>
+<span class="s0">2. </span><span class="s1">**</span><span class="s2">Parse &amp; tag</span><span class="s1">**: </span><span class="s2">chunk documents with metadata `{grade, subject, term, topic, doc_type}`. Parse past papers into structured records</span><span class="s1">: </span><span class="s2">question text, sub-parts, marks, memo answer, cognitive level.</span>
+<span class="s0">3. </span><span class="s1">**</span><span class="s2">Embed</span><span class="s1">**: </span><span class="s2">pgvector, per-chunk, with metadata filters applied </span><span class="s1">*</span><span class="s2">before</span><span class="s1">* </span><span class="s2">similarity search </span><span class="s1">(</span><span class="s2">a Grade 9 question must never retrieve Grade 12 content</span><span class="s1">)</span><span class="s2">.</span>
+<span class="s0">4. </span><span class="s1">**</span><span class="s2">Author</span><span class="s1">**: </span><span class="s2">our own worked examples for high-frequency topics </span><span class="s1">(</span><span class="s2">legally clean, quality-controlled</span><span class="s1">)</span><span class="s2">.</span>
+<span class="s0">5. </span><span class="s1">**</span><span class="s2">Version</span><span class="s1">**: </span><span class="s2">corpus versions are tagged; the eval harness runs against every corpus update, same as prompt updates.</span>
+
+<span class="s0">## </span><span class="s2">6. Compliance, safety &amp; platform ops </span><span class="s1">(</span><span class="s2">launch blockers</span><span class="s1">)</span>
+
+<span class="s0">- </span><span class="s1">**</span><span class="s2">POPIA</span><span class="s1">**: </span><span class="s2">guardian </span><span class="s1">(&quot;</span><span class="s2">competent person</span><span class="s1">&quot;) </span><span class="s2">consent captured at onboarding before any profiling; privacy notice in plain language; data minimisation </span><span class="s1">(</span><span class="s2">no names required — a nickname works</span><span class="s1">)</span><span class="s2">; Information Officer registered; data stored in af-south-1; deletion on request.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Safeguarding</span><span class="s1">**: </span><span class="s2">classifier + referral scripts </span><span class="s1">(</span><span class="s2">Childline SA 116, SADAG</span><span class="s1">)</span><span class="s2">; log and human-review flagged conversations under strict access control.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">Age-appropriate design</span><span class="s1">**: </span><span class="s2">no dark patterns in streaks; rewards capped; no shame mechanics on low marks.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">WhatsApp number ops</span><span class="s1">** (</span><span class="s2">someone must own this</span><span class="s1">): </span><span class="s2">business verification, display-name approval, messaging-tier limits </span><span class="s1">(~</span><span class="s2">1k/day initially, scales with quality rating</span><span class="s1">)</span><span class="s2">, quality score monitoring — user blocks can throttle the number and stall growth at the platform layer.</span>
+
+<span class="s0">## </span><span class="s2">7. Roadmap</span>
+
+<span class="s0">| </span><span class="s1">Phase </span><span class="s0">| </span><span class="s1">Window </span><span class="s0">| </span><span class="s1">Goal </span><span class="s0">| </span><span class="s1">Ships </span><span class="s0">|</span>
+<span class="s0">|---|---|---|---|</span>
+<span class="s0">| </span><span class="s1">**P0** </span><span class="s0">| </span><span class="s1">Weeks 1–6 </span><span class="s0">| </span><span class="s1">Prove: learner asks → CAPS-correct Socratic help → returns tomorrow </span><span class="s0">| </span><span class="s1">Cloud API direct; wedge = **Gr 11–12 Maths + Accounting**, English, text + photo; RAG over tagged CAPS/NSC corpus; Socratic prompt policy; POPIA consent flow + safety filter **in the first build**; 50-question eval harness. </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">**P1** </span><span class="s0">| </span><span class="s1">Months 2–4 </span><span class="s0">| </span><span class="s1">Become a tutor, not a chatbot </span><span class="s0">| </span><span class="s1">Voice notes (STT); timed quizzes marked vs memos + PDF report card; mastery graph → daily revision missions; shared-phone multi-profiles; learner-initiated streak mechanics (free-window-native). </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">**P2** </span><span class="s0">| </span><span class="s1">Months 4–8 </span><span class="s0">| </span><span class="s1">Widen the moat </span><span class="s0">| </span><span class="s1">Code-switched voice pipeline (measure WER first; fine-tune only if data demands); isiZulu/Sepedi replies; Study Squads; airtime micro-rewards; Moya channel; weekly parent digest (paid template). </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">**P3** </span><span class="s0">| </span><span class="s1">Months 8+ </span><span class="s0">| </span><span class="s1">Distribution &amp; revenue </span><span class="s0">| </span><span class="s1">USSD lookup; teacher dashboards; CSR/B-BBEE sponsorship packages; school licensing. </span><span class="s0">|</span>
+
+<span class="s0">## </span><span class="s2">8. Decisions already made </span><span class="s1">(</span><span class="s2">don't relitigate without new data</span><span class="s1">)</span>
+
+<span class="s0">1. </span><span class="s1">**</span><span class="s2">LLM</span><span class="s1">: </span><span class="s2">API, tiered — not custom.</span><span class="s1">** </span><span class="s2">Fine-tuning is a P2+ decision driven by measured vernacular performance. Prompted frontier models + RAG beat a fine-tune on curriculum accuracy per rand.</span>
+<span class="s0">2. </span><span class="s1">**</span><span class="s2">Direct Cloud API, not a BSP,</span><span class="s1">** </span><span class="s2">for P0. Revisit Turn.io when journey tooling outweighs its fees.</span>
+<span class="s0">3. </span><span class="s1">**</span><span class="s2">pgvector, not Pinecone/Weaviate,</span><span class="s1">** </span><span class="s2">until retrieval scale actually hurts.</span>
+<span class="s0">4. </span><span class="s1">**</span><span class="s2">af-south-1 hosting</span><span class="s1">** </span><span class="s2">for the POPIA residency story.</span>
+<span class="s0">5. </span><span class="s1">**</span><span class="s2">Voice calls</span><span class="s1">: </span><span class="s2">parked.</span><span class="s1">** </span><span class="s2">Voice </span><span class="s1">*</span><span class="s2">notes</span><span class="s1">* </span><span class="s2">cover the real use case at a fraction of the complexity.</span>
+<span class="s0">6. </span><span class="s1">**</span><span class="s2">Biggest cost risk is LLM tokens, not WhatsApp fees.</span><span class="s1">** </span><span class="s2">The intent router + free service window keep marginal session cost in the cents; the parent digest is the only meaningful template spend. Maintain a live cost-per-weekly-active-learner number from week one.</span>
+
+<span class="s0">## </span><span class="s2">9. Differentiation summary </span><span class="s1">(</span><span class="s2">vs the field</span><span class="s1">)</span>
+
+<span class="s0">| </span><span class="s1">Capability </span><span class="s0">| </span><span class="s1">Meta AI </span><span class="s0">| </span><span class="s1">Maski </span><span class="s0">| </span><span class="s1">Sammo </span><span class="s0">| </span><span class="s1">**TutoBuddy** </span><span class="s0">|</span>
+<span class="s0">|---|---|---|---|---|</span>
+<span class="s0">| </span><span class="s1">CAPS-grounded answers (RAG) </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✓ </span><span class="s0">| </span><span class="s1">✓ </span><span class="s0">| </span><span class="s1">✓ </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Persistent mastery memory </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">thin </span><span class="s0">| </span><span class="s1">thin </span><span class="s0">| </span><span class="s1">**core bet** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Timed assessments marked vs NSC memos + PDF report </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">teacher-side only </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">**learner-side** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Multi-learner profiles per phone </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">**✓** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Code-switched voice notes </span><span class="s0">| </span><span class="s1">generic </span><span class="s0">| </span><span class="s1">English replies </span><span class="s0">| </span><span class="s1">partial </span><span class="s0">| </span><span class="s1">**measured, then invested** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Data-free path (Moya + USSD) </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">**P2–P3** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Bot-hosted Study Squads </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">**P2** </span><span class="s0">|</span>
+<span class="s0">| </span><span class="s1">Niche-subject wedge (Accounting, EMS, IT, setworks) </span><span class="s0">| </span><span class="s1">✗ </span><span class="s0">| </span><span class="s1">maths/science-led </span><span class="s0">| </span><span class="s1">broad </span><span class="s0">| </span><span class="s1">**wedge strategy** </span><span class="s0">|</span>
+
+<span class="s0">## </span><span class="s2">10. Sources / verification trail</span>
+
+<span class="s0">- </span><span class="s2">Meta — WhatsApp Business Platform pricing </span><span class="s1">(</span><span class="s2">per-message since 1 Jul 2025; free service window</span><span class="s1">): </span><span class="s4">https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing</span>
+<span class="s0">- </span><span class="s2">Groups API limitations </span><span class="s1">(</span><span class="s2">no joining existing groups</span><span class="s1">): </span><span class="s4">https://botpenguin.com/blogs/how-to-add-whatsapp-bot-to-group-chat</span>
+<span class="s0">- </span><span class="s2">TechCentral on Maski </span><span class="s1">(</span><span class="s2">funding, users, English replies</span><span class="s1">): </span><span class="s4">https://techcentral.co.za/whatsapp-ai-tutor-a-big-hit-in-south-african-schools/272096/</span>
+<span class="s0">- </span><span class="s2">Sammo</span><span class="s1">: </span><span class="s4">https://sammo.co.za/</span>
+<span class="s0">- </span><span class="s2">Adesua feasibility study </span><span class="s1">(</span><span class="s2">ETH Zurich/Kwame AI</span><span class="s1">): </span><span class="s4">https://arxiv.org/html/2605.15376v1</span>
+<span class="s0">- </span><span class="s2">Moya Messenger / biNu #datafree</span><span class="s1">: </span><span class="s4">https://techcentral.co.za/moya-messenger-app-rival-whatsapp/200622/ </span><span class="s2">· DGMT zero-rating analysis</span><span class="s1">: </span><span class="s4">https://dgmt.co.za/wp-content/uploads/2021/06/Zero-Rating-Opportunity-2.pdf</span>
+<span class="s0">- </span><span class="s2">POPIA &amp; children's data </span><span class="s1">(</span><span class="s2">competent-person consent</span><span class="s1">): </span><span class="s4">https://www.ppmattorneys.co.za/personal-information-of-children-popia/</span>
+<span class="s0">- </span><span class="s2">DBE CAPS documents</span><span class="s1">: </span><span class="s4">https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS).aspx </span><span class="s2">· NSC past papers &amp; memos</span><span class="s1">: </span><span class="s4">https://www.education.gov.za/Curriculum/NationalSeniorCertificate(NSC)Examinations.aspx</span>
+<span class="s0">- </span><span class="s2">Turn.io pricing</span><span class="s1">: </span><span class="s4">https://www.turn.io/pricing </span><span class="s2">· ICTworks on Meta charging social-impact senders</span><span class="s1">: </span><span class="s4">https://www.ictworks.org/meta-wants-to-charge-for-whatsapp-messages/</span>
+
+<span class="s0">---</span>
+
+<span class="s1">*</span><span class="s2">Companion to the original whiteboard sketch </span><span class="s1">(</span><span class="s2">`TutoBuddy.pdf`</span><span class="s1">)</span><span class="s2">. When implementation starts in this folder, keep this file updated — it is the reference context for both humans and AI coding tools.</span><span class="s1">*</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katlego — WhatsApp Simulator</title>
+<style>
+  :root {
+    --wa-bg: #0b141a; --wa-panel: #202c33; --wa-header: #1f2c34;
+    --wa-in: #202c33; --wa-out: #005c4b; --wa-text: #e9edef;
+    --wa-sub: #8696a0; --wa-accent: #00a884;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #111b21; color: var(--wa-text);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 16px;
+  }
+  .phone-frame {
+    width: 420px; max-width: 100%; height: 88vh; min-height: 560px;
+    background: var(--wa-bg); border-radius: 24px; overflow: hidden;
+    display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    border: 1px solid #2a3942;
+  }
+  header {
+    background: var(--wa-header); padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--wa-accent); display: flex; align-items: center;
+    justify-content: center; font-size: 20px;
+  }
+  header .title { font-weight: 600; }
+  header .sub { font-size: 12px; color: var(--wa-sub); }
+  header .badge {
+    margin-left: auto; font-size: 10px; letter-spacing: .08em;
+    color: var(--wa-bg); background: #ffb02e; border-radius: 4px;
+    padding: 3px 6px; font-weight: 700;
+  }
+  #chat {
+    flex: 1; overflow-y: auto; padding: 16px 12px; display: flex;
+    flex-direction: column; gap: 6px;
+    background-image: radial-gradient(#182229 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .bubble {
+    max-width: 82%; padding: 8px 12px; border-radius: 10px;
+    font-size: 14.5px; line-height: 1.45; white-space: pre-wrap;
+    word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,.3);
+  }
+  .in  { background: var(--wa-in); align-self: flex-start; border-top-left-radius: 2px; }
+  .out { background: var(--wa-out); align-self: flex-end; border-top-right-radius: 2px; }
+  .bubble b { color: #ffd279; }
+  .meta { font-size: 10px; color: var(--wa-sub); margin-top: 4px; text-align: right; }
+  .sys {
+    align-self: center; background: #182229; color: var(--wa-sub);
+    font-size: 12px; padding: 5px 12px; border-radius: 8px; text-align: center;
+  }
+  footer {
+    background: var(--wa-header); padding: 8px; display: flex; gap: 8px; align-items: center;
+  }
+  footer input[type=text] {
+    flex: 1; background: var(--wa-panel); border: none; outline: none;
+    color: var(--wa-text); border-radius: 20px; padding: 11px 16px; font-size: 15px;
+  }
+  .icon-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--wa-panel); color: var(--wa-sub); font-size: 19px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .icon-btn.send { background: var(--wa-accent); color: #fff; }
+  .icon-btn.recording { background: #ea5545; color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.12); } }
+  .toolbar {
+    background: var(--wa-header); border-top: 1px solid #2a3942;
+    padding: 6px 12px; display: flex; gap: 10px; align-items: center;
+    font-size: 11px; color: var(--wa-sub);
+  }
+  .toolbar input {
+    background: var(--wa-panel); border: 1px solid #2a3942; color: var(--wa-text);
+    border-radius: 6px; padding: 3px 8px; width: 130px; font-size: 11px;
+  }
+  .toolbar button {
+    background: none; border: 1px solid #2a3942; color: var(--wa-sub);
+    border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <header>
+    <div class="avatar">🎓</div>
+    <div>
+      <div class="title">Katlego</div>
+      <div class="sub" id="status">online · CAPS tutor</div>
+    </div>
+    <div class="badge">LOCAL SIM</div>
+  </header>
+
+  <div id="chat">
+    <div class="sys">This simulator plays the role of a learner's WhatsApp. Messages travel through the real gateway → queue → worker → (mock) Cloud API pipeline. Say hi to start! 👋</div>
+  </div>
+
+  <footer>
+    <button class="icon-btn" id="photoBtn" title="Send a homework photo">📎</button>
+    <input type="file" id="photoInput" accept="image/*" hidden>
+    <input type="text" id="msg" placeholder="Type a message" autocomplete="off">
+    <button class="icon-btn" id="micBtn" title="Hold nothing — click to start/stop recording">🎤</button>
+    <button class="icon-btn send" id="sendBtn" title="Send">➤</button>
+  </footer>
+
+  <div class="toolbar">
+    <span>Learner number:</span>
+    <input id="phone" value="">
+    <button id="newLearner" title="Simulate a brand-new phone number">new learner</button>
+    <span id="hint" style="margin-left:auto"></span>
+  </div>
+</div>
+
+<script>
+const MOCKWA = `${location.protocol}//${location.hostname}:8001`;
+const chat = document.getElementById('chat');
+const msgInput = document.getElementById('msg');
+const phoneInput = document.getElementById('phone');
+const micBtn = document.getElementById('micBtn');
+let outboxCursor = 0;
+let mediaRecorder = null, recChunks = [];
+
+function randomPhone() { return '2782' + Math.floor(1000000 + Math.random() * 9000000); }
+phoneInput.value = randomPhone();
+document.getElementById('newLearner').onclick = () => {
+  phoneInput.value = randomPhone();
+  addSys('New learner number — fresh onboarding will start on the next message.');
+};
+
+function fmtTime() {
+  return new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+function mdLite(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/\*([^*\n]+)\*/g, '<b>$1</b>')
+    .replace(/_([^_\n]+)_/g, '<i>$1</i>');
+}
+function addBubble(text, cls) {
+  const div = document.createElement('div');
+  div.className = 'bubble ' + cls;
+  div.innerHTML = mdLite(text) + `<div class="meta">${fmtTime()}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function addSys(text) {
+  const div = document.createElement('div');
+  div.className = 'sys';
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function webhookPayload(message) {
+  const phone = phoneInput.value.trim();
+  return {
+    object: 'whatsapp_business_account',
+    entry: [{
+      id: '0',
+      changes: [{
+        field: 'messages',
+        value: {
+          messaging_product: 'whatsapp',
+          metadata: { display_phone_number: '27000000000', phone_number_id: '000000000000000' },
+          contacts: [{ wa_id: phone, profile: { name: 'Demo Learner' } }],
+          messages: [Object.assign({
+            from: phone,
+            id: 'wamid.demo.' + Date.now() + '.' + Math.random().toString(36).slice(2),
+            timestamp: String(Math.floor(Date.now() / 1000)),
+          }, message)],
+        },
+      }],
+    }],
+  };
+}
+
+async function postWebhook(message) {
+  const resp = await fetch('/webhook', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(webhookPayload(message)),
+  });
+  if (!resp.ok) addSys('Gateway error: HTTP ' + resp.status);
+}
+
+async function sendText() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  msgInput.value = '';
+  addBubble(text, 'out');
+  await postWebhook({ type: 'text', text: { body: text } });
+}
+document.getElementById('sendBtn').onclick = sendText;
+msgInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendText(); });
+
+// ── Voice notes ──────────────────────────────────────────────────────────────
+async function uploadMedia(blob, filename) {
+  const form = new FormData();
+  form.append('file', blob, filename);
+  const resp = await fetch(MOCKWA + '/media', { method: 'POST', body: form });
+  return (await resp.json()).id;
+}
+
+micBtn.onclick = async () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => recChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      micBtn.classList.remove('recording');
+      const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      addBubble('🎤 voice note (' + Math.round(blob.size / 1024) + ' KB)', 'out');
+      const id = await uploadMedia(blob, 'voice-note');
+      await postWebhook({ type: 'audio', audio: { id, mime_type: blob.type, voice: true } });
+    };
+    mediaRecorder.start();
+    micBtn.classList.add('recording');
+    addSys('Recording… click 🎤 again to send.');
+  } catch (err) {
+    addSys('Microphone unavailable: ' + err.message);
+  }
+};
+
+// ── Photos ───────────────────────────────────────────────────────────────────
+document.getElementById('photoBtn').onclick = () => document.getElementById('photoInput').click();
+document.getElementById('photoInput').onchange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  addBubble('📸 photo: ' + file.name, 'out');
+  const id = await uploadMedia(file, file.name);
+  await postWebhook({ type: 'image', image: { id, mime_type: file.type, caption: '' } });
+  e.target.value = '';
+};
+
+// ── Poll the mock Cloud API outbox for Katlego's replies ─────────────────────
+async function poll() {
+  try {
+    const phone = phoneInput.value.trim();
+    const resp = await fetch(`${MOCKWA}/outbox?to=${encodeURIComponent(phone)}&since=${outboxCursor}`);
+    const data = await resp.json();
+    outboxCursor = data.next;
+    for (const m of data.messages) addBubble(m.body, 'in');
+    document.getElementById('status').textContent = 'online · CAPS tutor';
+  } catch {
+    document.getElementById('status').textContent = 'mock Cloud API unreachable…';
+  }
+  setTimeout(poll, 900);
+}
+poll();
+</script>
+</body>
+</html>

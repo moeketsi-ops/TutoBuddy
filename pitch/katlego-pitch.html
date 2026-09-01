@@ -1,0 +1,259 @@
+<title>The Katlego Bet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --paper: #f4f6f2;
+    --card: #ffffff;
+    --ink: #17241d;
+    --muted: #55665c;
+    --line: #d8e0d9;
+    --green: #0b6e4f;
+    --green-deep: #084d38;
+    --gold: #c98a1b;
+    --gold-soft: #f3e3c2;
+    --bubble-in: #ffffff;
+    --bubble-out: #d5efdd;
+    --chat-bg: #e6ece5;
+    --placeholder-bg: #fdf6e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #101713;
+      --card: #182119;
+      --ink: #e8ede8;
+      --muted: #9cab9f;
+      --line: #2b372e;
+      --green: #3fae85;
+      --green-deep: #6bcaa5;
+      --gold: #e0aa45;
+      --gold-soft: #3a2f18;
+      --bubble-in: #222d24;
+      --bubble-out: #0e3b2b;
+      --chat-bg: #0c120e;
+      --placeholder-bg: #241d0e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #101713;
+    --card: #182119;
+    --ink: #e8ede8;
+    --muted: #9cab9f;
+    --line: #2b372e;
+    --green: #3fae85;
+    --green-deep: #6bcaa5;
+    --gold: #e0aa45;
+    --gold-soft: #3a2f18;
+    --bubble-in: #222d24;
+    --bubble-out: #0e3b2b;
+    --chat-bg: #0c120e;
+    --placeholder-bg: #241d0e;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--green);
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(38px, 6vw, 56px);
+    font-weight: 700; line-height: 1.08; text-wrap: balance;
+    margin: 10px 0 18px;
+  }
+  h1 em { font-style: italic; color: var(--green); }
+  .standfirst {
+    font-size: 19px; color: var(--muted); max-width: 58ch; text-wrap: balance;
+  }
+  h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 27px; font-weight: 600; line-height: 1.2; text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  section { margin-top: 60px; }
+  p { max-width: 65ch; }
+  p + p { margin-top: 12px; }
+  strong { font-weight: 600; }
+  .positioning {
+    margin: 28px 0 0; padding: 18px 22px;
+    border-left: 3px solid var(--gold);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 21px; font-style: italic; line-height: 1.4;
+    background: var(--card); border-radius: 0 10px 10px 0;
+  }
+
+  /* Chat vignette — the product, verbatim from the running POC */
+  .chat {
+    background: var(--chat-bg); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px; margin: 30px 0 8px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .chat .bubble {
+    max-width: 85%; padding: 9px 14px; border-radius: 10px;
+    font-size: 14.5px; line-height: 1.5; box-shadow: 0 1px 1px rgba(0,0,0,.06);
+  }
+  .chat .in  { background: var(--bubble-in); align-self: flex-start; border-top-left-radius: 3px; }
+  .chat .out { background: var(--bubble-out); align-self: flex-end; border-top-right-radius: 3px; }
+  .chat .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+  @media (max-width: 620px) { .grid2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 22px;
+  }
+  .card h3 {
+    font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--green);
+  }
+  .card p { font-size: 14.5px; color: var(--muted); }
+
+  /* Status list — what runs today */
+  .status { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .status .row {
+    display: flex; gap: 14px; align-items: baseline;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 13px 18px; font-size: 15px;
+  }
+  .status .tick { color: var(--green); font-weight: 700; flex-shrink: 0; }
+  .status .row small { color: var(--muted); display: block; font-size: 13.5px; }
+
+  .tablewrap { overflow-x: auto; margin-top: 22px; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--card); font-size: 14.5px; }
+  th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.us { color: var(--green); font-weight: 600; }
+  td.dim { color: var(--muted); }
+
+  .timeline { margin-top: 22px; display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: grid; grid-template-columns: 92px 1fr; gap: 18px;
+    padding: 14px 0; border-bottom: 1px solid var(--line);
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase .tag {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 20px;
+    color: var(--green);
+  }
+  .phase .tag small { display: block; font-family: "Archivo", sans-serif; font-weight: 500; font-size: 12px; color: var(--muted); }
+  .phase p { font-size: 15px; }
+
+  .ph {
+    background: var(--placeholder-bg); border: 1px dashed var(--gold);
+    border-radius: 6px; padding: 1px 8px; color: var(--gold);
+    font-weight: 600; white-space: nowrap; font-size: .95em;
+  }
+  .ask { margin-top: 22px; }
+  .ask .row {
+    display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline;
+    padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px;
+  }
+  .ask .row:last-child { border-bottom: none; }
+  .ask .amt { font-variant-numeric: tabular-nums; }
+
+  footer {
+    margin-top: 70px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted);
+  }
+  footer p { max-width: none; }
+  a { color: var(--green); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Katlego · Funding Concept · August 2026</div>
+    <h1>Every learner in South Africa already has the classroom app. It's called <em>WhatsApp</em>.</h1>
+    <p class="standfirst">Katlego is a CAPS-aligned AI tutor that lives where learners already are — and unlike every "AI on WhatsApp" bot before it, it remembers each learner.</p>
+    <div class="positioning">"Maski answers your question. Katlego knows your marks."</div>
+  </header>
+
+  <section>
+    <h2>Answering questions is a commodity. We're not selling answers.</h2>
+    <p>Maski (100k+ users, R55m raised), Sammo, and Meta AI itself — free and pre-installed in every South African learner's WhatsApp — already answer homework questions. Chat quality is a race nobody small can win.</p>
+    <p style="margin-top:12px"><strong>Our bet is a stateful tutor:</strong> a persistent per-learner mastery model ("you struggled with factorisation in March — let's revise before Friday's quiz"), real assessments marked against official NSC memos, and engagement engineered around WhatsApp's free 24-hour service window so a tutoring session costs cents, not rands.</p>
+
+    <div class="chat">
+      <div class="bubble out">How do I factorise x² + 5x + 6? 🎤</div>
+      <div class="bubble in">Great question — this is about <strong>Factorising quadratic trinomials</strong> (Grade 10 Mathematics) 🎯<br><br>Let's think it through instead of jumping to the answer. Remember: to factorise x² + bx + c, find two numbers whose product is c and whose sum is b.<br><br>What do you think the first step should be?</div>
+      <div class="note">Verbatim from the running proof-of-concept — voice note in, curriculum-grounded Socratic coaching out.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The proof-of-concept already runs, end to end</h2>
+    <p>This is not a slideware concept. The full P0 pipeline runs locally today in Docker, with every third-party dependency behind a swappable adapter — going live on the real WhatsApp Cloud API is a configuration change, not a rebuild.</p>
+    <div class="status">
+      <div class="row"><span class="tick">✓</span><span>Learner message → safety filter → POPIA consent gate → intent router → curriculum retrieval → Socratic reply <small>The whole loop, over text, voice notes and homework photos</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Voice notes transcribed by a local speech-to-text model — spoken maths question in, grounded coaching out <small>Proven with real audio in the automated test suite; zero API cost</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>15 / 15 end-to-end tests green <small>Consent flow, safety referrals (Childline 116), grade-filtered retrieval, webhook dedupe, live voice pipeline</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Eval harness grading the tutor against NSC-style memo answers <small>"The tutor that shows its marks" — the accuracy number ships with every prompt or model change</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Child-safety and POPIA designed in from message one <small>Crisis disclosures route to referral scripts before anything else; guardian consent before any profiling; DELETE erases everything</small></span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why we win the gaps the incumbents can't close</h2>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Capability</th><th>Meta AI</th><th>Maski</th><th>Katlego</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CAPS-grounded answers</td><td class="dim">✗</td><td class="dim">✓</td><td class="us">✓</td></tr>
+          <tr><td>Persistent mastery memory</td><td class="dim">✗</td><td class="dim">thin</td><td class="us">core bet</td></tr>
+          <tr><td>Assessments marked vs NSC memos, learner-side</td><td class="dim">✗</td><td class="dim">teacher-side only</td><td class="us">✓</td></tr>
+          <tr><td>Multi-learner profiles per shared family phone</td><td class="dim">✗</td><td class="dim">✗</td><td class="us">✓</td></tr>
+          <tr><td>Data-free path (Moya, USSD)</td><td class="dim">✗</td><td class="dim">✗</td><td class="us">roadmap P2–P3</td></tr>
+          <tr><td>isiZulu / Sepedi replies</td><td class="dim">generic</td><td class="dim">English only</td><td class="us">roadmap P2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>The economics work in our favour</h3>
+        <p>Since July 2025 Meta charges per template message — but replies inside the 24-hour window the learner opens are free. Every engagement loop is designed so the learner messages first: marginal session cost is LLM tokens in the cents, controlled by a cheap intent-router model.</p>
+      </div>
+      <div class="card">
+        <h3>A legally clean content moat</h3>
+        <p>Our corpus is DBE-published material — CAPS statements, ATPs, NSC past papers with marking memos, all public. No textbook licences to buy, no copyright exposure, and structured memo data that powers real marks, which embeddings-only competitors can't fake.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Roadmap: prove the loop, then widen the moat</h2>
+    <div class="timeline">
+      <div class="phase"><div class="tag">P0 <small>weeks 1–6</small></div><p>Prove the loop with Gr 11–12 Maths &amp; Accounting: CAPS-grounded Socratic help that brings learners back tomorrow. <strong>The POC de-risks this phase today.</strong></p></div>
+      <div class="phase"><div class="tag">P1 <small>months 2–4</small></div><p>Become a tutor, not a chatbot: timed quizzes marked vs memos, PDF report cards, the mastery graph driving daily revision missions, shared-phone profiles.</p></div>
+      <div class="phase"><div class="tag">P2 <small>months 4–8</small></div><p>Widen the moat: code-switched voice, isiZulu/Sepedi replies, Study Squads, airtime micro-rewards, the data-free Moya channel, weekly parent digest.</p></div>
+      <div class="phase"><div class="tag">P3 <small>months 8+</small></div><p>Distribution &amp; revenue: USSD lookup, teacher dashboards, CSR / B-BBEE sponsorship packages, school licensing.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The ask</h2>
+    <p>We are raising <span class="ph">[R — amount]</span> to take the proven P0 loop to a <span class="ph">[N-school / N-learner]</span> pilot over <span class="ph">[6–9 months]</span>.</p>
+    <div class="ask">
+      <div class="row"><span>WhatsApp platform setup — Meta business verification, dedicated number, domain, af-south-1 hosting (POPIA data residency)</span><span class="amt ph">[R —]</span></div>
+      <div class="row"><span>LLM + speech API budget for the pilot cohort</span><span class="amt ph">[R —]</span></div>
+      <div class="row"><span>Content pipeline: full CAPS/ATP + 5 years of NSC papers with memos, parsed and tagged</span><span class="amt ph">[R —]</span></div>
+      <div class="row"><span>POPIA legal review, Information Officer registration, safeguarding review</span><span class="amt ph">[R —]</span></div>
+      <div class="row"><span>Team — <span class="ph">[roles]</span></span><span class="amt ph">[R —]</span></div>
+    </div>
+    <p style="margin-top:18px">Pilot success metrics: weekly-active learners returning ≥3 days/week, measured mastery improvement on the eval harness, and a live cost-per-weekly-active-learner number from week one.</p>
+  </section>
+
+  <footer>
+    <p><strong>Katlego</strong> (Setswana: <em>success</em>) — working title TutoBuddy. Contact: <span class="ph">[name · email · phone]</span>. Full technical blueprint, verified market research and the runnable proof-of-concept available on request. Market claims verified August 2026; sources documented in the technical blueprint.</p>
+  </footer>
+</div>
