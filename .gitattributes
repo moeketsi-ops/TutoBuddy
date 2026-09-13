@@ -1,0 +1,9 @@
+# This repo is developed on Linux/macOS (Docker containers, shell scripts
+# with shebangs) but may be cloned on Windows too. Without this, Windows
+# Git defaults (core.autocrlf) -- or, as found while setting up a Windows
+# contributor, something in the local sync/OS layer independent of git --
+# can silently convert every text file to CRLF on checkout, which breaks
+# any shell script executed inside a Linux container (bad interpreter) and
+# makes every file show as fully modified in git status/diff for no real
+# reason. Force LF for everything git itself controls, regardless of OS.
+* text=auto eol=lf

@@ -12,10 +12,25 @@ class Settings(BaseSettings):
     graph_api_base_url: str = "http://mockwa:8001"
 
     # LLM
-    llm_provider: str = "stub"  # stub | anthropic
+    llm_provider: str = "stub"  # stub | anthropic | groq | ollama
     anthropic_api_key: str = PLACEHOLDER
     router_model: str = "claude-haiku-4-5-20251001"
     reasoner_model: str = "claude-sonnet-5"
+
+    # groq: free/cheap hosted inference for the open gpt-oss models. Same
+    # cheap-router/frontier-reasoner split as Anthropic above.
+    groq_api_key: str = PLACEHOLDER
+    groq_router_model: str = "openai/gpt-oss-20b"
+    groq_reasoner_model: str = "openai/gpt-oss-120b"
+
+    # ollama: fully local/offline, no API key. `ollama_base_url` defaults to
+    # the Docker Desktop hostname for the host machine, since Ollama itself
+    # runs on the host, not in a container. Model names are NOT verified
+    # defaults the way the Anthropic/Groq ones are above -- they're only a
+    # guess at what's commonly pulled; set to whatever `ollama list` shows.
+    ollama_base_url: str = "http://host.docker.internal:11434"
+    ollama_router_model: str = "llama3.2"
+    ollama_reasoner_model: str = "llama3.2"
 
     # Speech-to-text
     stt_provider: str = "stub"  # stub | local | openai

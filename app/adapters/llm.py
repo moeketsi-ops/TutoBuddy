@@ -3,6 +3,18 @@
 stub      — deterministic canned replies; fully offline, used by CI and the
             keyless demo. Never pretends to solve maths it didn't solve.
 anthropic — Haiku for intent routing, a frontier model for Socratic tutoring.
+groq      — same two-tier split, served by Groq's hosted open gpt-oss models.
+            Free/cheap alternative to Anthropic; no vision support (used only
+            for classify_intent/socratic_reply/direct_answer, never photos).
+ollama    — fully local/offline, no API key, via a locally running Ollama
+            server. Same caveat as groq: text only, and the model quality
+            depends entirely on what's been `ollama pull`ed -- not assumed to
+            match the hosted providers.
+
+Vision (photo_reply) intentionally stays anthropic-only: neither Groq's
+gpt-oss models nor an arbitrary local Ollama pull are assumed to be
+vision-capable. Falls back to the stub message for groq/ollama, same as it
+already did for stub mode.
 """
 
 import base64
@@ -22,10 +34,41 @@ def _anthropic_client():
     return anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
 
+def _groq_client():
+    from groq import AsyncGroq
+
+    return AsyncGroq(api_key=settings.groq_api_key)
+
+
+def _ollama_client():
+    from ollama import AsyncClient
+
+    return AsyncClient(host=settings.ollama_base_url)
+
+
 def _use_anthropic() -> bool:
     return settings.llm_provider == "anthropic" and settings.is_set(
         settings.anthropic_api_key
     )
+
+
+def _use_groq() -> bool:
+    return settings.llm_provider == "groq" and settings.is_set(settings.groq_api_key)
+
+
+def _use_ollama() -> bool:
+    # No API key to check -- provider selection alone is enough. A bad host
+    # or an unpulled model surfaces as a real connection/response error at
+    # call time rather than silently falling back to stub, so it's obvious
+    # something's actually wrong rather than looking like stub mode.
+    return settings.llm_provider == "ollama"
+
+
+def using_stub() -> bool:
+    """True when no real provider is configured -- shared with evals/run_eval.py
+    so the "scores aren't meaningful" warning covers every real provider, not
+    just anthropic."""
+    return not (_use_anthropic() or _use_groq() or _use_ollama())
 
 
 # ── Intent routing ────────────────────────────────────────────────────────────
@@ -41,20 +84,47 @@ async def classify_intent(text: str) -> str:
     lowered = text.lower().strip()
     if lowered in _SMALLTALK_WORDS:
         return "smalltalk"
-    if not _use_anthropic():
-        if any(h in lowered for h in _HOMEWORK_HINTS):
-            return "homework"
-        return "smalltalk" if len(lowered.split()) <= 3 else "homework"
 
-    client = _anthropic_client()
-    resp = await client.messages.create(
-        model=settings.router_model,
-        max_tokens=10,
-        system=prompts.INTENT_SYSTEM,
-        messages=[{"role": "user", "content": text}],
-    )
-    label = resp.content[0].text.strip().lower()
-    return label if label in INTENTS else "homework"
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.router_model,
+            max_tokens=10,
+            system=prompts.INTENT_SYSTEM,
+            messages=[{"role": "user", "content": text}],
+        )
+        label = resp.content[0].text.strip().lower()
+        return label if label in INTENTS else "homework"
+
+    if _use_groq():
+        client = _groq_client()
+        resp = await client.chat.completions.create(
+            model=settings.groq_router_model,
+            max_tokens=10,
+            messages=[
+                {"role": "system", "content": prompts.INTENT_SYSTEM},
+                {"role": "user", "content": text},
+            ],
+        )
+        label = resp.choices[0].message.content.strip().lower()
+        return label if label in INTENTS else "homework"
+
+    if _use_ollama():
+        client = _ollama_client()
+        resp = await client.chat(
+            model=settings.ollama_router_model,
+            messages=[
+                {"role": "system", "content": prompts.INTENT_SYSTEM},
+                {"role": "user", "content": text},
+            ],
+        )
+        label = resp["message"]["content"].strip().lower()
+        return label if label in INTENTS else "homework"
+
+    # stub: keyword heuristic, no model call
+    if any(h in lowered for h in _HOMEWORK_HINTS):
+        return "homework"
+    return "smalltalk" if len(lowered.split()) <= 3 else "homework"
 
 
 # ── Socratic tutoring ─────────────────────────────────────────────────────────
@@ -64,7 +134,7 @@ def _stub_socratic(question: str, chunks: list[dict], grade: int) -> str:
         return (
             "Good question! I couldn't find that topic in my CAPS notes yet 📚 "
             "Try asking about algebra, functions, trigonometry, calculus or "
-            "financial maths.\n\n_(stub LLM — add the Anthropic key in .env "
+            "financial maths.\n\n_(stub LLM — set LLM_PROVIDER in .env "
             "for real tutoring)_"
         )
     top = chunks[0]
@@ -76,48 +146,96 @@ def _stub_socratic(question: str, chunks: list[dict], grade: int) -> str:
         f"Remember: {first_sentence}\n\n"
         f"What do you think the first step should be? Reply with your attempt "
         f"and I'll guide you from there.\n\n"
-        f"_(stub LLM — add the Anthropic key in .env for real Socratic "
+        f"_(stub LLM — set LLM_PROVIDER in .env for real Socratic "
         f"tutoring)_"
     )
 
 
 async def socratic_reply(question: str, chunks: list[dict], grade: int) -> str:
-    if not _use_anthropic():
-        return _stub_socratic(question, chunks, grade)
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.reasoner_model,
+            max_tokens=600,
+            system=prompts.socratic_system(grade, chunks),
+            messages=[{"role": "user", "content": question}],
+        )
+        return resp.content[0].text.strip()
 
-    client = _anthropic_client()
-    resp = await client.messages.create(
-        model=settings.reasoner_model,
-        max_tokens=600,
-        system=prompts.socratic_system(grade, chunks),
-        messages=[{"role": "user", "content": question}],
-    )
-    return resp.content[0].text.strip()
+    if _use_groq():
+        client = _groq_client()
+        resp = await client.chat.completions.create(
+            model=settings.groq_reasoner_model,
+            max_tokens=600,
+            messages=[
+                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
+    if _use_ollama():
+        client = _ollama_client()
+        resp = await client.chat(
+            model=settings.ollama_reasoner_model,
+            messages=[
+                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp["message"]["content"].strip()
+
+    return _stub_socratic(question, chunks, grade)
 
 
 async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
     """Full worked answer — used only by the eval harness, never sent to learners."""
-    if not _use_anthropic():
-        return "(stub LLM cannot produce marked answers — set ANTHROPIC_API_KEY)"
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.reasoner_model,
+            max_tokens=800,
+            system=prompts.eval_system(grade, chunks),
+            messages=[{"role": "user", "content": question}],
+        )
+        return resp.content[0].text.strip()
 
-    client = _anthropic_client()
-    resp = await client.messages.create(
-        model=settings.reasoner_model,
-        max_tokens=800,
-        system=prompts.eval_system(grade, chunks),
-        messages=[{"role": "user", "content": question}],
-    )
-    return resp.content[0].text.strip()
+    if _use_groq():
+        client = _groq_client()
+        resp = await client.chat.completions.create(
+            model=settings.groq_reasoner_model,
+            max_tokens=800,
+            messages=[
+                {"role": "system", "content": prompts.eval_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
+    if _use_ollama():
+        client = _ollama_client()
+        resp = await client.chat(
+            model=settings.ollama_reasoner_model,
+            messages=[
+                {"role": "system", "content": prompts.eval_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp["message"]["content"].strip()
+
+    return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
 
 
 # ── Vision (homework photos) ──────────────────────────────────────────────────
+# Anthropic-only, deliberately: see module docstring.
 
 async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
     if not _use_anthropic():
         return (
             "I can see you sent a photo of your work 📸 Photo help runs on "
             "the real model.\n\n_(stub LLM — add the Anthropic key in .env "
-            "to enable homework-photo help)_"
+            "to enable homework-photo help; groq/ollama don't support photo "
+            "help here yet)_"
         )
 
     client = _anthropic_client()

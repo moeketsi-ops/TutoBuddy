@@ -84,9 +84,15 @@ All in `.env` (see `.env.example` for guidance). The mock-first design means
 | `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `META_APP_SECRET` | Meta Business Manager + Cloud API setup | §3 items 1–3 |
 | `GRAPH_API_BASE_URL` | set to `https://graph.facebook.com` to go live | — |
 | `ANTHROPIC_API_KEY` + `LLM_PROVIDER=anthropic` | Anthropic console | §3 item 6 |
+| `GROQ_API_KEY` + `LLM_PROVIDER=groq` (alternative to Anthropic) | console.groq.com — free/cheap hosted open gpt-oss models | — |
+| `LLM_PROVIDER=ollama` (alternative, no key) | a locally running Ollama with a model pulled (`ollama pull <name>`) | — |
 | `OPENAI_API_KEY` (optional) | Whisper API / embeddings alternative | §3 item 7 |
 
-Provider switches: `LLM_PROVIDER=stub|anthropic`,
+Note: homework-photo help only works with `LLM_PROVIDER=anthropic` for now —
+groq's gpt-oss models and an arbitrary local Ollama pull aren't assumed to be
+vision-capable.
+
+Provider switches: `LLM_PROVIDER=stub|anthropic|groq|ollama`,
 `STT_PROVIDER=stub|local|openai`, `EMBEDDINGS_PROVIDER=hash|openai`.
 
 ## Going live checklist (beyond keys)
