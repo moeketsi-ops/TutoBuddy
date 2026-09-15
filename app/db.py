@@ -94,6 +94,11 @@ CREATE TABLE IF NOT EXISTS documents (
     year          int,
     file_path     text,
     source_url    text,
+    -- Bridge columns so past papers/memos can be filtered by grade/subject
+    -- without a join through document_sections -> topics. Nullable: a CAPS
+    -- or ATP document may span multiple grades/subjects.
+    grade_id      int REFERENCES grades(id) ON DELETE SET NULL,
+    subject_id    int REFERENCES subjects(id) ON DELETE SET NULL,
     created_at    timestamptz NOT NULL DEFAULT now()
 );
 
@@ -127,6 +132,15 @@ CREATE TABLE IF NOT EXISTS topics (
 );
 CREATE INDEX IF NOT EXISTS idx_topics_grade_id ON topics(grade_id);
 CREATE INDEX IF NOT EXISTS idx_topics_subject_id ON topics(subject_id);
+
+-- Past-paper excerpts (document_sections) can now be tagged to a topic and
+-- carry their own embedding, so rag.py can pull a topic-relevant excerpt the
+-- same way it already pulls caps_chunks -- added here (after `topics`
+-- exists) rather than on the CREATE TABLE above, which runs earlier in this
+-- script, before `topics` does.
+ALTER TABLE document_sections ADD COLUMN IF NOT EXISTS topic_id int REFERENCES topics(id) ON DELETE SET NULL;
+ALTER TABLE document_sections ADD COLUMN IF NOT EXISTS embedding vector({dim});
+CREATE INDEX IF NOT EXISTS idx_document_sections_topic_id ON document_sections(topic_id);
 
 CREATE TABLE IF NOT EXISTS subtopics (
     id       serial PRIMARY KEY,

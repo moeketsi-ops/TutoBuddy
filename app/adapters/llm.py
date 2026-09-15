@@ -226,6 +226,59 @@ async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
     return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
 
 
+# ── Practice questions (see prompts.practice_system for the anti-hallucination
+# instructions around OCR'd past-paper excerpts) ─────────────────────────────
+
+def _stub_practice(topic: str, grade: int) -> str:
+    return (
+        f"Let's practise *{topic}* 🎯 Try a Grade {grade} CAPS-level problem on this "
+        f"topic and show me your working when you're ready.\n\n"
+        f"_(stub LLM — set LLM_PROVIDER in .env for a real generated practice question)_"
+    )
+
+
+async def practice_question(
+    topic: str, grade: int, band: str | None, excerpts: list[dict]
+) -> str:
+    system = prompts.practice_system(grade, topic, band, excerpts)
+    user_msg = f"Set me a practice question on {topic}."
+
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.reasoner_model,
+            max_tokens=300,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        return resp.content[0].text.strip()
+
+    if _use_groq():
+        client = _groq_client()
+        resp = await client.chat.completions.create(
+            model=settings.groq_reasoner_model,
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
+    if _use_ollama():
+        client = _ollama_client()
+        resp = await client.chat(
+            model=settings.ollama_reasoner_model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        return resp["message"]["content"].strip()
+
+    return _stub_practice(topic, grade)
+
+
 # ── Vision (homework photos) ──────────────────────────────────────────────────
 # Anthropic-only, deliberately: see module docstring.
 

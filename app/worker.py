@@ -17,7 +17,7 @@ from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
-from app.tutor.engine import tutor_reply
+from app.tutor.engine import practice_reply, progress_reply, tutor_reply
 
 log = logging.getLogger("katlego.worker")
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +25,8 @@ logging.basicConfig(level=logging.INFO)
 HELP_MESSAGE = (
     "Here's what I can do 🎓\n"
     "• Ask me any Maths question — text, 🎤 voice note, or 📸 photo\n"
+    "• Say \"quiz me\" (or similar) for a practice question\n"
+    "• *PROGRESS* — see how you're doing this term\n"
     "• *HELP* — this message\n"
     "• *RESET* — start onboarding again\n"
     "• *DELETE* — erase all your data (POPIA right to deletion)\n\n"
@@ -79,11 +81,15 @@ async def handle_active(
     if command == "DELETE":
         await session.delete_learner(phone)
         return DELETE_CONFIRMATION, "admin"
+    if command == "PROGRESS":
+        return await progress_reply(phone, sess.grade), "admin"
 
     intent = await llm.classify_intent(text)
     if intent == "smalltalk":
         return SMALLTALK_REPLY, intent
-    # homework / quiz / anything substantive → the tutor engine
+    if intent == "quiz":
+        return await practice_reply(phone, sess.grade), intent
+    # homework / anything else substantive → the tutor engine
     return await tutor_reply(text, sess.grade), intent
 
 

@@ -45,3 +45,76 @@ def eval_system(grade: int, chunks: list[dict]) -> str:
 Produce the full worked solution exactly as an NSC marking memo would express it: show each step, state the final answer clearly, use correct units and notation. Be concise — no teaching commentary.
 
 {_context_block(chunks)}"""
+
+
+# ── Term progress (pure text formatting — no LLM call, so nothing here can
+# be hallucinated: every number comes straight from learner_topic_mastery /
+# topics via app.tutor.rag.get_term_progress) ────────────────────────────────
+
+_BAND_EMOJI = {
+    "remediate": "🔴",
+    "practice": "🟡",
+    "challenge": "🟢",
+    "advance": "🌟",
+}
+
+
+def progress_message(progress: dict) -> str:
+    topics = progress["topics"]
+    term, subject = progress["term"], progress["subject"]
+    if not topics:
+        return (
+            f"I don't have Term {term} {subject} topics loaded yet 📚 "
+            "Ask me a question and we'll get going!"
+        )
+
+    filled = round(progress["coverage_pct"] / 10)
+    bar = "🟩" * filled + "⬜" * (10 - filled)
+    lines = [
+        f"*Term {term} {subject} progress*",
+        f"{bar}  {progress['coverage_pct']}% of topics started",
+    ]
+    if progress["avg_mastery"] is not None:
+        lines.append(f"Average score so far: {progress['avg_mastery']}%")
+    lines.append("")
+    for t in topics:
+        if t["mastery_score"] is None:
+            lines.append(f"◻️ {t['topic']} — not started yet")
+        else:
+            emoji = _BAND_EMOJI.get(t["band"], "◻️")
+            lines.append(f"{emoji} {t['topic']} — {t['mastery_score']}% ({t['band']})")
+    return "\n".join(lines)
+
+
+# ── Practice questions (past-paper excerpts as style reference ONLY — see
+# app.tutor.rag module docstring on why these are never treated as fact) ────
+
+def _past_paper_block(excerpts: list[dict]) -> str:
+    if not excerpts:
+        return "No past-paper excerpts were retrieved for this topic."
+    lines = [
+        f"- [{e['title']}, p.{e['page']}] {e['content'][:500]}" for e in excerpts
+    ]
+    return "Real past-exam excerpts for this topic (OCR-scanned — see warning below):\n" + "\n".join(lines)
+
+
+def practice_system(grade: int, topic: str, band: str | None, excerpts: list[dict]) -> str:
+    band_guidance = (
+        f"This learner's current mastery band on this topic is '{band}' — pitch the "
+        "question at that level (remediate: confidence-building basics; practice: "
+        "standard routine procedure; challenge: multi-step; advance: harder/extension)."
+        if band else
+        "This learner hasn't been assessed on this topic yet — set a standard, "
+        "routine-procedure-level question."
+    )
+    return f"""You are Katlego, a warm South African maths tutor on WhatsApp, setting a Grade {grade} learner a PRACTICE question on *{topic}* (prompt policy {PROMPT_VERSION}).
+
+{band_guidance}
+
+{_past_paper_block(excerpts)}
+
+CRITICAL: the excerpts above came from OCR (optical character recognition) on scanned exam papers and are KNOWN to garble numbers, fractions, exponents and symbols. Do NOT copy any number, question or answer from them verbatim, and do NOT trust any digit in them. Use them only to gauge realistic topic coverage, phrasing style and difficulty for a Grade {grade} CAPS paper on this topic. Then:
+1. Write ONE original practice question in that style, within Grade {grade} CAPS scope.
+2. Solve it yourself, step by step, to be certain of the correct answer — never assume an excerpt's numbers are right.
+3. Send the learner ONLY the question (and any given values) — never your solution.
+4. WhatsApp style: short, warm, plain language, under 80 words, at most one emoji."""
