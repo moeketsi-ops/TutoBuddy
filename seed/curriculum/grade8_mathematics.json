@@ -1,0 +1,255 @@
+{
+  "grade": 8,
+  "subject": "mathematics",
+  "content_areas": [
+    {
+      "name": "Numbers, Operations and Relationships",
+      "weight_pct": 25
+    },
+    {
+      "name": "Patterns, Functions and Algebra",
+      "weight_pct": 30
+    },
+    {
+      "name": "Space and Shape (Geometry)",
+      "weight_pct": 25
+    },
+    {
+      "name": "Measurement",
+      "weight_pct": 10
+    },
+    {
+      "name": "Data Handling",
+      "weight_pct": 10
+    }
+  ],
+  "topics": [
+    {
+      "name": "Whole numbers",
+      "term": 1,
+      "duration_hours": 9,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Exponents",
+      "term": 1,
+      "duration_hours": 9,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Construction of Geometric Figures",
+      "term": 1,
+      "duration_hours": 10,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of 2D Shapes",
+      "term": 1,
+      "duration_hours": 10,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Common Fractions",
+      "term": 2,
+      "duration_hours": 9,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Decimal Fractions",
+      "term": 2,
+      "duration_hours": 9,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of Straight Lines",
+      "term": 2,
+      "duration_hours": 2,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of 3D Objects",
+      "term": 2,
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Numeric and Geometric Patterns",
+      "term": 3,
+      "duration_hours": 6,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Functions and Relationships",
+      "term": 3,
+      "duration_hours": 3,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Algebraic Expressions",
+      "term": 3,
+      "duration_hours": 3,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": [
+        {
+          "objective_code": "ZA-MATH-G08-ALG-EXP-001",
+          "subtopic": "Algebraic language conventions",
+          "objective": "Recognise and identify algebraic conventions: identify variables and constants in expressions, and interpret algebraic expressions given formulae and equations, through adding and subtracting like terms.",
+          "skills": [
+            "Introduce and apply conventions of algebraic language",
+            "Identify variables and constants in an expression",
+            "Add and subtract like terms"
+          ],
+          "source_page": 95
+        },
+        {
+          "objective_code": "ZA-MATH-G08-ALG-EXP-002",
+          "subtopic": "Writing and interpreting expressions",
+          "objective": "Write and interpret algebraic expressions: identify and classify like and unlike terms, and write general rules (algebraic expressions) to describe relationships between numbers in a number pattern, including from flow diagrams and tables.",
+          "skills": [
+            "Identify and classify like and unlike terms",
+            "Write an algebraic expression as a general rule for a number pattern",
+            "Find input/output values for a given rule using flow diagrams or tables"
+          ],
+          "source_page": 95
+        },
+        {
+          "objective_code": "ZA-MATH-G08-ALG-EXP-003",
+          "subtopic": "Evaluating expressions",
+          "objective": "Recognise and identify coefficients, and determine the numerical value of an algebraic expression by substitution.",
+          "skills": [
+            "Recognise and identify coefficients in an algebraic term",
+            "Determine the numerical value of an expression by substitution",
+            "Determine the square, cube, square root and cube root of a single algebraic term",
+            "Apply the commutative, associative and distributive laws when evaluating algebraic expressions"
+          ],
+          "source_page": 95
+        }
+      ]
+    },
+    {
+      "name": "Algebraic Equations",
+      "term": 3,
+      "duration_hours": 4,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": [
+        {
+          "objective_code": "ZA-MATH-G08-ALG-EQ-001",
+          "subtopic": "Solving equations",
+          "objective": "Solve algebraic equations using additive and multiplicative inverses, and using the laws of exponents, e.g. solve for x if x + 6 = -9, or if -2x = 8.",
+          "skills": [
+            "Solve an equation using additive inverses (e.g. x + 6 = -9)",
+            "Solve an equation using multiplicative inverses (e.g. -2x = 8)",
+            "Solve a two-step equation (e.g. 3x + 1 = 7 - x)",
+            "Solve an equation using the laws of exponents"
+          ],
+          "source_page": 98
+        },
+        {
+          "objective_code": "ZA-MATH-G08-ALG-EQ-002",
+          "subtopic": "Equations in context",
+          "objective": "Set up and solve an equation to describe a given problem situation (e.g. a rectangle's area or perimeter in terms of x, or an age-relationship word problem), and use substitution in equations to generate a table of ordered pairs.",
+          "skills": [
+            "Set up an equation from a word or geometric problem (area/length in terms of x)",
+            "Use substitution to generate a table of ordered pairs from an equation",
+            "Determine the numerical value of an expression by substitution within an equation"
+          ],
+          "source_page": 98
+        }
+      ]
+    },
+    {
+      "name": "Graphs",
+      "term": 3,
+      "duration_hours": 6,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Area and Perimeter",
+      "term": 3,
+      "duration_hours": 7,
+      "content_area": "Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Integers",
+      "term": 4,
+      "duration_hours": 9,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Transformation Geometry",
+      "term": 4,
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Surface Area and Volume",
+      "term": 4,
+      "duration_hours": 8,
+      "content_area": "Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Collect, Organize and Summarize Data",
+      "term": 4,
+      "duration_hours": 4,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Represent Data",
+      "term": 4,
+      "duration_hours": 3,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Interpret, Analyse and Report Data",
+      "term": 4,
+      "duration_hours": 3.5,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Probability",
+      "term": 4,
+      "duration_hours": 4.5,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    }
+  ]
+}
