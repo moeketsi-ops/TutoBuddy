@@ -103,7 +103,12 @@ async def record_grade(phone: str, grade: int) -> None:
 
 
 async def delete_learner(phone: str) -> None:
-    """POPIA right to deletion — wipes profile, history and session."""
+    """POPIA right to deletion — wipes profile, history and session.
+
+    Deliberately does NOT touch safeguarding_flags: a self-harm/abuse
+    disclosure is a duty-of-care/legal record, not ordinary profile data,
+    and is not tied to this table by a foreign key for exactly that reason
+    (see the comment on safeguarding_flags in app/db.py)."""
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute("DELETE FROM learners WHERE phone = $1", phone)

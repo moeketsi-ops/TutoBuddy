@@ -15,7 +15,7 @@ import redis.asyncio as aioredis
 from app.adapters import llm, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
-from app.orchestrator import safety, session
+from app.orchestrator import safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
 from app.tutor.engine import practice_reply, progress_reply, tutor_reply
 
@@ -118,12 +118,15 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         await wa.send_text(phone, "I can read text, 🎤 voice notes and 📸 photos for now!")
         return
 
-    await log_message(phone, "inbound", msg_type, text)
+    await log_message(phone, "inbound", msg_type, safety.redact_pii(text))
 
-    # 2. Safety filter — before consent, before intent, always.
-    if text and safety.check(text):
+    # 2. Safety filter — before consent, before intent, always. Categorised
+    # (not just a bool) so the safeguarding flag records *why*.
+    risk_category = safety.classify_risk(text) if text else None
+    if risk_category is not None:
         await wa.send_text(phone, safety.REFERRAL_MESSAGE)
         await log_message(phone, "outbound", "system", safety.REFERRAL_MESSAGE, "safety", flagged=True)
+        await safeguarding.record_and_notify(wa, phone, risk_category, text)
         return
 
     # 3. POPIA consent gate + onboarding state machine
@@ -160,7 +163,15 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         else:
             reply, intent = await handle_active(wa, sess, phone, text)
 
-    reply = transcript_prefix + reply
+    raw_reply = transcript_prefix + reply
+    output_risk = safety.classify_risk(raw_reply)
+    if output_risk is not None:
+        # Defense-in-depth, not the expected path: the LLM's own generated
+        # text tripped the same risk screen a learner disclosure would.
+        await safeguarding.record_and_notify(
+            wa, phone, f"model_output_{output_risk}", raw_reply
+        )
+    reply = safety.sanitize_output(raw_reply)
     await wa.send_text(phone, reply)
     await log_message(phone, "outbound", "text", reply, intent)
 

@@ -55,6 +55,13 @@ class Settings(BaseSettings):
     embeddings_provider: str = "hash"  # hash | openai
     embedding_dim: int = 384
 
+    # Safeguarding (child-safety layer 4): where a flagged crisis/abuse
+    # message alerts a real human. WhatsApp is reused deliberately -- no new
+    # service/credential, works with the same WhatsAppClient already wired
+    # up. Leave unset (PLACEHOLDER) and alerts are logged at CRITICAL and
+    # persisted to safeguarding_flags, but nothing is pushed to anyone.
+    safeguarding_alert_phone: str = PLACEHOLDER
+
     # Infra
     database_url: str = "postgresql://katlego:katlego@db:5432/katlego"
     redis_url: str = "redis://redis:6379/0"

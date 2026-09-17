@@ -268,6 +268,28 @@ CREATE TABLE IF NOT EXISTS learner_assessment_attempts (
     attempted_at            timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_learner_attempts_phone ON learner_assessment_attempts(learner_phone);
+
+-- Safeguarding (child-safety architecture layer 4: a human reviews every
+-- risk-flagged case -- the AI is never the final authority). Deliberately
+-- NOT a FK to learners(phone) ON DELETE CASCADE: a POPIA "DELETE" request
+-- wipes the learner's profile/history, but a safeguarding record (a
+-- disclosed crisis/abuse flag) is a duty-of-care/legal record that must
+-- survive that deletion -- this is the one table in the schema that is
+-- intentionally exempt from the right-to-deletion cascade. `phone` here is
+-- a plain snapshot value, not a live reference.
+CREATE TABLE IF NOT EXISTS safeguarding_flags (
+    id              serial PRIMARY KEY,
+    phone           text NOT NULL,
+    category        text NOT NULL,
+    message_excerpt text NOT NULL,
+    status          text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'reviewed', 'resolved')),
+    notified_at     timestamptz,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    reviewed_at     timestamptz,
+    reviewed_by     text,
+    notes           text
+);
+CREATE INDEX IF NOT EXISTS idx_safeguarding_flags_status ON safeguarding_flags(status);
 """
 
 
