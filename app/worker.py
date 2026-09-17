@@ -1,8 +1,9 @@
 """Processing worker (blueprint §4.2: async, off the webhook path).
 
 Consumes inbound messages from the Redis stream and runs the pipeline:
-media (STT/vision) → safety filter → POPIA consent gate → intent router →
-RAG-grounded Socratic reply → send via the WhatsApp adapter.
+media (STT/vision) → safety filter → POPIA consent gate → profile creation
+(name + grade) → intent router → RAG-grounded Socratic reply → send via the
+WhatsApp adapter.
 """
 
 import asyncio
@@ -141,11 +142,20 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     elif sess.state == "awaiting_consent":
         if text.strip().upper() in {"AGREE", "YES", "ACCEPT", "I AGREE"}:
             await session.record_consent(phone, sess.data.get("name", name))
-            sess.data["state"] = "awaiting_grade"
+            sess.data["state"] = "awaiting_name"
             await session.save(sess)
-            reply = session.GRADE_PROMPT
+            reply = session.NAME_PROMPT
         else:
             reply = session.CONSENT_REPROMPT
+    elif sess.state == "awaiting_name":
+        cleaned = session.clean_name(text)
+        if cleaned:
+            await session.record_name(phone, cleaned)
+            sess.data.update(state="awaiting_grade", name=cleaned)
+            await session.save(sess)
+            reply = session.grade_prompt(cleaned)
+        else:
+            reply = session.NAME_REPROMPT
     elif sess.state == "awaiting_grade":
         digits = "".join(ch for ch in text if ch.isdigit())
         if digits and 8 <= int(digits) <= 12:
@@ -153,7 +163,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             await session.record_grade(phone, grade)
             sess.data.update(state="active", grade=grade)
             await session.save(sess)
-            reply = session.welcome_message(grade)
+            reply = session.welcome_message(sess.data.get("name", "there"), grade)
         else:
             reply = session.GRADE_REPROMPT
     else:  # active

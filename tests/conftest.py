@@ -101,11 +101,14 @@ def chat() -> Chat:
 
 @pytest.fixture
 def onboarded_chat() -> Chat:
-    """A learner who has completed consent + grade onboarding (Grade 11)."""
+    """A learner who has completed consent + name + grade onboarding
+    (nickname "Thabo", Grade 11)."""
     c = Chat()
     c.send_text("hi")
     assert "POPIA" in c.wait_for_reply()
     c.send_text("AGREE")
+    assert "call you" in c.wait_for_reply().lower()
+    c.send_text("Thabo")
     assert "grade" in c.wait_for_reply().lower()
     c.send_text("11")
     assert "Grade 11" in c.wait_for_reply()
