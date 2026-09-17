@@ -94,13 +94,19 @@ CREATE TABLE IF NOT EXISTS documents (
     year          int,
     file_path     text,
     source_url    text,
-    -- Bridge columns so past papers/memos can be filtered by grade/subject
-    -- without a join through document_sections -> topics. Nullable: a CAPS
-    -- or ATP document may span multiple grades/subjects.
-    grade_id      int REFERENCES grades(id) ON DELETE SET NULL,
-    subject_id    int REFERENCES subjects(id) ON DELETE SET NULL,
     created_at    timestamptz NOT NULL DEFAULT now()
 );
+-- Bridge columns so past papers/memos can be filtered by grade/subject
+-- without a join through document_sections -> topics. Nullable: a CAPS
+-- or ATP document may span multiple grades/subjects. Added via ALTER, not
+-- on the CREATE TABLE above -- `documents` already existed on real
+-- databases (created by an earlier load_curriculum.py run) before these
+-- columns were designed, and CREATE TABLE IF NOT EXISTS is a no-op against
+-- an existing table, so putting them there silently did nothing on any
+-- database that wasn't brand new. Same fix already applied to
+-- learners.grade_id below.
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS grade_id int REFERENCES grades(id) ON DELETE SET NULL;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS subject_id int REFERENCES subjects(id) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS document_sections (
     id            serial PRIMARY KEY,
