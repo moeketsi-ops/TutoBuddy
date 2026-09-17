@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     graph_api_base_url: str = "http://mockwa:8001"
 
     # LLM
-    llm_provider: str = "stub"  # stub | anthropic | groq | ollama
+    llm_provider: str = "stub"  # stub | anthropic | groq | ollama | openrouter
     anthropic_api_key: str = PLACEHOLDER
     router_model: str = "claude-haiku-4-5-20251001"
     reasoner_model: str = "claude-sonnet-5"
@@ -31,6 +31,20 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://host.docker.internal:11434"
     ollama_router_model: str = "llama3.2"
     ollama_reasoner_model: str = "llama3.2"
+
+    # openrouter: OpenAI-compatible API (https://openrouter.ai/api/v1), one
+    # key across many hosted models. Added for Qwen3.5-35B-A3B (open-weight
+    # MoE, ~3B active params, reasoning + genuinely multimodal) -- founder
+    # wants it for reasoning AND vision, so it's wired into the reasoner
+    # tier AND photo_reply, not just the router. Router stays on whichever
+    # provider LLM_PROVIDER already points to unless you also set
+    # LLM_PROVIDER=openrouter, in which case openrouter handles intent
+    # routing too (same one-setting-picks-everything pattern as the other
+    # three providers above -- there's no per-tier provider mix yet).
+    openrouter_api_key: str = PLACEHOLDER
+    openrouter_router_model: str = "qwen/qwen3.5-35b-a3b"
+    openrouter_reasoner_model: str = "qwen/qwen3.5-35b-a3b"
+    openrouter_vision_model: str = "qwen/qwen3.5-35b-a3b"
 
     # Speech-to-text
     stt_provider: str = "stub"  # stub | local | openai

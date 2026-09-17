@@ -1,20 +1,28 @@
 """Two-tier LLM adapter (blueprint §4.2: cheap router + frontier reasoner).
 
-stub      — deterministic canned replies; fully offline, used by CI and the
-            keyless demo. Never pretends to solve maths it didn't solve.
-anthropic — Haiku for intent routing, a frontier model for Socratic tutoring.
-groq      — same two-tier split, served by Groq's hosted open gpt-oss models.
-            Free/cheap alternative to Anthropic; no vision support (used only
-            for classify_intent/socratic_reply/direct_answer, never photos).
-ollama    — fully local/offline, no API key, via a locally running Ollama
-            server. Same caveat as groq: text only, and the model quality
-            depends entirely on what's been `ollama pull`ed -- not assumed to
-            match the hosted providers.
+stub       — deterministic canned replies; fully offline, used by CI and the
+             keyless demo. Never pretends to solve maths it didn't solve.
+anthropic  — Haiku for intent routing, a frontier model for Socratic tutoring.
+groq       — same two-tier split, served by Groq's hosted open gpt-oss models.
+             Free/cheap alternative to Anthropic; no vision support (used
+             only for classify_intent/socratic_reply/direct_answer, never
+             photos).
+ollama     — fully local/offline, no API key, via a locally running Ollama
+             server. Same caveat as groq: text only, and the model quality
+             depends entirely on what's been `ollama pull`ed -- not assumed
+             to match the hosted providers.
+openrouter — OpenAI-compatible API (https://openrouter.ai/api/v1), one key
+             across many hosted models. Added for Qwen3.5-35B-A3B
+             (open-weight MoE, ~3B active params, reasoning + genuinely
+             multimodal) — unlike groq/ollama above, THIS provider also
+             powers photo_reply, because the model is actually vision-
+             capable (verified against Alibaba's own docs + OpenRouter's
+             listing before wiring this up, not assumed).
 
-Vision (photo_reply) intentionally stays anthropic-only: neither Groq's
+Vision (photo_reply) is anthropic OR openrouter only: neither Groq's
 gpt-oss models nor an arbitrary local Ollama pull are assumed to be
 vision-capable. Falls back to the stub message for groq/ollama, same as it
-already did for stub mode.
+already did before openrouter existed.
 """
 
 import base64
@@ -26,6 +34,8 @@ from app.tutor import prompts
 log = logging.getLogger("katlego.llm")
 
 INTENTS = ("homework", "quiz", "smalltalk", "admin")
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 def _anthropic_client():
@@ -46,6 +56,12 @@ def _ollama_client():
     return AsyncClient(host=settings.ollama_base_url)
 
 
+def _openrouter_client():
+    from openai import AsyncOpenAI
+
+    return AsyncOpenAI(base_url=OPENROUTER_BASE_URL, api_key=settings.openrouter_api_key)
+
+
 def _use_anthropic() -> bool:
     return settings.llm_provider == "anthropic" and settings.is_set(
         settings.anthropic_api_key
@@ -64,11 +80,17 @@ def _use_ollama() -> bool:
     return settings.llm_provider == "ollama"
 
 
+def _use_openrouter() -> bool:
+    return settings.llm_provider == "openrouter" and settings.is_set(
+        settings.openrouter_api_key
+    )
+
+
 def using_stub() -> bool:
     """True when no real provider is configured -- shared with evals/run_eval.py
     so the "scores aren't meaningful" warning covers every real provider, not
     just anthropic."""
-    return not (_use_anthropic() or _use_groq() or _use_ollama())
+    return not (_use_anthropic() or _use_groq() or _use_ollama() or _use_openrouter())
 
 
 # ── Intent routing ────────────────────────────────────────────────────────────
@@ -119,6 +141,19 @@ async def classify_intent(text: str) -> str:
             ],
         )
         label = resp["message"]["content"].strip().lower()
+        return label if label in INTENTS else "homework"
+
+    if _use_openrouter():
+        client = _openrouter_client()
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_router_model,
+            max_tokens=10,
+            messages=[
+                {"role": "system", "content": prompts.INTENT_SYSTEM},
+                {"role": "user", "content": text},
+            ],
+        )
+        label = resp.choices[0].message.content.strip().lower()
         return label if label in INTENTS else "homework"
 
     # stub: keyword heuristic, no model call
@@ -185,6 +220,18 @@ async def socratic_reply(question: str, chunks: list[dict], grade: int) -> str:
         )
         return resp["message"]["content"].strip()
 
+    if _use_openrouter():
+        client = _openrouter_client()
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_reasoner_model,
+            max_tokens=600,
+            messages=[
+                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
     return _stub_socratic(question, chunks, grade)
 
 
@@ -222,6 +269,18 @@ async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
             ],
         )
         return resp["message"]["content"].strip()
+
+    if _use_openrouter():
+        client = _openrouter_client()
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_reasoner_model,
+            max_tokens=800,
+            messages=[
+                {"role": "system", "content": prompts.eval_system(grade, chunks)},
+                {"role": "user", "content": question},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
 
     return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
 
@@ -276,45 +335,77 @@ async def practice_question(
         )
         return resp["message"]["content"].strip()
 
+    if _use_openrouter():
+        client = _openrouter_client()
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_reasoner_model,
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
     return _stub_practice(topic, grade)
 
 
 # ── Vision (homework photos) ──────────────────────────────────────────────────
-# Anthropic-only, deliberately: see module docstring.
+# anthropic or openrouter only: see module docstring on why groq/ollama don't
+# get a vision path.
 
 async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
-    if not _use_anthropic():
-        return (
-            "I can see you sent a photo of your work 📸 Photo help runs on "
-            "the real model.\n\n_(stub LLM — add the Anthropic key in .env "
-            "to enable homework-photo help; groq/ollama don't support photo "
-            "help here yet)_"
-        )
-
-    client = _anthropic_client()
-    resp = await client.messages.create(
-        model=settings.reasoner_model,
-        max_tokens=600,
-        system=prompts.socratic_system(grade, []),
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": mime,
-                            "data": base64.b64encode(image).decode(),
-                        },
-                    },
-                    {
-                        "type": "text",
-                        "text": caption
-                        or "Here is a photo of my homework problem. Help me work through it.",
-                    },
-                ],
-            }
-        ],
+    prompt_text = (
+        caption or "Here is a photo of my homework problem. Help me work through it."
     )
-    return resp.content[0].text.strip()
+
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.reasoner_model,
+            max_tokens=600,
+            system=prompts.socratic_system(grade, []),
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": mime,
+                                "data": base64.b64encode(image).decode(),
+                            },
+                        },
+                        {"type": "text", "text": prompt_text},
+                    ],
+                }
+            ],
+        )
+        return resp.content[0].text.strip()
+
+    if _use_openrouter():
+        client = _openrouter_client()
+        data_url = f"data:{mime};base64,{base64.b64encode(image).decode()}"
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_vision_model,
+            max_tokens=600,
+            messages=[
+                {"role": "system", "content": prompts.socratic_system(grade, [])},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": data_url}},
+                        {"type": "text", "text": prompt_text},
+                    ],
+                },
+            ],
+        )
+        return resp.choices[0].message.content.strip()
+
+    return (
+        "I can see you sent a photo of your work 📸 Photo help runs on "
+        "the real model.\n\n_(stub LLM — add the Anthropic or OpenRouter key "
+        "in .env to enable homework-photo help; groq/ollama don't support "
+        "photo help here yet)_"
+    )

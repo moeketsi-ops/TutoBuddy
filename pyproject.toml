@@ -12,6 +12,7 @@ dependencies = [
     "anthropic>=0.40",
     "groq>=0.11",
     "ollama>=0.4",
+    "openai>=1.50",  # OpenRouter client (OpenAI-compatible API)
     "pydantic-settings>=2.4",
     "python-multipart>=0.0.9",
 ]
