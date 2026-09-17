@@ -1,9 +1,14 @@
 """Processing worker (blueprint §4.2: async, off the webhook path).
 
 Consumes inbound messages from the Redis stream and runs the pipeline:
-media (STT/vision) → safety filter → POPIA consent gate → profile creation
-(name + grade) → intent router → RAG-grounded Socratic reply → send via the
-WhatsApp adapter.
+media (STT/vision) → safety filter → POPIA consent gate → household/learner
+profile creation (name + grade) → intent router → RAG-grounded Socratic
+reply → send via the WhatsApp adapter.
+
+See tutobuddy-household-account-model-phase1-plan.md: a phone number is a
+channel onto an account (household), which can hold multiple learners.
+ADD LEARNER and SWITCH let a household with more than one learner add a
+sibling or change who's actively chatting.
 """
 
 import asyncio
@@ -28,9 +33,11 @@ HELP_MESSAGE = (
     "• Ask me any Maths question — text, 🎤 voice note, or 📸 photo\n"
     "• Say \"quiz me\" (or similar) for a practice question\n"
     "• *PROGRESS* — see how you're doing this term\n"
+    "• *ADD LEARNER* — add a sibling to this household\n"
+    "• *SWITCH* — change who's studying\n"
     "• *HELP* — this message\n"
     "• *RESET* — start onboarding again\n"
-    "• *DELETE* — erase all your data (POPIA right to deletion)\n\n"
+    "• *DELETE* — erase the active learner's data (POPIA right to deletion)\n\n"
     "Tip: I coach you step by step instead of just giving answers."
 )
 
@@ -40,9 +47,9 @@ SMALLTALK_REPLY = (
     "🎤 voice note or 📸 photo of the problem."
 )
 
-DELETE_CONFIRMATION = (
-    "All your data has been deleted — profile, progress and chat history. ✅\n"
-    "If you ever want to study together again, just say hi."
+ADD_LEARNER_NO_SIBLINGS = (
+    "It's just you on this account so far! Send *ADD LEARNER* any time to "
+    "add a sibling under the same household."
 )
 
 ERROR_REPLY = (
@@ -57,15 +64,17 @@ async def log_message(
     content: str,
     intent: str | None = None,
     flagged: bool = False,
+    learner_id: int | None = None,
 ) -> None:
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(
             """
-            INSERT INTO conversation_log (phone, direction, msg_type, content, intent, flagged)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO conversation_log
+                (phone, direction, msg_type, content, intent, flagged, learner_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             """,
-            phone, direction, msg_type, content[:4000], intent, flagged,
+            phone, direction, msg_type, content[:4000], intent, flagged, learner_id,
         )
 
 
@@ -79,17 +88,51 @@ async def handle_active(
     if command == "RESET":
         await session.reset(phone)
         return "Okay, starting fresh! Say hi to begin again. 👋", "admin"
+    if command == "ADD LEARNER":
+        sess.data.update(state="awaiting_name", onboarding_reason="add_learner")
+        await session.save(sess)
+        return session.NAME_PROMPT, "admin"
+    if command == "SWITCH":
+        learners = await session.list_learners(sess.account_id)
+        if len(learners) <= 1:
+            return ADD_LEARNER_NO_SIBLINGS, "admin"
+        sess.data["state"] = "choosing_learner"
+        await session.save(sess)
+        return session.switch_prompt(learners), "admin"
     if command == "DELETE":
-        await session.delete_learner(phone)
-        return DELETE_CONFIRMATION, "admin"
+        deleted_name = sess.name
+        await session.delete_active_learner(sess.active_learner_id)
+        remaining = await session.list_learners(sess.account_id)
+        if remaining:
+            nxt = remaining[0]
+            sess.data.update(
+                state="active",
+                active_learner_id=nxt["id"],
+                grade=nxt["grade"] or 11,
+                name=nxt["nickname"],
+            )
+            await session.save(sess)
+            return (
+                f"{deleted_name}'s profile was deleted. ✅ Switched to "
+                f"{nxt['nickname']} (Grade {nxt['grade'] or 11}).",
+                "admin",
+            )
+        sess.data.update(state="awaiting_name", onboarding_reason="add_learner")
+        sess.data.pop("active_learner_id", None)
+        await session.save(sess)
+        return (
+            f"{deleted_name}'s profile was deleted. ✅ This household has no "
+            f"learners left — let's add one.\n\n" + session.NAME_PROMPT,
+            "admin",
+        )
     if command == "PROGRESS":
-        return await progress_reply(phone, sess.grade), "admin"
+        return await progress_reply(sess.active_learner_id, sess.grade), "admin"
 
     intent = await llm.classify_intent(text)
     if intent == "smalltalk":
         return SMALLTALK_REPLY, intent
     if intent == "quiz":
-        return await practice_reply(phone, sess.grade), intent
+        return await practice_reply(sess.active_learner_id, sess.grade), intent
     # homework / anything else substantive → the tutor engine
     return await tutor_reply(text, sess.grade), intent
 
@@ -99,6 +142,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     name = job.get("name") or "learner"
     message = job["message"]
     msg_type = message.get("type", "text")
+
+    sess = await session.load(phone)
 
     # 1. Extract text (running STT for voice notes first)
     text = ""
@@ -119,19 +164,25 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         await wa.send_text(phone, "I can read text, 🎤 voice notes and 📸 photos for now!")
         return
 
-    await log_message(phone, "inbound", msg_type, safety.redact_pii(text))
+    await log_message(
+        phone, "inbound", msg_type, safety.redact_pii(text), learner_id=sess.active_learner_id
+    )
 
     # 2. Safety filter — before consent, before intent, always. Categorised
     # (not just a bool) so the safeguarding flag records *why*.
     risk_category = safety.classify_risk(text) if text else None
     if risk_category is not None:
         await wa.send_text(phone, safety.REFERRAL_MESSAGE)
-        await log_message(phone, "outbound", "system", safety.REFERRAL_MESSAGE, "safety", flagged=True)
-        await safeguarding.record_and_notify(wa, phone, risk_category, text)
+        await log_message(
+            phone, "outbound", "system", safety.REFERRAL_MESSAGE, "safety",
+            flagged=True, learner_id=sess.active_learner_id,
+        )
+        await safeguarding.record_and_notify(
+            wa, phone, risk_category, text, learner_id=sess.active_learner_id
+        )
         return
 
-    # 3. POPIA consent gate + onboarding state machine
-    sess = await session.load(phone)
+    # 3. POPIA consent gate + household/learner onboarding state machine
     reply = ""
     intent: str | None = None
 
@@ -141,8 +192,13 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         reply = session.CONSENT_MESSAGE
     elif sess.state == "awaiting_consent":
         if text.strip().upper() in {"AGREE", "YES", "ACCEPT", "I AGREE"}:
-            await session.record_consent(phone, sess.data.get("name", name))
-            sess.data["state"] = "awaiting_name"
+            account_id, guardian_id = await session.create_household(phone)
+            sess.data.update(
+                state="awaiting_name",
+                account_id=account_id,
+                guardian_id=guardian_id,
+                onboarding_reason="new_household",
+            )
             await session.save(sess)
             reply = session.NAME_PROMPT
         else:
@@ -150,8 +206,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     elif sess.state == "awaiting_name":
         cleaned = session.clean_name(text)
         if cleaned:
-            await session.record_name(phone, cleaned)
-            sess.data.update(state="awaiting_grade", name=cleaned)
+            learner_id = await session.add_learner(sess.account_id, sess.guardian_id, cleaned)
+            sess.data.update(state="awaiting_grade", active_learner_id=learner_id, name=cleaned)
             await session.save(sess)
             reply = session.grade_prompt(cleaned)
         else:
@@ -160,12 +216,30 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         digits = "".join(ch for ch in text if ch.isdigit())
         if digits and 8 <= int(digits) <= 12:
             grade = int(digits)
-            await session.record_grade(phone, grade)
+            await session.set_learner_grade(sess.active_learner_id, grade)
+            reason = sess.data.get("onboarding_reason", "new_household")
             sess.data.update(state="active", grade=grade)
             await session.save(sess)
-            reply = session.welcome_message(sess.data.get("name", "there"), grade)
+            if reason == "add_learner":
+                reply = session.added_learner_welcome(sess.name, grade)
+            else:
+                reply = session.welcome_message(sess.name, grade)
         else:
             reply = session.GRADE_REPROMPT
+    elif sess.state == "choosing_learner":
+        learners = await session.list_learners(sess.account_id)
+        matched = session.match_learner(text, learners)
+        if matched:
+            sess.data.update(
+                state="active",
+                active_learner_id=matched["id"],
+                grade=matched["grade"] or 11,
+                name=matched["nickname"],
+            )
+            await session.save(sess)
+            reply = session.switch_confirmation(matched["nickname"], matched["grade"] or 11)
+        else:
+            reply = session.SWITCH_REPROMPT
     else:  # active
         if image_bytes is not None:
             reply = await llm.photo_reply(image_bytes, image_mime, text, sess.grade)
@@ -179,11 +253,12 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         # Defense-in-depth, not the expected path: the LLM's own generated
         # text tripped the same risk screen a learner disclosure would.
         await safeguarding.record_and_notify(
-            wa, phone, f"model_output_{output_risk}", raw_reply
+            wa, phone, f"model_output_{output_risk}", raw_reply,
+            learner_id=sess.active_learner_id,
         )
     reply = safety.sanitize_output(raw_reply)
     await wa.send_text(phone, reply)
-    await log_message(phone, "outbound", "text", reply, intent)
+    await log_message(phone, "outbound", "text", reply, intent, learner_id=sess.active_learner_id)
 
 
 async def main() -> None:

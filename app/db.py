@@ -30,12 +30,57 @@ CREATE TABLE IF NOT EXISTS question_bank (
     source text
 );
 
+-- Household account model (see tutobuddy-household-account-model-phase1-plan.md).
+-- The phone number is a CHANNEL under an account, never the learner's
+-- identity -- one household can hold multiple learner profiles.
+CREATE TABLE IF NOT EXISTS accounts (
+    id serial PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS account_channels (
+    id serial PRIMARY KEY,
+    account_id int NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    channel text NOT NULL DEFAULT 'whatsapp',
+    phone text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (channel, phone)
+);
+CREATE INDEX IF NOT EXISTS idx_account_channels_phone ON account_channels(phone);
+
+CREATE TABLE IF NOT EXISTS guardians (
+    id serial PRIMARY KEY,
+    account_id int NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Redesigned from a phone-keyed single row per number to an id-keyed row
+-- per LEARNER, many per account. NOTE: if `learners` already exists from
+-- before this change (phone text PRIMARY KEY), this CREATE TABLE IF NOT
+-- EXISTS is a no-op against the OLD shape -- exactly the documents.grade_id
+-- bug from earlier this session. A fresh database gets the new shape
+-- directly; an existing one needs the one-off
+-- seed/migrate_to_household_accounts.py migration run once (destructive --
+-- see that script's docstring). Never add a DROP TABLE here: this whole
+-- string reruns on every service boot via ensure_schema().
 CREATE TABLE IF NOT EXISTS learners (
-    phone text PRIMARY KEY,
-    display_name text,
+    id serial PRIMARY KEY,
+    account_id int NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    nickname text,
     grade int,
-    consent_given_at timestamptz,
-    created_at timestamptz DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_learners_account ON learners(account_id);
+
+-- Per-learner guardian consent. Phase 1 simplification: one guardian's
+-- consent (given once, at household creation) covers every learner they
+-- add -- there's no separate per-child consent capture flow yet, even
+-- though this table is already shaped for it (its own consent_given_at).
+CREATE TABLE IF NOT EXISTS guardian_learner (
+    guardian_id int NOT NULL REFERENCES guardians(id) ON DELETE CASCADE,
+    learner_id  int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    consent_given_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (guardian_id, learner_id)
 );
 
 CREATE TABLE IF NOT EXISTS conversation_log (
@@ -231,20 +276,12 @@ CREATE TABLE IF NOT EXISTS cognitive_level_weights (
     UNIQUE (subject_id, level_name)
 );
 
--- Bridge column: Katlego's `learners` (phone-keyed, wired into the live
--- POPIA consent flow in app/orchestrator/session.py) stays the single
--- canonical learners table -- the standalone engine's own `learners`
--- (id-keyed, whatsapp_number) is NOT imported, to avoid two competing
--- identities for the same person. grade_id links a learner to the
--- normalized grades table above; the existing `grade int` column is
--- untouched and keeps working for session.py.
-ALTER TABLE learners ADD COLUMN IF NOT EXISTS grade_id int REFERENCES grades(id) ON DELETE SET NULL;
-
--- Mastery + attempts, re-keyed to learners(phone) instead of the
--- standalone engine's learners(id) -- see note above.
+-- Mastery + attempts, keyed to learners(id) -- see the household-model
+-- note above `learners` for why this replaced the earlier phone-keyed
+-- design (tutobuddy-household-account-model-phase1-plan.md).
 CREATE TABLE IF NOT EXISTS learner_topic_mastery (
     id            serial PRIMARY KEY,
-    learner_phone text NOT NULL REFERENCES learners(phone) ON DELETE CASCADE,
+    learner_id    int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
     topic_id      int NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
     mastery_score numeric(5,2) NOT NULL CHECK (mastery_score BETWEEN 0 AND 100),
     band          varchar(20) GENERATED ALWAYS AS (
@@ -256,22 +293,27 @@ CREATE TABLE IF NOT EXISTS learner_topic_mastery (
                       END
                   ) STORED,
     last_assessed_at timestamptz NOT NULL DEFAULT now(),
-    UNIQUE (learner_phone, topic_id)
+    UNIQUE (learner_id, topic_id)
 );
-CREATE INDEX IF NOT EXISTS idx_learner_topic_mastery_phone ON learner_topic_mastery(learner_phone);
+CREATE INDEX IF NOT EXISTS idx_learner_topic_mastery_learner ON learner_topic_mastery(learner_id);
 
 CREATE TABLE IF NOT EXISTS learner_assessment_attempts (
     id                      serial PRIMARY KEY,
-    learner_phone           text NOT NULL REFERENCES learners(phone) ON DELETE CASCADE,
+    learner_id              int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
     assessment_structure_id int NOT NULL REFERENCES assessment_structure(id) ON DELETE RESTRICT,
     score_pct               numeric(5,2) NOT NULL CHECK (score_pct BETWEEN 0 AND 100),
     attempted_at            timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_learner_attempts_phone ON learner_assessment_attempts(learner_phone);
+CREATE INDEX IF NOT EXISTS idx_learner_attempts_learner ON learner_assessment_attempts(learner_id);
+
+-- conversation_log is phone-scoped (a whole household's chat stream);
+-- learner_id attributes a row to whichever learner was active when it was
+-- sent. Nullable: onboarding messages predate any learner existing.
+ALTER TABLE conversation_log ADD COLUMN IF NOT EXISTS learner_id int REFERENCES learners(id) ON DELETE SET NULL;
 
 -- Safeguarding (child-safety architecture layer 4: a human reviews every
 -- risk-flagged case -- the AI is never the final authority). Deliberately
--- NOT a FK to learners(phone) ON DELETE CASCADE: a POPIA "DELETE" request
+-- NOT a FK to learners(id) ON DELETE CASCADE: a POPIA "DELETE" request
 -- wipes the learner's profile/history, but a safeguarding record (a
 -- disclosed crisis/abuse flag) is a duty-of-care/legal record that must
 -- survive that deletion -- this is the one table in the schema that is
@@ -290,6 +332,11 @@ CREATE TABLE IF NOT EXISTS safeguarding_flags (
     notes           text
 );
 CREATE INDEX IF NOT EXISTS idx_safeguarding_flags_status ON safeguarding_flags(status);
+
+-- learner_id SNAPSHOT for cross-reference, deliberately not FK'd --
+-- same reason phone isn't (see the comment on this table above): a
+-- duty-of-care record must survive learner deletion.
+ALTER TABLE safeguarding_flags ADD COLUMN IF NOT EXISTS learner_id int;
 """
 
 

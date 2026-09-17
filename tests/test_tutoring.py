@@ -15,9 +15,11 @@ def test_grade_filter_never_retrieves_above_learner_grade(chat):
     chat.send_text("hi")
     chat.wait_for_reply()
     chat.send_text("AGREE")
-    chat.wait_for_reply()
+    chat.wait_for_reply()  # name prompt
+    chat.send_text("Grade8Learner")
+    chat.wait_for_reply()  # grade prompt
     chat.send_text("8")
-    chat.wait_for_reply()
+    chat.wait_for_reply()  # welcome
     chat.send_text("How do I differentiate from first principles?")
     reply = chat.wait_for_reply()
     # The corpus has no content at grade <= 8, so no grounded topic may appear.

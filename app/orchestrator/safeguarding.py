@@ -32,27 +32,33 @@ ALERT_TEMPLATE = (
 
 
 async def record_and_notify(
-    wa: WhatsAppClient, phone: str, category: str, message: str
+    wa: WhatsAppClient, phone: str, category: str, message: str,
+    learner_id: int | None = None,
 ) -> int:
     """Persists the flag (status='open') and, if an alert number is
     configured, sends it a WhatsApp alert immediately. Returns the new
     safeguarding_flags row id. Never raises on the notify step -- a failed
     alert must not crash message processing or hide the fact that a
     referral message was already sent to the learner; it's logged at
-    CRITICAL instead so it's impossible to miss in the logs."""
+    CRITICAL instead so it's impossible to miss in the logs.
+
+    `learner_id` is a best-effort SNAPSHOT (see app/db.py's comment on
+    safeguarding_flags) -- it may be None if the flag fires before any
+    learner profile exists yet (e.g. during onboarding itself)."""
     excerpt = message.strip()[:_EXCERPT_MAX]
 
     pool = await get_pool()
     async with pool.acquire() as conn:
         flag_id = await conn.fetchval(
             """
-            INSERT INTO safeguarding_flags (phone, category, message_excerpt)
-            VALUES ($1, $2, $3)
+            INSERT INTO safeguarding_flags (phone, category, message_excerpt, learner_id)
+            VALUES ($1, $2, $3, $4)
             RETURNING id
             """,
             phone,
             category,
             excerpt,
+            learner_id,
         )
 
     if not settings.is_set(settings.safeguarding_alert_phone):

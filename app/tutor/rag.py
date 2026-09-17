@@ -69,13 +69,17 @@ async def _grade_id(conn, grade: int) -> int | None:
 
 
 async def get_term_progress(
-    phone: str, grade: int, term: int, subject: str = "Mathematics"
+    learner_id: int, grade: int, term: int, subject: str = "Mathematics"
 ) -> dict:
     """This learner's progress across the current term's topics: per-topic
     mastery (band + score, or not-yet-assessed), plus two summary numbers —
     coverage (share of topics with at least one recorded score) and the
     average mastery over those. This is the data behind the term-progress
     message the bot reports in chat (see prompts.progress_message).
+
+    `learner_id` (not phone -- see tutobuddy-household-account-model-phase1-
+    plan.md) identifies the individual learner within a household; a phone
+    number may have several learners behind it.
 
     Topics are ranked heavily-weighted-and-weak first (same ordering as the
     reference gap-ranking query in migration_learner_assessment_model.sql),
@@ -99,13 +103,13 @@ async def get_term_progress(
             JOIN subjects s ON s.id = t.subject_id
             LEFT JOIN content_areas ca ON ca.id = t.content_area_id
             LEFT JOIN learner_topic_mastery ltm
-                   ON ltm.topic_id = t.id AND ltm.learner_phone = $1
+                   ON ltm.topic_id = t.id AND ltm.learner_id = $1
             WHERE t.grade_id = $2 AND t.term = $3 AND lower(s.name) = lower($4)
             ORDER BY ca.weight_pct DESC NULLS LAST,
                      ltm.mastery_score ASC NULLS FIRST,
                      t.name
             """,
-            phone, grade_id, term, subject,
+            learner_id, grade_id, term, subject,
         )
 
     topics = [dict(r) for r in rows]

@@ -38,17 +38,19 @@ def current_term() -> int:
 
 
 async def progress_reply(
-    phone: str, grade: int, term: int | None = None, subject: str = DEFAULT_SUBJECT
+    learner_id: int, grade: int, term: int | None = None, subject: str = DEFAULT_SUBJECT
 ) -> str:
     """Term-progress message for the learner. Pure data formatting under the
     hood (prompts.progress_message) — no LLM call, so nothing here can be
-    hallucinated."""
-    progress = await get_term_progress(phone, grade, term or current_term(), subject)
+    hallucinated. `learner_id` identifies the individual learner within a
+    household (see tutobuddy-household-account-model-phase1-plan.md), not
+    a phone number -- a phone may have several learners behind it."""
+    progress = await get_term_progress(learner_id, grade, term or current_term(), subject)
     return prompts.progress_message(progress)
 
 
 async def practice_reply(
-    phone: str, grade: int, term: int | None = None, subject: str = DEFAULT_SUBJECT
+    learner_id: int, grade: int, term: int | None = None, subject: str = DEFAULT_SUBJECT
 ) -> str:
     """Picks the learner's weakest/least-assessed topic this term (heavily-
     weighted-and-weak first, see rag.get_term_progress), pulls past-paper
@@ -56,7 +58,7 @@ async def practice_reply(
     an original practice question — never quoting the OCR'd excerpts as
     ground truth (see prompts.practice_system)."""
     resolved_term = term or current_term()
-    progress = await get_term_progress(phone, grade, resolved_term, subject)
+    progress = await get_term_progress(learner_id, grade, resolved_term, subject)
     topic = await pick_practice_topic(progress)
     if topic is None:
         return (
