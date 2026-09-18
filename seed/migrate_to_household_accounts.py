@@ -28,16 +28,30 @@ write a real backfill instead of running this.
 
 import asyncio
 
-from app.db import ensure_schema, get_pool
+import asyncpg
+
+from app.config import settings
+from app.db import ensure_schema
 
 
 async def main() -> None:
-    pool = await get_pool()
-    async with pool.acquire() as conn:
+    # Deliberately NOT get_pool(): get_pool() calls ensure_schema() before
+    # handing back a connection, and ensure_schema() runs the FULL new
+    # schema -- including statements like
+    # `CREATE INDEX IF NOT EXISTS idx_learners_account ON learners(account_id)`
+    # -- against whatever `learners` currently is. Against the OLD
+    # phone-keyed table (no `account_id` column) that blows up with
+    # `UndefinedColumnError: column "account_id" does not exist` before
+    # this script ever reaches its own DROP TABLE lines below. Connect
+    # directly instead, so the drop happens BEFORE any schema check.
+    conn = await asyncpg.connect(settings.database_url)
+    try:
         async with conn.transaction():
             await conn.execute("DROP TABLE IF EXISTS learner_assessment_attempts CASCADE")
             await conn.execute("DROP TABLE IF EXISTS learner_topic_mastery CASCADE")
             await conn.execute("DROP TABLE IF EXISTS learners CASCADE")
+    finally:
+        await conn.close()
     print(
         "Dropped the old phone-keyed learners/learner_topic_mastery/"
         "learner_assessment_attempts tables. Recreating in the new "
