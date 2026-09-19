@@ -23,7 +23,7 @@ from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
-from app.tutor.engine import practice_reply, progress_reply, tutor_reply
+from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
 
 log = logging.getLogger("katlego.worker")
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +32,7 @@ HELP_MESSAGE = (
     "Here's what I can do 🎓\n"
     "• Ask me any Maths question — text, 🎤 voice note, or 📸 photo\n"
     "• Say \"quiz me\" (or similar) for a practice question\n"
+    "• *SKIP* — drop the current practice question without answering it\n"
     "• *PROGRESS* — see how you're doing this term\n"
     "• *ADD LEARNER* — add a sibling to this household\n"
     "• *SWITCH* — change who's studying\n"
@@ -102,6 +103,7 @@ async def handle_active(
     if command == "DELETE":
         deleted_name = sess.name
         await session.delete_active_learner(sess.active_learner_id)
+        sess.data.pop("pending_practice", None)
         remaining = await session.list_learners(sess.account_id)
         if remaining:
             nxt = remaining[0]
@@ -127,12 +129,36 @@ async def handle_active(
         )
     if command == "PROGRESS":
         return await progress_reply(sess.active_learner_id, sess.grade), "admin"
+    if command == "SKIP":
+        had_pending = sess.data.pop("pending_practice", None) is not None
+        await session.save(sess)
+        return (
+            "Okay, skipped that one 👍 Say \"quiz me\" whenever you want another."
+            if had_pending else
+            "No practice question waiting to be skipped — say \"quiz me\" for one.",
+            "admin",
+        )
+
+    # A practice question is pending (see practice_reply / grade_practice_reply
+    # below): the NEXT message from this learner is their attempt at it, not
+    # a fresh question — grade it and close the mastery loop, rather than
+    # running it through intent classification as if it were a new message.
+    pending = sess.data.get("pending_practice")
+    if pending:
+        sess.data.pop("pending_practice", None)
+        reply = await grade_practice_reply(sess.active_learner_id, pending, text)
+        await session.save(sess)
+        return reply, "quiz_answer"
 
     intent = await llm.classify_intent(text)
     if intent == "smalltalk":
         return SMALLTALK_REPLY, intent
     if intent == "quiz":
-        return await practice_reply(sess.active_learner_id, sess.grade), intent
+        reply, pending = await practice_reply(sess.active_learner_id, sess.grade)
+        if pending:
+            sess.data["pending_practice"] = pending
+            await session.save(sess)
+        return reply, intent
     # homework / anything else substantive → the tutor engine
     return await tutor_reply(text, sess.grade), intent
 
@@ -207,6 +233,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         cleaned = session.clean_name(text)
         if cleaned:
             learner_id = await session.add_learner(sess.account_id, sess.guardian_id, cleaned)
+            sess.data.pop("pending_practice", None)
             sess.data.update(state="awaiting_grade", active_learner_id=learner_id, name=cleaned)
             await session.save(sess)
             reply = session.grade_prompt(cleaned)
@@ -230,6 +257,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         learners = await session.list_learners(sess.account_id)
         matched = session.match_learner(text, learners)
         if matched:
+            sess.data.pop("pending_practice", None)
             sess.data.update(
                 state="active",
                 active_learner_id=matched["id"],

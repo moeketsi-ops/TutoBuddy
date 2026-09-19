@@ -169,3 +169,60 @@ async def get_past_paper_excerpts(topic_name: str, grade: int, k: int = 2) -> li
         }
         for r in rows
     ]
+
+
+# ── Closing the mastery loop: grading a practice attempt updates mastery ────
+
+# Placeholder mastery-delta magnitudes -- a simple, transparent heuristic
+# (not a calibrated learning model): a correct answer nudges mastery up
+# more than a partial one costs on an incorrect answer, and a
+# never-assessed topic starts at a neutral midpoint (50, which already
+# lands in the 'practice' band per the <40/<70/<85 bands on
+# learner_topic_mastery). Revisit once there's enough real attempt data to
+# calibrate against, per tutobuddy-dynamic-pedagogy-engine-design.md
+# section 9 (strategy-effectiveness tracking) and section 16 (adaptive
+# intervention threshold) -- this is the foundation those build on, not a
+# finished version of them.
+MASTERY_BASELINE = 50.0
+MASTERY_DELTA = {"correct": 12.0, "partial": 4.0, "incorrect": -6.0}
+
+
+async def record_practice_attempt(
+    learner_id: int,
+    topic_id: int,
+    question: str,
+    model_answer: str | None,
+    learner_answer: str,
+    correctness: str,
+) -> None:
+    """Logs the attempt (learner_practice_attempts) and upserts
+    learner_topic_mastery, clamped to [0, 100]. This is the write side that
+    was missing since the progress/practice-question step shipped -- see
+    tutobuddy-pedagogy-mastery-pace-step.md's "known gaps" and
+    tutobuddy-dynamic-pedagogy-engine-design.md's "relationship to what's
+    already built"."""
+    delta = MASTERY_DELTA[correctness]
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            await conn.execute(
+                f"""
+                INSERT INTO learner_topic_mastery (learner_id, topic_id, mastery_score)
+                VALUES ($1, $2, GREATEST(0, LEAST(100, {MASTERY_BASELINE} + $3)))
+                ON CONFLICT (learner_id, topic_id) DO UPDATE
+                    SET mastery_score = GREATEST(0, LEAST(100,
+                            learner_topic_mastery.mastery_score + $3)),
+                        last_assessed_at = now()
+                """,
+                learner_id, topic_id, delta,
+            )
+            await conn.execute(
+                """
+                INSERT INTO learner_practice_attempts
+                    (learner_id, topic_id, question, model_answer, learner_answer,
+                     correctness, mastery_delta)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                """,
+                learner_id, topic_id, question, model_answer, learner_answer,
+                correctness, delta,
+            )

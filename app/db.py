@@ -306,6 +306,27 @@ CREATE TABLE IF NOT EXISTS learner_assessment_attempts (
 );
 CREATE INDEX IF NOT EXISTS idx_learner_attempts_learner ON learner_assessment_attempts(learner_id);
 
+-- Ad-hoc WhatsApp "quiz me" practice attempts -- distinct from
+-- learner_assessment_attempts above (which is tied to formal CAPS
+-- assessment_structure tasks: assignments/tests/exams). This is what
+-- closes the mastery loop: every graded practice answer here also
+-- upserts learner_topic_mastery (see app.tutor.rag.record_practice_attempt).
+-- Deliberately NOT FK'd to assessment_structure -- a practice question is
+-- generated ad-hoc by the LLM, not a real gazetted assessment task.
+CREATE TABLE IF NOT EXISTS learner_practice_attempts (
+    id             serial PRIMARY KEY,
+    learner_id     int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    topic_id       int NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    question       text NOT NULL,
+    model_answer   text,
+    learner_answer text NOT NULL,
+    correctness    varchar(20) NOT NULL
+        CHECK (correctness IN ('correct', 'partial', 'incorrect')),
+    mastery_delta  numeric(5,2) NOT NULL,
+    created_at     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_learner_practice_attempts_learner ON learner_practice_attempts(learner_id);
+
 -- conversation_log is phone-scoped (a whole household's chat stream);
 -- learner_id attributes a row to whichever learner was active when it was
 -- sent. Nullable: onboarding messages predate any learner existing.

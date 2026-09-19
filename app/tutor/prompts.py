@@ -1,7 +1,7 @@
 """Versioned prompt policies (blueprint §4.2: versioned prompts; eval harness
 runs on every prompt change — bump PROMPT_VERSION when editing)."""
 
-PROMPT_VERSION = "socratic-v1"
+PROMPT_VERSION = "socratic-v2"
 
 INTENT_SYSTEM = (
     "You route messages for a South African WhatsApp maths tutor. "
@@ -116,5 +116,44 @@ def practice_system(grade: int, topic: str, band: str | None, excerpts: list[dic
 CRITICAL: the excerpts above came from OCR (optical character recognition) on scanned exam papers and are KNOWN to garble numbers, fractions, exponents and symbols. Do NOT copy any number, question or answer from them verbatim, and do NOT trust any digit in them. Use them only to gauge realistic topic coverage, phrasing style and difficulty for a Grade {grade} CAPS paper on this topic. Then:
 1. Write ONE original practice question in that style, within Grade {grade} CAPS scope.
 2. Solve it yourself, step by step, to be certain of the correct answer — never assume an excerpt's numbers are right.
-3. Send the learner ONLY the question (and any given values) — never your solution.
-4. WhatsApp style: short, warm, plain language, under 80 words, at most one emoji."""
+3. Reply in EXACTLY this two-line format, nothing else, nothing before or after:
+QUESTION: <the question and any given values, WhatsApp style — short, warm, plain language, under 80 words, at most one emoji>
+FINAL_ANSWER: <the correct final answer only, e.g. "x = 6" or "R240" — this line is never shown to the learner, it is used later to grade their reply>"""
+
+
+def grade_practice_system(grade: int, question: str, model_answer: str | None) -> str:
+    """System prompt for grading a learner's free-text answer to a practice
+    question Katlego set them (see llm.grade_practice_answer). This is what
+    closes the mastery loop -- the parsed CORRECTNESS here drives the
+    learner_topic_mastery update in app.tutor.rag.record_practice_attempt."""
+    if model_answer:
+        answer_block = (
+            f"The correct final answer, which you solved yourself when you set "
+            f"this question, is: {model_answer}\n"
+            "Grade the learner's reply against THIS -- trust it over anything "
+            "the learner claims, even confidently."
+        )
+    else:
+        answer_block = (
+            "No verified final answer was captured for this question (a parsing "
+            "gap when it was generated) -- judge the learner's reasoning and "
+            "final result on merit instead, and lean toward 'partial' rather "
+            "than a confident 'correct' or 'incorrect' when genuinely unsure."
+        )
+    return f"""You are Katlego, a warm South African maths tutor on WhatsApp, grading a Grade {grade} learner's answer to a practice question you set them (prompt policy {PROMPT_VERSION}).
+
+QUESTION: {question}
+
+{answer_block}
+
+Reply in EXACTLY this two-line format, nothing else, nothing before or after:
+CORRECTNESS: correct | partial | incorrect
+FEEDBACK: <one short warm sentence, under 40 words, WhatsApp style, at most one emoji. If correct: affirm briefly and say why it's right. If partial: name what's right, then correct the specific gap. If incorrect: gently give the correct approach and answer -- never just "that's wrong".>"""
+
+
+def practice_feedback_message(correctness: str, feedback: str) -> str:
+    """Pure formatting around the LLM's graded feedback -- see
+    grade_practice_system. No LLM call here, so the icon/prompt wrapper
+    itself can't be hallucinated."""
+    icon = {"correct": "✅", "partial": "➗", "incorrect": "❌"}[correctness]
+    return f"{icon} {feedback}\n\nWant another one? Just say \"quiz me\" 🎯 (or *SKIP* to drop this one)."

@@ -27,6 +27,7 @@ already did before openrouter existed.
 
 import base64
 import logging
+import re
 
 from app.config import settings
 from app.tutor import prompts
@@ -288,17 +289,40 @@ async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
 # ── Practice questions (see prompts.practice_system for the anti-hallucination
 # instructions around OCR'd past-paper excerpts) ─────────────────────────────
 
-def _stub_practice(topic: str, grade: int) -> str:
-    return (
-        f"Let's practise *{topic}* 🎯 Try a Grade {grade} CAPS-level problem on this "
-        f"topic and show me your working when you're ready.\n\n"
-        f"_(stub LLM — set LLM_PROVIDER in .env for a real generated practice question)_"
-    )
+def _stub_practice(topic: str, grade: int) -> dict:
+    return {
+        "question": (
+            f"Let's practise *{topic}* 🎯 Try a Grade {grade} CAPS-level problem on this "
+            f"topic and show me your working when you're ready.\n\n"
+            f"_(stub LLM — set LLM_PROVIDER in .env for a real generated practice question)_"
+        ),
+        # Stub never invents a ground-truth answer it hasn't actually solved
+        # (see module docstring) -- grading falls back to the no-answer path.
+        "model_answer": None,
+    }
+
+
+def _parse_practice_response(raw: str) -> dict:
+    """Split a real provider's QUESTION:/FINAL_ANSWER: response (see
+    prompts.practice_system) into the two fields. If a provider doesn't
+    follow the format, fall back to treating the whole reply as the
+    question with no captured ground-truth answer -- grade_practice_answer
+    already has a defined fallback for that (see prompts.grade_practice_system)."""
+    m = re.search(r"QUESTION:\s*(.*?)\s*FINAL_ANSWER:\s*(.*)", raw, re.DOTALL | re.IGNORECASE)
+    if not m:
+        log.warning("practice_question: response didn't match QUESTION:/FINAL_ANSWER: format")
+        return {"question": raw.strip(), "model_answer": None}
+    return {"question": m.group(1).strip(), "model_answer": m.group(2).strip()}
 
 
 async def practice_question(
     topic: str, grade: int, band: str | None, excerpts: list[dict]
-) -> str:
+) -> dict:
+    """Returns {"question": str, "model_answer": str | None} -- see
+    prompts.practice_system for the QUESTION:/FINAL_ANSWER: contract this
+    parses. Callers (app.tutor.engine.practice_reply) must only ever send
+    the "question" field to the learner; "model_answer" is the ground
+    truth grade_practice_answer() grades against later, never shown."""
     system = prompts.practice_system(grade, topic, band, excerpts)
     user_msg = f"Set me a practice question on {topic}."
 
@@ -310,7 +334,7 @@ async def practice_question(
             system=system,
             messages=[{"role": "user", "content": user_msg}],
         )
-        return resp.content[0].text.strip()
+        return _parse_practice_response(resp.content[0].text)
 
     if _use_groq():
         client = _groq_client()
@@ -322,7 +346,7 @@ async def practice_question(
                 {"role": "user", "content": user_msg},
             ],
         )
-        return resp.choices[0].message.content.strip()
+        return _parse_practice_response(resp.choices[0].message.content)
 
     if _use_ollama():
         client = _ollama_client()
@@ -333,7 +357,7 @@ async def practice_question(
                 {"role": "user", "content": user_msg},
             ],
         )
-        return resp["message"]["content"].strip()
+        return _parse_practice_response(resp["message"]["content"])
 
     if _use_openrouter():
         client = _openrouter_client()
@@ -345,9 +369,89 @@ async def practice_question(
                 {"role": "user", "content": user_msg},
             ],
         )
-        return resp.choices[0].message.content.strip()
+        return _parse_practice_response(resp.choices[0].message.content)
 
     return _stub_practice(topic, grade)
+
+
+# ── Grading a learner's answer to a practice question (closes the mastery
+# loop -- see app.tutor.rag.record_practice_attempt) ────────────────────────
+
+def _stub_grade(model_answer: str | None, learner_answer: str) -> dict:
+    if model_answer and model_answer.strip().lower() in learner_answer.strip().lower():
+        return {
+            "correctness": "correct",
+            "feedback": "Correct! Nicely worked out. _(stub LLM)_",
+        }
+    return {
+        "correctness": "partial",
+        "feedback": (
+            "Thanks for giving that a go — set LLM_PROVIDER in .env for real "
+            "grading. _(stub LLM)_"
+        ),
+    }
+
+
+def _parse_grade_response(raw: str) -> dict:
+    m = re.search(r"CORRECTNESS:\s*(correct|partial|incorrect)\s*FEEDBACK:\s*(.*)", raw, re.DOTALL | re.IGNORECASE)
+    if not m:
+        log.warning("grade_practice_answer: response didn't match CORRECTNESS:/FEEDBACK: format")
+        return {"correctness": "partial", "feedback": raw.strip()[:300]}
+    return {"correctness": m.group(1).strip().lower(), "feedback": m.group(2).strip()}
+
+
+async def grade_practice_answer(
+    question: str, model_answer: str | None, learner_answer: str, grade: int
+) -> dict:
+    """Returns {"correctness": "correct"|"partial"|"incorrect", "feedback": str}."""
+    system = prompts.grade_practice_system(grade, question, model_answer)
+
+    if _use_anthropic():
+        client = _anthropic_client()
+        resp = await client.messages.create(
+            model=settings.reasoner_model,
+            max_tokens=200,
+            system=system,
+            messages=[{"role": "user", "content": learner_answer}],
+        )
+        return _parse_grade_response(resp.content[0].text)
+
+    if _use_groq():
+        client = _groq_client()
+        resp = await client.chat.completions.create(
+            model=settings.groq_reasoner_model,
+            max_tokens=200,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": learner_answer},
+            ],
+        )
+        return _parse_grade_response(resp.choices[0].message.content)
+
+    if _use_ollama():
+        client = _ollama_client()
+        resp = await client.chat(
+            model=settings.ollama_reasoner_model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": learner_answer},
+            ],
+        )
+        return _parse_grade_response(resp["message"]["content"])
+
+    if _use_openrouter():
+        client = _openrouter_client()
+        resp = await client.chat.completions.create(
+            model=settings.openrouter_reasoner_model,
+            max_tokens=200,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": learner_answer},
+            ],
+        )
+        return _parse_grade_response(resp.choices[0].message.content)
+
+    return _stub_grade(model_answer, learner_answer)
 
 
 # ── Vision (homework photos) ──────────────────────────────────────────────────
