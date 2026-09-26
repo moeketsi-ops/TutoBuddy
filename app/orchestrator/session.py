@@ -33,8 +33,8 @@ CONSENT_MESSAGE = (
     "better.\n\n"
     "📋 *Please show this to your parent/guardian:*\n"
     "_Katlego stores this phone number, a nickname and grade, plus study "
-    "progress, to personalise tutoring. No data is sold or shared. Delete "
-    "everything any time by sending DELETE._\n\n"
+    "progress, to personalise tutoring. No data is sold or shared. Send "
+    "DELETE any time to erase a learner's profile and chat history._\n\n"
     "If your parent or guardian agrees, ask them to reply *AGREE* to continue."
 )
 
