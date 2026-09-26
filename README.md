@@ -16,13 +16,19 @@ exist.
 ```bash
 cp .env.example .env
 docker compose up --build -d
-docker compose run --rm seed        # load the CAPS corpus + question bank
-open http://localhost:8000/demo     # WhatsApp-style demo simulator
+docker compose build seed tests evals                  # profiled services are NOT built by `up --build`
+docker compose run --rm seed                           # CAPS corpus (Gr 8–12) + question bank
+docker compose run --rm seed python -m seed.load_curriculum   # Grade 8 curriculum graph + assessment model
+docker compose run --rm seed python -m seed.load_past_papers  # OCR'd Grade 8 past papers (practice questions)
+open http://localhost:8000/demo                        # WhatsApp-style demo simulator
 ```
 
-Say **hi** in the simulator, follow the consent + grade onboarding, then ask
-something like *"How do I factorise x² + 5x + 6?"* — or click 🎤 and ask out
-loud (local Whisper transcribes it, no key needed).
+Say **hi** in the simulator, then onboard: a guardian replies **AGREE**, you
+give a **name**, then a **grade** (the pilot grade is **8**). Then ask
+something like *"How do I collect like terms?"* — or click 🎤 and ask out
+loud (local Whisper transcribes it, no key needed). Say **quiz me** for a
+practice question, **PROGRESS** for your term mastery, **ADD LEARNER** /
+**SWITCH** for siblings on a shared phone.
 
 ## Run the tests
 
@@ -108,9 +114,16 @@ Provider switches: `LLM_PROVIDER=stub|anthropic|groq|ollama`,
    pipeline (blueprint §5) over DBE CAPS/ATP + past papers.
 6. Deploy to `af-south-1` for the POPIA data-residency story.
 
+## Pilot scope: Grade 8 Mathematics
+
+The curriculum graph, past papers, practice questions and mastery tracking
+are loaded for **Grade 8 Mathematics only**. Learners in other grades still
+get CAPS-grounded Socratic help from `caps_chunks` (Gr 8–12), but PROGRESS
+and quiz report "no topics loaded" until more grades are ingested.
+
 ## What's deliberately NOT in the POC
 
-Mastery graph, timed quizzes with PDF report cards, multi-learner profiles,
-streaks, Study Squads, isiZulu/Sepedi replies, Moya/USSD channels — see the
-roadmap in the blueprint (§7). The POC proves the P0 loop and the architecture
-that those features plug into.
+Timed quizzes with PDF report cards, per-child consent capture, PIN-locked
+profiles, streaks, Study Squads, isiZulu/Sepedi replies, Moya/USSD channels —
+see the roadmap in the blueprint (§7). Mastery tracking here is a transparent
+placeholder heuristic (+12/+4/−6 per attempt), not a calibrated model.

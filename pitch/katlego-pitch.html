@@ -195,9 +195,11 @@
     <div class="status">
       <div class="row"><span class="tick">✓</span><span>Learner message → safety filter → POPIA consent gate → intent router → curriculum retrieval → Socratic reply <small>The whole loop, over text, voice notes and homework photos</small></span></div>
       <div class="row"><span class="tick">✓</span><span>Voice notes transcribed by a local speech-to-text model — spoken maths question in, grounded coaching out <small>Proven with real audio in the automated test suite; zero API cost</small></span></div>
-      <div class="row"><span class="tick">✓</span><span>15 / 15 end-to-end tests green <small>Consent flow, safety referrals (Childline 116), grade-filtered retrieval, webhook dedupe, live voice pipeline</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>22 / 22 end-to-end tests green <small>Consent flow, safety referrals (Childline 116), grade-filtered retrieval, webhook dedupe, live voice pipeline, household profiles, practice grading</small></span></div>
       <div class="row"><span class="tick">✓</span><span>Eval harness grading the tutor against NSC-style memo answers <small>"The tutor that shows its marks" — the accuracy number ships with every prompt or model change</small></span></div>
-      <div class="row"><span class="tick">✓</span><span>Child-safety and POPIA designed in from message one <small>Crisis disclosures route to referral scripts before anything else; guardian consent before any profiling; DELETE erases everything</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Child-safety and POPIA designed in from message one <small>Crisis disclosures route to referral scripts before anything else; guardian consent before any profiling; every flagged case is persisted and escalated to a human</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Grade 8 Maths curriculum graph, real past papers, practice questions and per-topic mastery tracking <small>The mastery loop is wired end to end: "quiz me" → graded answer → PROGRESS shows the learner's bands</small></span></div>
+      <div class="row"><span class="tick">✓</span><span>Household accounts: many learners on one shared family phone <small>ADD LEARNER / SWITCH — the shared-phone reality no competitor handles</small></span></div>
     </div>
   </section>
 
@@ -233,7 +235,7 @@
   <section>
     <h2>Roadmap: prove the loop, then widen the moat</h2>
     <div class="timeline">
-      <div class="phase"><div class="tag">P0 <small>weeks 1–6</small></div><p>Prove the loop with Gr 11–12 Maths &amp; Accounting: CAPS-grounded Socratic help that brings learners back tomorrow. <strong>The POC de-risks this phase today.</strong></p></div>
+      <div class="phase"><div class="tag">P0 <small>weeks 1–6</small></div><p>Prove the loop with a <strong>Grade 8 Mathematics pilot</strong>: CAPS-grounded Socratic help plus practice and mastery tracking that bring learners back tomorrow. <strong>The POC de-risks this phase today.</strong></p></div>
       <div class="phase"><div class="tag">P1 <small>months 2–4</small></div><p>Become a tutor, not a chatbot: timed quizzes marked vs memos, PDF report cards, the mastery graph driving daily revision missions, shared-phone profiles.</p></div>
       <div class="phase"><div class="tag">P2 <small>months 4–8</small></div><p>Widen the moat: code-switched voice, isiZulu/Sepedi replies, Study Squads, airtime micro-rewards, the data-free Moya channel, weekly parent digest.</p></div>
       <div class="phase"><div class="tag">P3 <small>months 8+</small></div><p>Distribution &amp; revenue: USSD lookup, teacher dashboards, CSR / B-BBEE sponsorship packages, school licensing.</p></div>

@@ -6,7 +6,7 @@ every prompt/model/corpus change and publish the number).
 POC grading is keyword-based against memo answers — honest but crude. The
 production harness grades against full official NSC marking memos with an
 LLM judge. Scores are only meaningful with a real LLM: LLM_PROVIDER set to
-anthropic, groq, or ollama (with the matching key/host configured) — see
+anthropic, groq, openrouter, or ollama (with the matching key/host) — see
 .env.example.
 """
 
@@ -45,7 +45,7 @@ async def main() -> None:
     if stub_mode:
         print("⚠️  STUB MODE — the stub LLM cannot solve maths, so scores below are")
         print("   expected to be ~0 and are NOT meaningful. Set LLM_PROVIDER to anthropic, ")
-        print("   groq, or ollama (with its key/host configured) in .env for a real number.\n")
+        print("   groq, openrouter, or ollama (with its key/host) in .env for a real number.\n")
 
     passed = 0
     for i, item in enumerate(golden, 1):
