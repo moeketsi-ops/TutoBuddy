@@ -22,7 +22,8 @@ def test_grade_filter_never_retrieves_above_learner_grade(chat):
     chat.wait_for_reply()  # welcome
     chat.send_text("How do I differentiate from first principles?")
     reply = chat.wait_for_reply()
-    # The corpus has no content at grade <= 8, so no grounded topic may appear.
+    # Only Grade 8 content may be retrieved for a Grade 8 learner — never
+    # the Grade 12 calculus chunk that matches this question best.
     assert "Grade 12" not in reply
 
 
