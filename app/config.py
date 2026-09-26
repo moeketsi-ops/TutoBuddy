@@ -46,6 +46,14 @@ class Settings(BaseSettings):
     openrouter_reasoner_model: str = "qwen/qwen3.5-35b-a3b"
     openrouter_vision_model: str = "qwen/qwen3.5-35b-a3b"
 
+    # Intent router tier (app/adapters/router.py). "" = follow LLM_PROVIDER;
+    # "jev" = TypeSafe AI's typed-decision model, with confidence-threshold
+    # fallback to the LLM router. Pin the model version, per TypeSafe's docs.
+    router_provider: str = ""  # "" | jev
+    typesafe_api_key: str = PLACEHOLDER
+    jev_model: str = "jev-1.13.0"
+    jev_min_confidence: float = 0.6
+
     # Speech-to-text
     stt_provider: str = "stub"  # stub | local | openai
     stt_base_url: str = "http://stt:9000"
