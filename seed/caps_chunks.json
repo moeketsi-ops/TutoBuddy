@@ -1,5 +1,101 @@
 [
   {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Whole numbers",
+    "doc_type": "CAPS note",
+    "content": "Prime factorisation writes a whole number as a product of primes, e.g. 360 = 2³ × 3² × 5. The HCF (highest common factor) is the product of the prime factors two numbers share; the LCM (lowest common multiple) is the product of the highest power of every prime that appears in either number. Ratio, rate and percentage problems (discount, profit, simple interest) are solved by writing the relationship first, then calculating."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Exponents",
+    "doc_type": "CAPS note",
+    "content": "Laws of exponents for whole-number and integer exponents: aᵐ × aⁿ = aᵐ⁺ⁿ, aᵐ ÷ aⁿ = aᵐ⁻ⁿ, (aᵐ)ⁿ = aᵐⁿ, (ab)ⁿ = aⁿbⁿ, a⁰ = 1 and a⁻ⁿ = 1/aⁿ. Square roots and cube roots undo squares and cubes: √64 = 8 because 8² = 64, and ∛27 = 3. Scientific notation writes very large or small numbers as a × 10ⁿ with 1 ≤ a < 10."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Common Fractions",
+    "doc_type": "CAPS note",
+    "content": "To add or subtract fractions, first write them with a common denominator (use the LCM of the denominators), then add or subtract the numerators. To multiply, multiply numerators and denominators; to divide, multiply by the reciprocal of the second fraction. Always simplify the answer, and convert mixed numbers to improper fractions before calculating."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Decimal Fractions",
+    "doc_type": "CAPS note",
+    "content": "Decimals are fractions with denominators of 10, 100, 1000. To convert a decimal to a percentage multiply by 100 (0,625 = 62,5%). Multiplying by 10, 100 or 1000 moves the decimal comma right; dividing moves it left. When rounding, look at the digit after the required place. Recurring decimals like 0,333… equal simple fractions (1/3)."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Geometry of Straight Lines",
+    "doc_type": "CAPS note",
+    "content": "When a transversal cuts two parallel lines: corresponding angles are equal, alternate angles are equal, and co-interior angles add up to 180°. Angles on a straight line sum to 180°, angles around a point sum to 360°, and vertically opposite angles are equal. Always state the reason next to each step, e.g. (alt ∠s, AB ∥ CD)."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Numeric and Geometric Patterns",
+    "doc_type": "CAPS note",
+    "content": "In a numeric pattern, find the rule by looking at the difference between consecutive terms. A constant difference d means a linear rule of the form Tₙ = dn + c; substitute n = 1 to find c. Patterns in diagrams (dots, matchsticks) are handled the same way: count each figure, tabulate, find the difference, then write the general term to predict a far-off term like the 85th."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Functions and Relationships",
+    "doc_type": "CAPS note",
+    "content": "A function is a rule linking each input to exactly one output, shown as a flow diagram, a table or an equation such as y = 3x − 2. To find the rule from a table, check whether the outputs change by a constant amount for each step in x (then the rule is linear) and test it on two rows. Substitute a known x to find a missing y, or solve the equation to find a missing x."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Algebraic Expressions",
+    "doc_type": "CAPS note",
+    "content": "Like terms have exactly the same variables with the same exponents (3x² and −5x² are like terms; 3x and 3x² are not). Simplify by collecting like terms: 4x − 8y − 3z + x − y + z = 5x − 9y − 2z. The coefficient is the number in front of a term; the constant term has no variable. To multiply a monomial by a binomial, use the distributive law: 2x(x + 3) = 2x² + 6x. Multiplying powers with the same base adds the exponents."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Algebraic Equations",
+    "doc_type": "CAPS note",
+    "content": "An equation stays balanced if you do the same thing to both sides. To solve for x, collect the x-terms on one side and the constants on the other using inverse operations: 3x + 5 = 20 → 3x = 15 → x = 5. Check the answer by substituting it back into the original equation. Word problems are solved by letting the unknown be x, writing the equation, then solving."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Area and Perimeter",
+    "doc_type": "CAPS note",
+    "content": "Perimeter is the total distance around a shape; area is the surface it covers. Rectangle: A = l × b, P = 2(l + b). Triangle: A = ½ × base × height, with the height perpendicular to the base. Circle: circumference C = 2πr and area A = πr². Convert units before calculating (1 m² = 10 000 cm²), and give area answers in square units."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 4,
+    "topic": "Integers",
+    "doc_type": "CAPS note",
+    "content": "On the number line, negative numbers are to the left of zero. Adding a negative is the same as subtracting; subtracting a negative is the same as adding: 3 − (−3) = 6. When multiplying or dividing, two signs the same give a positive answer and different signs give a negative answer: (−4) × (−5) = 20 but (−4) × 5 = −20. Follow the order of operations (BODMAS) with integers too."
+  },
+  {
+    "grade": 8,
+    "subject": "Mathematics",
+    "term": 4,
+    "topic": "Probability",
+    "doc_type": "CAPS note",
+    "content": "Probability = (number of favourable outcomes) ÷ (total number of equally likely outcomes), written as a fraction, decimal or percentage between 0 and 1. List all possible outcomes first (the sample space), e.g. rolling a die gives 6 outcomes so P(even) = 3/6 = ½. Relative frequency from an experiment approaches the theoretical probability as trials increase."
+  },
+  {
     "grade": 10,
     "subject": "Mathematics",
     "term": 1,
