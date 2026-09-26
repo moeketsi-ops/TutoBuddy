@@ -158,6 +158,8 @@ async def classify_intent(text: str) -> str:
         return label if label in INTENTS else "homework"
 
     # stub: keyword heuristic, no model call
+    if any(w in lowered for w in ("quiz", "practice", "test me")):
+        return "quiz"
     if any(h in lowered for h in _HOMEWORK_HINTS):
         return "homework"
     return "smalltalk" if len(lowered.split()) <= 3 else "homework"
