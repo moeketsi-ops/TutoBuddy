@@ -34,7 +34,8 @@ CONSENT_MESSAGE = (
     "📋 *Please show this to your parent/guardian:*\n"
     "_Katlego stores this phone number, a nickname and grade, plus study "
     "progress, to personalise tutoring. No data is sold or shared. Send "
-    "DELETE any time to erase a learner's profile and chat history._\n\n"
+    "DELETE any time to erase a learner; erasing the last learner removes "
+    "the whole household record._\n\n"
     "If your parent or guardian agrees, ask them to reply *AGREE* to continue."
 )
 
@@ -280,3 +281,18 @@ async def delete_active_learner(learner_id: int) -> None:
             "DELETE FROM conversation_log WHERE learner_id = $1", learner_id
         )
         await conn.execute("DELETE FROM learners WHERE id = $1", learner_id)
+
+
+async def delete_household(account_id: int | None, phone: str) -> None:
+    """Called when the LAST learner on a household is deleted: erase the
+    phone-scoped chat rows (incl. pre-consent rows with no learner_id), the
+    account (cascades to account_channels, guardians, guardian_learner) and
+    the Redis session. safeguarding_flags are deliberately untouched — see
+    the comment on that table in app/db.py."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            await conn.execute("DELETE FROM conversation_log WHERE phone = $1", phone)
+            if account_id is not None:
+                await conn.execute("DELETE FROM accounts WHERE id = $1", account_id)
+    await reset(phone)

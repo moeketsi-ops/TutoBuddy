@@ -44,15 +44,45 @@ def test_name_step_reprompts_on_empty_or_reserved_word(chat):
     assert "grade" in chat.wait_for_reply().lower()
 
 
-def test_delete_last_learner_keeps_household_asks_for_new_name(onboarded_chat):
-    # DELETE removes the LEARNER profile, not the household/consent -- a
-    # second guardian message shouldn't have to re-consent from scratch.
+def test_delete_last_learner_drops_household_and_requires_reconsent(onboarded_chat):
     onboarded_chat.send_text("DELETE")
     reply = onboarded_chat.wait_for_reply()
-    assert "deleted" in reply.lower()
-    assert "call you" in reply.lower()  # straight back into the name step
-    onboarded_chat.send_text("Kabelo")
-    assert "grade" in onboarded_chat.wait_for_reply().lower()
+    assert "erased" in reply.lower()
+    # Nothing left in the DB for this phone (the POPIA "erase everything" promise).
+    assert _rows_for_phone(onboarded_chat.phone) == {"account_channels": 0, "conversation_log": 0}
+    onboarded_chat.send_text("hi again")
+    assert "POPIA" in onboarded_chat.wait_for_reply()
+
+
+def test_delete_with_sibling_keeps_household(onboarded_chat):
+    onboarded_chat.send_text("ADD LEARNER")
+    onboarded_chat.wait_for_reply()
+    onboarded_chat.send_text("Naledi")
+    onboarded_chat.wait_for_reply()
+    onboarded_chat.send_text("9")
+    onboarded_chat.wait_for_reply()
+    onboarded_chat.send_text("DELETE")  # deletes Naledi (active), Thabo remains
+    reply = onboarded_chat.wait_for_reply()
+    assert "Switched to Thabo" in reply
+    assert _rows_for_phone(onboarded_chat.phone)["account_channels"] == 1
+
+
+def _rows_for_phone(phone: str) -> dict:
+    import asyncio, os
+    import asyncpg
+
+    async def q():
+        conn = await asyncpg.connect(os.environ["DATABASE_URL"])
+        try:
+            return {
+                "account_channels": await conn.fetchval(
+                    "SELECT count(*) FROM account_channels WHERE phone = $1", phone),
+                "conversation_log": await conn.fetchval(
+                    "SELECT count(*) FROM conversation_log WHERE phone = $1", phone),
+            }
+        finally:
+            await conn.close()
+    return asyncio.run(q())
 
 
 def test_add_learner_creates_sibling_and_switch_moves_between_them(onboarded_chat):

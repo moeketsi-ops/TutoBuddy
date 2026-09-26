@@ -18,7 +18,7 @@ import os
 
 import redis.asyncio as aioredis
 
-from app.adapters import llm, stt
+from app.adapters import llm, router, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import safeguarding, safety, session
@@ -119,12 +119,15 @@ async def handle_active(
                 f"{nxt['nickname']} (Grade {nxt['grade'] or 11}).",
                 "admin",
             )
-        sess.data.update(state="awaiting_name", onboarding_reason="add_learner")
-        sess.data.pop("active_learner_id", None)
-        await session.save(sess)
+        # Last learner gone → the whole household record goes too (POPIA:
+        # "erase everything" must mean everything, incl. the phone number and
+        # pre-consent chat rows). Safeguarding flags are kept by design.
+        await session.delete_household(sess.account_id, phone)
         return (
-            f"{deleted_name}'s profile was deleted. ✅ This household has no "
-            f"learners left — let's add one.\n\n" + session.NAME_PROMPT,
+            f"{deleted_name}'s profile was deleted, and with no learners left "
+            f"everything else has been erased too — phone number, consent and "
+            f"chat history. ✅\n\nIf you ever want to study together again, just "
+            f"say hi; a parent or guardian will need to AGREE again.",
             "admin",
         )
     if command == "PROGRESS":
@@ -150,7 +153,7 @@ async def handle_active(
         await session.save(sess)
         return reply, "quiz_answer"
 
-    intent = await llm.classify_intent(text)
+    intent = await router.classify_intent(text)
     if intent == "smalltalk":
         return SMALLTALK_REPLY, intent
     if intent == "quiz":
