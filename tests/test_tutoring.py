@@ -5,7 +5,7 @@ def test_homework_question_gets_grounded_socratic_reply(onboarded_chat):
     onboarded_chat.send_text("How do I factorise x squared plus 5x plus 6?")
     reply = onboarded_chat.wait_for_reply()
     # Grounded in the retrieved CAPS chunk...
-    assert "factoris" in reply.lower()
+    assert "factori" in reply.lower()  # factorise (SA/UK) or factorize (US): a real model and Whisper use either
     # ...and Socratic: coaches rather than closing the conversation.
     assert "?" in reply
 

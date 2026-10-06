@@ -42,4 +42,4 @@ def test_voice_note_end_to_end(onboarded_chat):
 
     # The reply must echo what was heard and be grounded in the right topic.
     assert "I heard" in reply
-    assert "factoris" in reply.lower()
+    assert "factori" in reply.lower()  # factorise (SA/UK) or factorize (US): a real model and Whisper use either

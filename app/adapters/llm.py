@@ -81,6 +81,33 @@ def _use_ollama() -> bool:
     return settings.llm_provider == "ollama"
 
 
+# OpenRouter + Qwen3.5 (a reasoning model): reasoning tokens count against
+# max_tokens, and when they use the whole budget the API returns
+# finish_reason="length" with EMPTY content
+# (https://openrouter.ai/docs/use-cases/reasoning-tokens). With this file's
+# small budgets (10 for routing, 200-600 elsewhere) that happened often:
+# `None.strip()` crashed the worker ("Eish, something went wrong") and the
+# extra thinking time made later replies miss their 30 s window.
+# Fix: turn reasoning off for short, latency-sensitive calls, keep a little
+# for the calls that must actually solve maths (practice question, eval
+# answer) with a budget big enough to leave room for the answer, and never
+# call .strip() on a missing content field.
+def _openrouter_reasoning(effort: str) -> dict:
+    return {"extra_body": {"reasoning": {"effort": effort}}}
+
+
+def _openrouter_text(resp, call: str) -> str:
+    choice = resp.choices[0]
+    content = choice.message.content or ""
+    if not content.strip():
+        log.warning(
+            "%s: OpenRouter returned no visible text (finish_reason=%s) -- "
+            "reasoning probably used the whole max_tokens budget",
+            call, choice.finish_reason,
+        )
+    return content
+
+
 def _use_openrouter() -> bool:
     return settings.llm_provider == "openrouter" and settings.is_set(
         settings.openrouter_api_key
@@ -149,12 +176,13 @@ async def classify_intent(text: str) -> str:
         resp = await client.chat.completions.create(
             model=settings.openrouter_router_model,
             max_tokens=10,
+            **_openrouter_reasoning("none"),
             messages=[
                 {"role": "system", "content": prompts.INTENT_SYSTEM},
                 {"role": "user", "content": text},
             ],
         )
-        label = resp.choices[0].message.content.strip().lower()
+        label = _openrouter_text(resp, "classify_intent").strip().lower()
         return label if label in INTENTS else "homework"
 
     # stub: keyword heuristic, no model call
@@ -228,12 +256,16 @@ async def socratic_reply(question: str, chunks: list[dict], grade: int) -> str:
         resp = await client.chat.completions.create(
             model=settings.openrouter_reasoner_model,
             max_tokens=600,
+            **_openrouter_reasoning("none"),
             messages=[
                 {"role": "system", "content": prompts.socratic_system(grade, chunks)},
                 {"role": "user", "content": question},
             ],
         )
-        return resp.choices[0].message.content.strip()
+        text = _openrouter_text(resp, "socratic_reply").strip()
+        if not text:
+            raise RuntimeError("socratic_reply: empty OpenRouter response")
+        return text
 
     return _stub_socratic(question, chunks, grade)
 
@@ -277,13 +309,14 @@ async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
         client = _openrouter_client()
         resp = await client.chat.completions.create(
             model=settings.openrouter_reasoner_model,
-            max_tokens=800,
+            max_tokens=2000,
+            **_openrouter_reasoning("low"),
             messages=[
                 {"role": "system", "content": prompts.eval_system(grade, chunks)},
                 {"role": "user", "content": question},
             ],
         )
-        return resp.choices[0].message.content.strip()
+        return _openrouter_text(resp, "direct_answer").strip()
 
     return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
 
@@ -365,13 +398,14 @@ async def practice_question(
         client = _openrouter_client()
         resp = await client.chat.completions.create(
             model=settings.openrouter_reasoner_model,
-            max_tokens=300,
+            max_tokens=1500,
+            **_openrouter_reasoning("low"),
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user_msg},
             ],
         )
-        return _parse_practice_response(resp.choices[0].message.content)
+        return _parse_practice_response(_openrouter_text(resp, "practice_question"))
 
     return _stub_practice(topic, grade)
 
@@ -446,12 +480,13 @@ async def grade_practice_answer(
         resp = await client.chat.completions.create(
             model=settings.openrouter_reasoner_model,
             max_tokens=200,
+            **_openrouter_reasoning("none"),
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": learner_answer},
             ],
         )
-        return _parse_grade_response(resp.choices[0].message.content)
+        return _parse_grade_response(_openrouter_text(resp, "grade_practice_answer"))
 
     return _stub_grade(model_answer, learner_answer)
 
@@ -496,6 +531,7 @@ async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
         resp = await client.chat.completions.create(
             model=settings.openrouter_vision_model,
             max_tokens=600,
+            **_openrouter_reasoning("none"),
             messages=[
                 {"role": "system", "content": prompts.socratic_system(grade, [])},
                 {
@@ -507,7 +543,7 @@ async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
                 },
             ],
         )
-        return resp.choices[0].message.content.strip()
+        return _openrouter_text(resp, "photo_reply").strip()
 
     return (
         "I can see you sent a photo of your work 📸 Photo help runs on "
