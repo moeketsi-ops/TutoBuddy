@@ -1,0 +1,222 @@
+{
+  "grade": 12,
+  "subject": "mathematics",
+  "year_label": "2023/24",
+  "source_pdf": "data/raw/atp/1.600 ATP 2023-24 Gr 12 Maths final.pdf",
+  "entries": [
+    {
+      "term": 1,
+      "weeks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "week_start": 1,
+      "week_end": 4,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Number patterns, sequences and series",
+      "topics": [
+        "Patterns, sequences and series"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        5,
+        6,
+        7
+      ],
+      "week_start": 5,
+      "week_end": 7,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Functions: Formal definition, inverses, exponential and logarithmic",
+      "topics": [
+        "Functions and inverse functions",
+        "Exponential and logarithmic functions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "week_start": 8,
+      "week_end": 11,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Trigonometry",
+      "topics": [
+        "Trigonometry - compound angles",
+        "Trigonometry 2D and 3D"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Euclidean Geometry",
+      "topics": [
+        "Euclidean Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        3,
+        4
+      ],
+      "week_start": 3,
+      "week_end": 4,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Analytical Geometry",
+      "topics": [
+        "Analytical Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "week_start": 5,
+      "week_end": 8,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Differential Calculus, including polynomials",
+      "topics": [
+        "Differential calculus",
+        "Polynomial functions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "week_start": 1,
+      "week_end": 3,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Finance, growth and decay (continuation)",
+      "topics": [
+        "Finance, growth and decay"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        4,
+        5
+      ],
+      "week_start": 4,
+      "week_end": 5,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Statistics",
+      "topics": [
+        "Statistics (regression and correlation)"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        6,
+        7
+      ],
+      "week_start": 6,
+      "week_end": 7,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Counting and probability",
+      "topics": [
+        "Counting and Probability"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        8
+      ],
+      "week_start": 8,
+      "week_end": 8,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revision",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "week_start": 1,
+      "week_end": 4,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revision",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "week_start": 5,
+      "week_end": 10,
+      "hours": 27.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "exam",
+      "label": "Final examination",
+      "topics": [],
+      "source_page": 1
+    }
+  ]
+}

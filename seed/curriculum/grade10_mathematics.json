@@ -1,0 +1,329 @@
+{
+  "grade": 10,
+  "subject": "mathematics",
+  "phase": "FET Phase",
+  "source": "DBE CAPS FET Mathematics Gr 10-12: s.3.2.1 time allocation (p.16), s.2.5 weighting (p.10), s.4 programme of assessment (p.54)",
+  "hours_per_week": 4.5,
+  "content_areas": [
+    {
+      "name": "Algebra and Equations (and Inequalities)",
+      "weight_pct": 15.0,
+      "exam_paper": 1,
+      "exam_marks": 30,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Patterns and Sequences",
+      "weight_pct": 7.5,
+      "exam_paper": 1,
+      "exam_marks": 15,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Finance, Growth and Decay",
+      "weight_pct": 5.0,
+      "exam_paper": 1,
+      "exam_marks": 10,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Functions and Graphs",
+      "weight_pct": 15.0,
+      "exam_paper": 1,
+      "exam_marks": 30,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Probability",
+      "weight_pct": 7.5,
+      "exam_paper": 1,
+      "exam_marks": 15,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Statistics",
+      "weight_pct": 7.5,
+      "exam_paper": 2,
+      "exam_marks": 15,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Analytical Geometry",
+      "weight_pct": 7.5,
+      "exam_paper": 2,
+      "exam_marks": 15,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Trigonometry",
+      "weight_pct": 20.0,
+      "exam_paper": 2,
+      "exam_marks": 40,
+      "exam_marks_tolerance": 3
+    },
+    {
+      "name": "Euclidean Geometry and Measurement",
+      "weight_pct": 15.0,
+      "exam_paper": 2,
+      "exam_marks": 30,
+      "exam_marks_tolerance": 3
+    }
+  ],
+  "non_teaching_weeks": {
+    "2": {
+      "mid_year_exams": 3
+    },
+    "4": {
+      "revision": 4,
+      "exams": 3
+    }
+  },
+  "assessment": {
+    "sba_pct_of_promotion": 25,
+    "exam_pct_of_promotion": 75,
+    "cognitive_levels": {
+      "knowledge": 20,
+      "routine_procedures": 35,
+      "complex_procedures": 30,
+      "problem_solving": 15
+    },
+    "sba_tasks": [
+      {
+        "term": 1,
+        "task_type": "investigation",
+        "sequence_in_term": 1,
+        "weight_pct_of_sba": 20
+      },
+      {
+        "term": 1,
+        "task_type": "test",
+        "sequence_in_term": 2,
+        "weight_pct_of_sba": 10
+      },
+      {
+        "term": 2,
+        "task_type": "assignment",
+        "sequence_in_term": 1,
+        "weight_pct_of_sba": 10
+      },
+      {
+        "term": 2,
+        "task_type": "june_exam",
+        "sequence_in_term": 2,
+        "weight_pct_of_sba": 30
+      },
+      {
+        "term": 3,
+        "task_type": "test",
+        "sequence_in_term": 1,
+        "weight_pct_of_sba": 10
+      },
+      {
+        "term": 3,
+        "task_type": "test",
+        "sequence_in_term": 2,
+        "weight_pct_of_sba": 10
+      },
+      {
+        "term": 4,
+        "task_type": "test",
+        "sequence_in_term": 1,
+        "weight_pct_of_sba": 10
+      }
+    ],
+    "end_of_year_exam": {
+      "papers": 2,
+      "marks_per_paper": 100,
+      "minutes_per_paper": 120
+    },
+    "skipped_tasks": []
+  },
+  "topics": [
+    {
+      "name": "Algebraic expressions",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 13.5
+      },
+      "duration_hours": 13.5,
+      "content_area": "Algebra and Equations (and Inequalities)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Exponents",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Algebra and Equations (and Inequalities)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Number patterns",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Patterns and Sequences",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Equations and inequalities",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Algebra and Equations (and Inequalities)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Trigonometry",
+      "term": 1,
+      "terms": [
+        1,
+        3
+      ],
+      "term_hours": {
+        "1": 13.5,
+        "3": 9.0
+      },
+      "duration_hours": 22.5,
+      "content_area": "Trigonometry",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Functions",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 18.0
+      },
+      "duration_hours": 18.0,
+      "content_area": "Functions and Graphs",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Trigonometric functions",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Trigonometry",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Euclidean Geometry",
+      "term": 2,
+      "terms": [
+        2,
+        3
+      ],
+      "term_hours": {
+        "2": 13.5,
+        "3": 4.5
+      },
+      "duration_hours": 18.0,
+      "content_area": "Euclidean Geometry and Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Analytical Geometry",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Analytical Geometry",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Finance and growth",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Finance, Growth and Decay",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Statistics",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Statistics",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Measurement",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Euclidean Geometry and Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Probability",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 9.0
+      },
+      "duration_hours": 9.0,
+      "content_area": "Probability",
+      "subtopics": [],
+      "learning_objectives": []
+    }
+  ]
+}

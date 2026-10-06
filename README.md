@@ -18,7 +18,7 @@ cp .env.example .env
 docker compose up --build -d
 docker compose build seed tests evals                  # profiled services are NOT built by `up --build`
 docker compose run --rm seed                           # CAPS corpus (Gr 8–12) + question bank
-docker compose run --rm seed python -m seed.load_curriculum   # Grade 8 curriculum graph + assessment model
+docker compose run --rm seed python -m seed.load_curriculum   # Gr 8-12 Maths: CAPS topics, weights, assessment model, ATP schedules
 docker compose run --rm seed python -m seed.load_past_papers  # OCR'd Grade 8 past papers (practice questions)
 open http://localhost:8000/demo                        # WhatsApp-style demo simulator
 ```

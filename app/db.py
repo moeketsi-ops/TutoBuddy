@@ -254,18 +254,61 @@ CREATE TABLE IF NOT EXISTS assessment_structure (
     time_allocation_minutes int,
     source_document_id      int REFERENCES documents(id) ON DELETE SET NULL,
     source_page             int,
-    UNIQUE (subject_id, term, task_type, sequence_in_term)
+    -- NULL = applies to every grade of the subject's phase (Senior Phase:
+    -- one task structure for Gr 7-9). FET rows set it, because the Grade 12
+    -- programme of assessment differs from Grades 10-11 (CAPS FET s.4).
+    grade_id                int REFERENCES grades(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_assessment_structure_subject_term ON assessment_structure(subject_id, term);
+-- Uniqueness now includes grade_id (NULLS NOT DISTINCT, Postgres 15+, so a
+-- Senior Phase row with grade_id NULL still upserts cleanly). Databases
+-- created before Grades 9-12 were added carry the old 4-column UNIQUE and
+-- no grade_id column: add the column, drop the old constraint, add the new.
+ALTER TABLE assessment_structure ADD COLUMN IF NOT EXISTS grade_id int REFERENCES grades(id) ON DELETE CASCADE;
+DO $$
+DECLARE old_name text;
+BEGIN
+    SELECT conname INTO old_name FROM pg_constraint
+     WHERE conrelid = 'assessment_structure'::regclass AND contype = 'u'
+       AND conname <> 'assessment_structure_grade_task_key'
+       AND array_length(conkey, 1) = 4;
+    IF old_name IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE assessment_structure DROP CONSTRAINT %I', old_name);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assessment_structure_grade_task_key') THEN
+        ALTER TABLE assessment_structure ADD CONSTRAINT assessment_structure_grade_task_key
+            UNIQUE NULLS NOT DISTINCT (subject_id, grade_id, term, task_type, sequence_in_term);
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS assessment_task_marks (
     id                       serial PRIMARY KEY,
     assessment_structure_id int NOT NULL REFERENCES assessment_structure(id) ON DELETE CASCADE,
     grade_id                int NOT NULL REFERENCES grades(id) ON DELETE CASCADE,
     paper_number             int,
-    min_marks                int NOT NULL,
-    UNIQUE (assessment_structure_id, grade_id, paper_number)
+    min_marks                int NOT NULL
 );
+-- Single-paper tasks store paper_number NULL. A plain UNIQUE treats NULLs as
+-- distinct, so every re-run of load_curriculum duplicated those rows. Replace
+-- it with a NULLS NOT DISTINCT constraint (after removing any duplicates).
+DO $$
+DECLARE old_name text;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assessment_task_marks_paper_key') THEN
+        SELECT conname INTO old_name FROM pg_constraint
+         WHERE conrelid = 'assessment_task_marks'::regclass AND contype = 'u';
+        IF old_name IS NOT NULL THEN
+            EXECUTE format('ALTER TABLE assessment_task_marks DROP CONSTRAINT %I', old_name);
+        END IF;
+        DELETE FROM assessment_task_marks a USING assessment_task_marks b
+         WHERE a.id > b.id
+           AND a.assessment_structure_id = b.assessment_structure_id
+           AND a.grade_id = b.grade_id
+           AND a.paper_number IS NOT DISTINCT FROM b.paper_number;
+        ALTER TABLE assessment_task_marks ADD CONSTRAINT assessment_task_marks_paper_key
+            UNIQUE NULLS NOT DISTINCT (assessment_structure_id, grade_id, paper_number);
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS cognitive_level_weights (
     id         serial PRIMARY KEY,
@@ -275,6 +318,54 @@ CREATE TABLE IF NOT EXISTS cognitive_level_weights (
     weight_pct numeric(5,2) CHECK (weight_pct BETWEEN 0 AND 100),
     UNIQUE (subject_id, level_name)
 );
+
+-- Grades 9-12 (added 2026-10, see seed/load_curriculum.py) ----------------
+-- A CAPS topic can be taught in more than one term (Grade 8 Algebraic
+-- Equations: Terms 1, 2 and 4), but topics is UNIQUE per grade+subject+name.
+-- `term` stays the first term taught; `terms` lists all of them and
+-- `term_hours` maps term -> hours, e.g. {{"1": 3, "2": 3, "4": 3}}.
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS terms int[];
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS term_hours jsonb;
+CREATE INDEX IF NOT EXISTS idx_topics_terms ON topics USING gin (terms);
+
+-- Content-area weighting differs by grade (Senior Phase Gr 8: 25/30/25/10/10,
+-- Gr 9: 15/35/30/10/10; FET: share of the Paper 1 + Paper 2 marks), but
+-- content_areas is per subject and the Senior Phase subject spans Gr 7-9.
+-- Per-grade weights live here; content_areas.weight_pct is legacy (Gr 8).
+CREATE TABLE IF NOT EXISTS content_area_weights (
+    id              serial PRIMARY KEY,
+    content_area_id int NOT NULL REFERENCES content_areas(id) ON DELETE CASCADE,
+    grade_id        int NOT NULL REFERENCES grades(id) ON DELETE CASCADE,
+    weight_pct      numeric(5,2) NOT NULL CHECK (weight_pct BETWEEN 0 AND 100),
+    exam_paper      int CHECK (exam_paper IN (1, 2)),   -- FET only
+    exam_marks      int,                                -- FET only, CAPS +/-3
+    UNIQUE (content_area_id, grade_id)
+);
+CREATE INDEX IF NOT EXISTS idx_content_area_weights_grade ON content_area_weights(grade_id);
+
+-- Annual Teaching Plan schedule at topic level (atp_schedules above is keyed
+-- to learning objectives, of which only a handful exist). ATPs change every
+-- year, so each row carries the ATP's own year label ('2026', '2023/24').
+-- `hours` is for the whole ATP block; a block covering several CAPS topics
+-- (Grade 8 'Data Handling') is stored once per topic with topics_in_block.
+CREATE TABLE IF NOT EXISTS atp_topic_schedule (
+    id              serial PRIMARY KEY,
+    grade_id        int NOT NULL REFERENCES grades(id) ON DELETE CASCADE,
+    subject_id      int NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+    year_label      varchar(20) NOT NULL,
+    term            int NOT NULL CHECK (term BETWEEN 1 AND 4),
+    week_start      int CHECK (week_start BETWEEN 1 AND 12),
+    week_end        int CHECK (week_end BETWEEN 1 AND 12),
+    hours           numeric(4,1),
+    kind            varchar(20) NOT NULL
+        CHECK (kind IN ('topic','assessment','revision','exam','admin')),
+    label           text NOT NULL,
+    topic_id        int REFERENCES topics(id) ON DELETE CASCADE,
+    topics_in_block int NOT NULL DEFAULT 1,
+    source_page     int
+);
+CREATE INDEX IF NOT EXISTS idx_atp_topic_schedule_lookup
+    ON atp_topic_schedule(grade_id, year_label, term);
 
 -- Mastery + attempts, keyed to learners(id) -- see the household-model
 -- note above `learners` for why this replaced the earlier phone-keyed

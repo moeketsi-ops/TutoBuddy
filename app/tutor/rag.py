@@ -22,6 +22,8 @@ excerpts (style/topic reference only, to write and solve an original
 question, never to copy a number from them).
 """
 
+import datetime
+
 from app.adapters.embeddings import embed
 from app.db import get_pool, vector_literal
 
@@ -94,23 +96,51 @@ async def get_term_progress(
                 "coverage_pct": 0, "avg_mastery": None,
             }
 
-        rows = await conn.fetch(
-            """
+        # Which topics count as "this term": the ATP for the current school
+        # year if one is loaded for this grade (what classes are actually
+        # being taught), otherwise every CAPS topic taught in this term
+        # (topics.terms; a topic can span several terms). ATPs stored under
+        # an older year label (e.g. the 2023/24 FET ATPs) are deliberately
+        # not used here -- see seed/load_curriculum.py.
+        year_label = str(datetime.date.today().year)
+        use_atp = await conn.fetchval(
+            "SELECT EXISTS (SELECT 1 FROM atp_topic_schedule a JOIN subjects s ON s.id = a.subject_id "
+            "WHERE a.grade_id = $1 AND a.year_label = $2 AND lower(s.name) = lower($3))",
+            grade_id, year_label, subject,
+        )
+        sql = """
             SELECT t.id AS topic_id, t.name AS topic, t.term,
-                   ca.name AS content_area, ca.weight_pct AS content_area_weight,
+                   ca.name AS content_area,
+                   COALESCE(caw.weight_pct, ca.weight_pct) AS content_area_weight,
                    ltm.mastery_score, ltm.band
             FROM topics t
             JOIN subjects s ON s.id = t.subject_id
             LEFT JOIN content_areas ca ON ca.id = t.content_area_id
+            LEFT JOIN content_area_weights caw
+                   ON caw.content_area_id = ca.id AND caw.grade_id = t.grade_id
             LEFT JOIN learner_topic_mastery ltm
                    ON ltm.topic_id = t.id AND ltm.learner_id = $1
-            WHERE t.grade_id = $2 AND t.term = $3 AND lower(s.name) = lower($4)
-            ORDER BY ca.weight_pct DESC NULLS LAST,
+            WHERE t.grade_id = $2 AND lower(s.name) = lower($4)
+              AND CASE WHEN $7::bool THEN true
+                       WHEN $5::bool THEN EXISTS (
+                        SELECT 1 FROM atp_topic_schedule a
+                        WHERE a.topic_id = t.id AND a.term = $3
+                          AND a.year_label = $6 AND a.kind = 'topic')
+                       ELSE $3 = ANY(COALESCE(t.terms, ARRAY[t.term])) END
+            ORDER BY COALESCE(caw.weight_pct, ca.weight_pct) DESC NULLS LAST,
                      ltm.mastery_score ASC NULLS FIRST,
                      t.name
-            """,
-            learner_id, grade_id, term, subject,
-        )
+            """
+        query_args = (learner_id, grade_id, term, subject, use_atp, year_label)
+        rows = await conn.fetch(sql, *query_args, False)
+        revision = False
+        if not rows:
+            # No topics scheduled this term (e.g. Grade 12 Term 4 is revision
+            # and final exams only, CAPS FET s.3.2.1): offer the whole year's
+            # topics for revision rather than telling the learner nothing is
+            # loaded.
+            rows = await conn.fetch(sql, *query_args, True)
+            revision = bool(rows)
 
     topics = [dict(r) for r in rows]
     assessed = [t for t in topics if t["mastery_score"] is not None]
@@ -122,6 +152,8 @@ async def get_term_progress(
     return {
         "term": term,
         "subject": subject,
+        "schedule_source": ("revision: all topics" if revision
+                            else f"ATP {year_label}" if use_atp else "CAPS"),
         "topics": topics,
         "coverage_pct": coverage_pct,
         "avg_mastery": avg_mastery,

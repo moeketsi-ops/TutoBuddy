@@ -1,0 +1,350 @@
+{
+  "grade": 9,
+  "subject": "mathematics",
+  "phase": "Senior Phase",
+  "source": "CAPS Mathematics Gr 7-9, Time allocation per Term: Grade 9 (CAPS p.118)",
+  "content_areas": [
+    {
+      "name": "Numbers, Operations and Relationships",
+      "weight_pct": 15
+    },
+    {
+      "name": "Patterns, Functions and Algebra",
+      "weight_pct": 35
+    },
+    {
+      "name": "Space and Shape (Geometry)",
+      "weight_pct": 30
+    },
+    {
+      "name": "Measurement",
+      "weight_pct": 10
+    },
+    {
+      "name": "Data Handling",
+      "weight_pct": 10
+    }
+  ],
+  "revision_hours": {
+    "1": 5,
+    "2": 8,
+    "3": 5,
+    "4": 12
+  },
+  "topics": [
+    {
+      "name": "Whole numbers",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Integers",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Common Fractions",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Decimal Fractions",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Exponents",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 5
+      },
+      "duration_hours": 5,
+      "content_area": "Numbers, Operations and Relationships",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Numeric and Geometric Patterns",
+      "term": 1,
+      "terms": [
+        1
+      ],
+      "term_hours": {
+        "1": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Functions and Relationships",
+      "term": 1,
+      "terms": [
+        1,
+        3
+      ],
+      "term_hours": {
+        "1": 4,
+        "3": 5
+      },
+      "duration_hours": 9,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Algebraic Expressions",
+      "term": 1,
+      "terms": [
+        1,
+        3
+      ],
+      "term_hours": {
+        "1": 4.5,
+        "3": 9
+      },
+      "duration_hours": 13.5,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Algebraic Equations",
+      "term": 1,
+      "terms": [
+        1,
+        3
+      ],
+      "term_hours": {
+        "1": 4,
+        "3": 9
+      },
+      "duration_hours": 13,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Construction of Geometric Figures",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 9
+      },
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of 2D Shapes",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 9
+      },
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of Straight Lines",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 9
+      },
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Theorem of Pythagoras",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 5
+      },
+      "duration_hours": 5,
+      "content_area": "Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Area and Perimeter",
+      "term": 2,
+      "terms": [
+        2
+      ],
+      "term_hours": {
+        "2": 5
+      },
+      "duration_hours": 5,
+      "content_area": "Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Graphs",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 12
+      },
+      "duration_hours": 12,
+      "content_area": "Patterns, Functions and Algebra",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Surface Area and Volume",
+      "term": 3,
+      "terms": [
+        3
+      ],
+      "term_hours": {
+        "3": 5
+      },
+      "duration_hours": 5,
+      "content_area": "Measurement",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Transformation Geometry",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 9
+      },
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Geometry of 3D Objects",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 9
+      },
+      "duration_hours": 9,
+      "content_area": "Space and Shape (Geometry)",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Collect, Organize and Summarize Data",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 4
+      },
+      "duration_hours": 4,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Represent Data",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 3
+      },
+      "duration_hours": 3,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Interpret, Analyse and Report Data",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 3.5
+      },
+      "duration_hours": 3.5,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    },
+    {
+      "name": "Probability",
+      "term": 4,
+      "terms": [
+        4
+      ],
+      "term_hours": {
+        "4": 4.5
+      },
+      "duration_hours": 4.5,
+      "content_area": "Data Handling",
+      "subtopics": [],
+      "learning_objectives": []
+    }
+  ]
+}

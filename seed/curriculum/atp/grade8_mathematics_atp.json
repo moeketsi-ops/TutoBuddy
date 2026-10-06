@@ -1,0 +1,359 @@
+{
+  "grade": 8,
+  "subject": "mathematics",
+  "year_label": "2026",
+  "source_pdf": "data/raw/atp/2026_ATP_Mathematics_Grade8.pdf",
+  "entries": [
+    {
+      "term": 1,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 7.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "WHOLE NUMBERS",
+      "topics": [
+        "Whole numbers"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        3,
+        4
+      ],
+      "week_start": 3,
+      "week_end": 4,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "INTEGERS",
+      "topics": [
+        "Integers"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        5,
+        6
+      ],
+      "week_start": 5,
+      "week_end": 6,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "COMMON FRACTIONS",
+      "topics": [
+        "Common Fractions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        7
+      ],
+      "week_start": 7,
+      "week_end": 7,
+      "hours": 2.0,
+      "hours_source": "atp",
+      "kind": "assessment",
+      "label": "FORMAL ASSESSMENT TASK ASSIGNMENT: ",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        8
+      ],
+      "week_start": 8,
+      "week_end": 8,
+      "hours": 4.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "DECIMAL FRACTIONS",
+      "topics": [
+        "Decimal Fractions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        9,
+        10
+      ],
+      "week_start": 9,
+      "week_end": 10,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "NUMERIC AND GEOMETRIC PATTERNS",
+      "topics": [
+        "Numeric and Geometric Patterns"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        11
+      ],
+      "week_start": 11,
+      "week_end": 11,
+      "hours": 7.0,
+      "hours_source": "atp",
+      "kind": "revision",
+      "label": "REVISION FORMAL ASSESSMEN T TASK TEST",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "week_start": 1,
+      "week_end": 3,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "EXPONENTS",
+      "topics": [
+        "Exponents"
+      ],
+      "source_page": 5
+    },
+    {
+      "term": 2,
+      "weeks": [
+        4,
+        5
+      ],
+      "week_start": 4,
+      "week_end": 5,
+      "hours": 13.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "ALGEBRAIC EXPRESSIONS",
+      "topics": [
+        "Algebraic Expressions"
+      ],
+      "source_page": 5
+    },
+    {
+      "term": 2,
+      "weeks": [
+        6,
+        7
+      ],
+      "week_start": 6,
+      "week_end": 7,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "ALGEBRAIC EQUATIONS",
+      "topics": [
+        "Algebraic Equations"
+      ],
+      "source_page": 5
+    },
+    {
+      "term": 2,
+      "weeks": [
+        8
+      ],
+      "week_start": 8,
+      "week_end": 8,
+      "hours": 4.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "FUNCTIONS AND RELATIONSHIPS",
+      "topics": [
+        "Functions and Relationships"
+      ],
+      "source_page": 5
+    },
+    {
+      "term": 2,
+      "weeks": [
+        9,
+        10
+      ],
+      "week_start": 9,
+      "week_end": 10,
+      "hours": 6.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "GRAPHS",
+      "topics": [
+        "Graphs"
+      ],
+      "source_page": 5
+    },
+    {
+      "term": 3,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 11.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "DATA HANDLING",
+      "topics": [
+        "Collect, Organize and Summarize Data",
+        "Represent Data",
+        "Interpret, Analyse and Report Data"
+      ],
+      "source_page": 8
+    },
+    {
+      "term": 3,
+      "weeks": [
+        3,
+        4,
+        5
+      ],
+      "week_start": 3,
+      "week_end": 5,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "GEOMETRY OF STRAIGHT LINES",
+      "topics": [
+        "Geometry of Straight Lines"
+      ],
+      "source_page": 8
+    },
+    {
+      "term": 3,
+      "weeks": [
+        6,
+        7
+      ],
+      "week_start": 6,
+      "week_end": 7,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "GEOMETRY OF 2D SHAPES",
+      "topics": [
+        "Geometry of 2D Shapes"
+      ],
+      "source_page": 8
+    },
+    {
+      "term": 3,
+      "weeks": [
+        8,
+        9,
+        10
+      ],
+      "week_start": 8,
+      "week_end": 10,
+      "hours": 12.0,
+      "hours_source": "atp",
+      "kind": "revision",
+      "label": "REVISION FORMAL ASSESSMENT TASK TEST",
+      "topics": [],
+      "source_page": 8
+    },
+    {
+      "term": 4,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 9.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "THEOREM OF PYTHAGORAS",
+      "topics": [
+        "Theorem of Pythagoras"
+      ],
+      "source_page": 12
+    },
+    {
+      "term": 4,
+      "weeks": [
+        3,
+        4
+      ],
+      "week_start": 3,
+      "week_end": 4,
+      "hours": 4.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "TRANSFORMATION GEOMETRY",
+      "topics": [
+        "Transformation Geometry"
+      ],
+      "source_page": 12
+    },
+    {
+      "term": 4,
+      "weeks": [
+        5,
+        6
+      ],
+      "week_start": 5,
+      "week_end": 6,
+      "hours": 8.0,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "AREA AND PERIMETER OF 2-D SHAPES",
+      "topics": [
+        "Area and Perimeter"
+      ],
+      "source_page": 12
+    },
+    {
+      "term": 4,
+      "weeks": [
+        6,
+        7
+      ],
+      "week_start": 6,
+      "week_end": 7,
+      "hours": 4.5,
+      "hours_source": "atp",
+      "kind": "topic",
+      "label": "SURFACE AREA AND VOLUME OF 3-D OBJECTS",
+      "topics": [
+        "Surface Area and Volume"
+      ],
+      "source_page": 12
+    },
+    {
+      "term": 4,
+      "weeks": [
+        8,
+        9,
+        10
+      ],
+      "week_start": 8,
+      "week_end": 10,
+      "hours": null,
+      "hours_source": null,
+      "kind": "revision",
+      "label": "REVISION FORMAL ASSESSMENT TASK TEST",
+      "topics": [],
+      "source_page": 12
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+{
+  "grade": 10,
+  "subject": "mathematics",
+  "year_label": "2023/24",
+  "source_pdf": "data/raw/atp/20260309160600-grade-10-maths-atp-2026.pdf",
+  "entries": [
+    {
+      "term": 1,
+      "weeks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "week_start": 1,
+      "week_end": 4,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Algebraic expressions",
+      "topics": [
+        "Algebraic expressions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "week_start": 5,
+      "week_end": 8,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Exponents, equations and inequalities",
+      "topics": [
+        "Exponents",
+        "Equations and inequalities"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        9,
+        10,
+        11
+      ],
+      "week_start": 9,
+      "week_end": 11,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Trigonometry",
+      "topics": [
+        "Trigonometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "week_start": 1,
+      "week_end": 4,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Euclidean Geometry",
+      "topics": [
+        "Euclidean Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        5,
+        6
+      ],
+      "week_start": 5,
+      "week_end": 6,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Analytical Geometry",
+      "topics": [
+        "Analytical Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "week_start": 7,
+      "week_end": 11,
+      "hours": 22.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Functions (including trigonometric functions)",
+      "topics": [
+        "Functions",
+        "Trigonometric functions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Trigonometry (2D)",
+      "topics": [
+        "Trigonometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        3,
+        4,
+        5
+      ],
+      "week_start": 3,
+      "week_end": 5,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Statistics",
+      "topics": [
+        "Statistics"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        6,
+        7,
+        8
+      ],
+      "week_start": 6,
+      "week_end": 8,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Probability",
+      "topics": [
+        "Probability"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        9,
+        10,
+        11
+      ],
+      "week_start": 9,
+      "week_end": 11,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Finance and growth",
+      "topics": [
+        "Finance and growth"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Measurement",
+      "topics": [
+        "Measurement"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        3
+      ],
+      "week_start": 3,
+      "week_end": 3,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Number patterns",
+      "topics": [
+        "Number patterns"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        4
+      ],
+      "week_start": 4,
+      "week_end": 4,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revise Algebra",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        5
+      ],
+      "week_start": 5,
+      "week_end": 5,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revise Trigonometry & Geometry",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        6
+      ],
+      "week_start": 6,
+      "week_end": 6,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revise functions",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        7,
+        8,
+        9
+      ],
+      "week_start": 7,
+      "week_end": 9,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "exam",
+      "label": "Examination",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        10
+      ],
+      "week_start": 10,
+      "week_end": 10,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "admin",
+      "label": "Admin",
+      "topics": [],
+      "source_page": 1
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "grade": 11,
+  "subject": "mathematics",
+  "year_label": "2023/24",
+  "source_pdf": "data/raw/atp/1.590 ATP 2023-24 Gr 11 Maths final.pdf",
+  "entries": [
+    {
+      "term": 1,
+      "weeks": [
+        1,
+        2
+      ],
+      "week_start": 1,
+      "week_end": 2,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Exponents and surds",
+      "topics": [
+        "Exponents and surds"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "week_start": 3,
+      "week_end": 6,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Equations and inequalities",
+      "topics": [
+        "Equations and inequalities"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 1,
+      "weeks": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "week_start": 7,
+      "week_end": 11,
+      "hours": 22.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Trigonometry (reduction formulae, trig equations & general solutions)",
+      "topics": [
+        "Trigonometry (reduction formulae, graphs, equations)"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "week_start": 1,
+      "week_end": 4,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Euclidean Geometry",
+      "topics": [
+        "Euclidean Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        5,
+        6
+      ],
+      "week_start": 5,
+      "week_end": 6,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Analytical Geometry",
+      "topics": [
+        "Analytical Geometry"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 2,
+      "weeks": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "week_start": 7,
+      "week_end": 11,
+      "hours": 22.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Functions (including trigonometric functions)",
+      "topics": [
+        "Functions"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "week_start": 1,
+      "week_end": 3,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Trigonometry (sine, cosine and area rules)",
+      "topics": [
+        "Trigonometry (sine, area, cosine rules)"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        4,
+        5
+      ],
+      "week_start": 4,
+      "week_end": 5,
+      "hours": 9.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Statistics",
+      "topics": [
+        "Statistics"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        6,
+        7,
+        8
+      ],
+      "week_start": 6,
+      "week_end": 8,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Probability",
+      "topics": [
+        "Probability"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 3,
+      "weeks": [
+        9,
+        10,
+        11
+      ],
+      "week_start": 9,
+      "week_end": 11,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Finance, growth and decay",
+      "topics": [
+        "Finance, growth and decay"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "week_start": 1,
+      "week_end": 3,
+      "hours": 13.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "topic",
+      "label": "Number patterns",
+      "topics": [
+        "Number patterns"
+      ],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        4
+      ],
+      "week_start": 4,
+      "week_end": 4,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revision of measurement",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        5
+      ],
+      "week_start": 5,
+      "week_end": 5,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revision of",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        6
+      ],
+      "week_start": 6,
+      "week_end": 6,
+      "hours": 4.5,
+      "hours_source": "weeks x 4.5",
+      "kind": "revision",
+      "label": "Revision of",
+      "topics": [],
+      "source_page": 1
+    },
+    {
+      "term": 4,
+      "weeks": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "week_start": 7,
+      "week_end": 10,
+      "hours": 18.0,
+      "hours_source": "weeks x 4.5",
+      "kind": "exam",
+      "label": "Examination",
+      "topics": [],
+      "source_page": 1
+    }
+  ]
+}

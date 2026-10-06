@@ -85,8 +85,13 @@ async def main() -> None:
         grade_id = await conn.fetchval(
             "SELECT id FROM grades WHERE grade_number = $1", GRADE_NUMBER
         )
+        # One Mathematics subject row exists per phase (Senior Phase, FET
+        # Phase) since Grades 10-12 were loaded, so pick the one in this
+        # grade's phase rather than whichever row comes back first.
         subject_id = await conn.fetchval(
-            "SELECT id FROM subjects WHERE lower(name) = lower($1)", SUBJECT
+            "SELECT s.id FROM subjects s JOIN grades g ON g.phase_id = s.phase_id "
+            "WHERE g.id = $1 AND lower(s.name) = lower($2)",
+            grade_id, SUBJECT,
         )
         if grade_id is None or subject_id is None:
             raise RuntimeError(
