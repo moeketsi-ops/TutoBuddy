@@ -1,0 +1,20 @@
+# Past papers/memos — found, organized, and OCR'd (11 Sep)
+
+Founder's question: "What do I do with downloaded papers and memos?" (10 real Grade 8 Mathematics past-paper/memo PDFs, downloaded 2023-2025, sitting in Downloads). Answer executed directly rather than just described, using the device-bridge access to the founder's own machine confirmed working this session.
+
+## What was done
+
+1. **Confirmed and organized**: found all 10 PDFs in Downloads, copied into `TutoBuddy/data/raw/past_papers/` (mirrors the existing `data/raw/{caps,atp,textbooks}` convention). Files: EC-ORT June 2024, FS MOCK Nov 2025 (P1+P2), GP Revision Term 1 2025, KZN Nov 2023 (P1+P2), LP-VW March 2024, Maths June 2025, and a matched "GR 8 MATH MARCH CONTROLLED TEST" pair (test + memorandum as separate files — the only one of the 10 not combined into one PDF).
+
+2. **Important finding: these are scanned/photographed PDFs, not text-native.** Ran the existing `extract_pdf.py` (built for the text-native CAPS/ATP documents) against all 10 — every single page came back with 0 characters of text. Confirmed via pdfplumber that each page is a full-page embedded image, not a text layer.
+
+3. **Built `ingestion/ocr_pdf.py`** — renders each page to an image (`pdftoppm`) and OCRs it (`tesseract`), output shaped to match `extract_pdf.py`'s JSON so downstream tooling doesn't care which path a document came from. Ran successfully on all 10 PDFs (116 pages total, 0 blank after OCR) — output committed to `data/processed/past_papers/*.json` on the founder's machine.
+   - **OCR quality, tested on real pages**: legible and reliable for prose (instructions, question stems, "Testpapers.co.za" footer visible on every paper, confirming the third-party-aggregator source already flagged in `content-sourcing-copyright-strategy.md`). **Degrades on math notation** — fractions, exponents, multi-step arithmetic, pattern/dot diagrams, and tables come out mangled (e.g. "3 − (−3) + 8..." → "3---3+8-1-7+12+1"). Usable as a starting point for human curation, **not** as auto-gradable ground truth on its own — someone still needs to check each question/answer against the actual page image before it goes into an eval set.
+
+4. **Confirmed real usable content exists for the one topic with real learning objectives loaded** (Algebraic Expressions/Equations, per `tutobuddy-curriculum-engine-phase2-ingestion.md`): keyword-scanned the OCR'd text — 6 of the 10 papers (EC-ORT, FS P1, GP, KZN P1, KZN P2, June 2025) contain algebra/equation/expression/simplify/polynomial content across multiple pages. Good diversity across provinces and years for a first eval batch.
+
+5. **Wrote `database/register_past_papers.sql`** — registers all 10 as rows in the existing `documents` table (schema already supported `document_type IN ('past_paper','marking_memo')`, just never populated). 8 of the 10 are one combined PDF (question paper + memo together) and registered as `past_paper` with "(includes memo)" in the title; only the one genuinely-split pair gets separate `past_paper`/`marking_memo` rows. No `source_url` set — these were downloaded directly, not from a URL the founder gave us. **Not yet run** — needs the founder's own `psql`, same as every other DB migration this session (device-bridge tools can reach the founder's files but not their Windows Postgres service).
+
+## Next step (not yet built)
+
+The actual eval-harness curation ("50+ real past-paper questions with official memos as ground truth, auto-graded on every prompt/model change" — flagged as needed in `technical-blueprint-reconciliation.md`, never built): pull the ~6 algebra-relevant papers' OCR'd text, hand-verify a first batch of question+correct-answer pairs against the real memo pages (human-in-the-loop, given the OCR math-notation caveat above), and shape them into whatever the eval runner expects once that's designed. Natural first scope: Algebraic Expressions/Equations only, matching the one topic with real content loaded so the tutor's answers are actually gradable against something real.
