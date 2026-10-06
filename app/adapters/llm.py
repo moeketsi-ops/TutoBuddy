@@ -300,11 +300,21 @@ async def practice_question(
     provider = _provider("reasoner")
     if not provider:
         return _stub_practice(topic, grade)
-    raw = await _complete(provider, "reasoner", "practice_question",
-                          prompts.practice_system(grade, topic, band, excerpts),
-                          f"Set me a practice question on {topic}.",
+    system = prompts.practice_system(grade, topic, band, excerpts)
+    user = f"Set me a practice question on {topic}."
+    raw = await _complete(provider, "reasoner", "practice_question", system, user,
                           max_tokens=300, openrouter_max_tokens=1500,
                           openrouter_reasoning="low")
+    if not raw.strip() and provider == "openrouter":
+        # Seen in the Docker suite: even "low" reasoning can use the whole
+        # 1500-token budget, leaving no question. Retry once without it.
+        raw = await _complete(provider, "reasoner", "practice_question", system, user,
+                              max_tokens=300, openrouter_max_tokens=1500,
+                              openrouter_reasoning="none")
+    if not raw.strip():
+        # Never send the learner a blank "question" (the worker replies with
+        # its error message instead and no practice question is left pending).
+        raise RuntimeError(f"practice_question: empty {provider} response")
     return _parse_practice_response(raw)
 
 
