@@ -1,5 +1,11 @@
 """POPIA consent gate + onboarding state machine."""
 
+import time
+
+import httpx
+
+from tests.conftest import MOCKWA
+
 
 def test_new_learner_hits_consent_gate_first(chat):
     chat.send_text("How do I factorise x² + 5x + 6?")
@@ -48,6 +54,15 @@ def test_delete_last_learner_drops_household_and_requires_reconsent(onboarded_ch
     onboarded_chat.send_text("DELETE")
     reply = onboarded_chat.wait_for_reply()
     assert "erased" in reply.lower()
+    # Exactly one reply: no error message after the confirmation (logging it
+    # used to hit a foreign-key error on the just-deleted learner -> "Eish").
+    # Read the whole outbox for this phone, since wait_for_reply() returns
+    # only the first message of a batch.
+    time.sleep(3)
+    outbox = [m["body"] for m in httpx.get(
+        f"{MOCKWA}/outbox", params={"to": onboarded_chat.phone, "since": 0}).json()["messages"]]
+    assert sum("erased" in m.lower() for m in outbox) == 1
+    assert not any("went wrong" in m.lower() for m in outbox), outbox
     # Nothing left in the DB for this phone (the POPIA "erase everything" promise).
     assert _rows_for_phone(onboarded_chat.phone) == {"account_channels": 0, "conversation_log": 0}
     onboarded_chat.send_text("hi again")

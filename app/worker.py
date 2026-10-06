@@ -16,6 +16,7 @@ import json
 import logging
 import os
 
+import httpx
 import redis.asyncio as aioredis
 
 from app.adapters import llm, router, stt
@@ -56,6 +57,17 @@ ADD_LEARNER_NO_SIBLINGS = (
 ERROR_REPLY = (
     "Eish, something went wrong on my side. 🙈 Please try that again in a moment."
 )
+
+
+async def _send_with_retry(wa: WhatsAppClient, phone: str, body: str) -> None:
+    """One retry on a transport error, for messages that must get through
+    (the safety referral). Anything else follows the normal error path."""
+    try:
+        await wa.send_text(phone, body)
+    except httpx.TransportError:
+        log.warning("send to %s failed, retrying once", phone)
+        await asyncio.sleep(1)
+        await wa.send_text(phone, body)
 
 
 async def log_message(
@@ -123,6 +135,7 @@ async def handle_active(
         # "erase everything" must mean everything, incl. the phone number and
         # pre-consent chat rows). Safeguarding flags are kept by design.
         await session.delete_household(sess.account_id, phone)
+        sess.data["household_erased"] = True  # in-memory only; Redis was reset
         return (
             f"{deleted_name}'s profile was deleted, and with no learners left "
             f"everything else has been erased too — phone number, consent and "
@@ -201,13 +214,17 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     # (not just a bool) so the safeguarding flag records *why*.
     risk_category = safety.classify_risk(text) if text else None
     if risk_category is not None:
-        await wa.send_text(phone, safety.REFERRAL_MESSAGE)
+        # Record the flag FIRST. It used to be written after the referral was
+        # sent, so a failed send (seen in the test suite: a WhatsApp
+        # ConnectTimeout) lost the duty-of-care record entirely and the
+        # learner got the generic error message instead of Childline.
+        await safeguarding.record_and_notify(
+            wa, phone, risk_category, text, learner_id=sess.active_learner_id
+        )
+        await _send_with_retry(wa, phone, safety.REFERRAL_MESSAGE)
         await log_message(
             phone, "outbound", "system", safety.REFERRAL_MESSAGE, "safety",
             flagged=True, learner_id=sess.active_learner_id,
-        )
-        await safeguarding.record_and_notify(
-            wa, phone, risk_category, text, learner_id=sess.active_learner_id
         )
         return
 
@@ -289,6 +306,13 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         )
     reply = safety.sanitize_output(raw_reply)
     await wa.send_text(phone, reply)
+    if sess.data.get("household_erased"):
+        # DELETE of the last learner just erased the account, learner and
+        # every conversation_log row for this phone. Logging the confirmation
+        # would write a new row for an erased household, and its learner_id
+        # no longer exists (FK violation -> the learner also got "Eish, ..."
+        # right after the deletion confirmation).
+        return
     await log_message(phone, "outbound", "text", reply, intent, learner_id=sess.active_learner_id)
 
 
