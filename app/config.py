@@ -39,8 +39,7 @@ class Settings(BaseSettings):
     # tier AND photo_reply, not just the router. Router stays on whichever
     # provider LLM_PROVIDER already points to unless you also set
     # LLM_PROVIDER=openrouter, in which case openrouter handles intent
-    # routing too (same one-setting-picks-everything pattern as the other
-    # three providers above -- there's no per-tier provider mix yet).
+    # routing too. To mix providers per tier, see REASONER_PROVIDER below.
     openrouter_api_key: str = PLACEHOLDER
     openrouter_router_model: str = "qwen/qwen3.5-35b-a3b"
     openrouter_reasoner_model: str = "qwen/qwen3.5-35b-a3b"
@@ -50,6 +49,14 @@ class Settings(BaseSettings):
     # "jev" = TypeSafe AI's typed-decision model, with confidence-threshold
     # fallback to the LLM router. Pin the model version, per TypeSafe's docs.
     router_provider: str = ""  # "" | jev
+
+    # Reasoner tier (tutoring, practice questions, grading, photos, eval
+    # answers). "" = follow LLM_PROVIDER. Set it to split the tiers, e.g.
+    # LLM_PROVIDER=groq for cheap routing + REASONER_PROVIDER=anthropic for
+    # tutoring. Values: "" | stub | anthropic | groq | ollama | openrouter.
+    # Uses that provider's *_REASONER_MODEL setting.
+    reasoner_provider: str = ""
+
     typesafe_api_key: str = PLACEHOLDER
     jev_model: str = "jev-1.13.0"
     jev_min_confidence: float = 0.6

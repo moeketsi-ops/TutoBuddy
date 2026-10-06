@@ -1,28 +1,33 @@
 """Two-tier LLM adapter (blueprint §4.2: cheap router + frontier reasoner).
 
-stub       — deterministic canned replies; fully offline, used by CI and the
-             keyless demo. Never pretends to solve maths it didn't solve.
-anthropic  — Haiku for intent routing, a frontier model for Socratic tutoring.
-groq       — same two-tier split, served by Groq's hosted open gpt-oss models.
-             Free/cheap alternative to Anthropic; no vision support (used
-             only for classify_intent/socratic_reply/direct_answer, never
-             photos).
-ollama     — fully local/offline, no API key, via a locally running Ollama
-             server. Same caveat as groq: text only, and the model quality
-             depends entirely on what's been `ollama pull`ed -- not assumed
-             to match the hosted providers.
-openrouter — OpenAI-compatible API (https://openrouter.ai/api/v1), one key
-             across many hosted models. Added for Qwen3.5-35B-A3B
-             (open-weight MoE, ~3B active params, reasoning + genuinely
-             multimodal) — unlike groq/ollama above, THIS provider also
-             powers photo_reply, because the model is actually vision-
-             capable (verified against Alibaba's own docs + OpenRouter's
-             listing before wiring this up, not assumed).
+Tiers and who serves them:
+  router   — classify_intent. Served by LLM_PROVIDER. (ROUTER_PROVIDER=jev in
+             app/adapters/router.py can sit in front of it; this file is its
+             fallback.)
+  reasoner — socratic_reply, direct_answer, practice_question,
+             grade_practice_answer, photo_reply. Served by REASONER_PROVIDER,
+             or by LLM_PROVIDER when REASONER_PROVIDER is empty. That lets a
+             cheap/fast provider route while a stronger one tutors, e.g.
+             LLM_PROVIDER=groq + REASONER_PROVIDER=anthropic.
 
-Vision (photo_reply) is anthropic OR openrouter only: neither Groq's
-gpt-oss models nor an arbitrary local Ollama pull are assumed to be
-vision-capable. Falls back to the stub message for groq/ollama, same as it
-already did before openrouter existed.
+Providers:
+  stub       — deterministic canned replies; fully offline, used by CI and
+               the keyless demo. Never pretends to solve maths it didn't solve.
+  anthropic  — Haiku (router) / a frontier model (reasoner). Vision capable.
+  groq       — hosted open gpt-oss models. Text only.
+  ollama     — fully local, no API key; quality depends on what's been
+               `ollama pull`ed. Text only.
+  openrouter — OpenAI-compatible API (https://openrouter.ai/api/v1), one key
+               across many hosted models; wired for Qwen3.5-35B-A3B, which is
+               multimodal, so it also powers photo_reply.
+
+Every text call goes through one helper, _complete(): anthropic uses its
+Messages API, ollama its native chat API, and groq + openrouter share the
+OpenAI-style chat-completions path. Each public function below states only
+its prompt, token budget and how to parse the reply.
+
+Vision (photo_reply) is anthropic or openrouter only; other reasoner
+providers fall back to the stub photo message.
 """
 
 import base64
@@ -35,9 +40,12 @@ from app.tutor import prompts
 log = logging.getLogger("katlego.llm")
 
 INTENTS = ("homework", "quiz", "smalltalk", "admin")
+PROVIDERS = ("anthropic", "groq", "ollama", "openrouter")
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
+
+# ── Clients ───────────────────────────────────────────────────────────────────
 
 def _anthropic_client():
     import anthropic
@@ -63,62 +71,116 @@ def _openrouter_client():
     return AsyncOpenAI(base_url=OPENROUTER_BASE_URL, api_key=settings.openrouter_api_key)
 
 
-def _use_anthropic() -> bool:
-    return settings.llm_provider == "anthropic" and settings.is_set(
-        settings.anthropic_api_key
-    )
+# ── Provider selection ────────────────────────────────────────────────────────
+
+def _available(provider: str) -> bool:
+    """A provider is usable when it's named and its key is set. Ollama has no
+    key: a bad host or unpulled model surfaces as a real error at call time
+    rather than a silent fall-back to stub."""
+    if provider == "anthropic":
+        return settings.is_set(settings.anthropic_api_key)
+    if provider == "groq":
+        return settings.is_set(settings.groq_api_key)
+    if provider == "openrouter":
+        return settings.is_set(settings.openrouter_api_key)
+    return provider == "ollama"
 
 
-def _use_groq() -> bool:
-    return settings.llm_provider == "groq" and settings.is_set(settings.groq_api_key)
+def _provider(tier: str) -> str | None:
+    """The provider serving `tier` ("router" or "reasoner"), or None for stub."""
+    name = settings.llm_provider
+    if tier == "reasoner" and settings.reasoner_provider.strip():
+        name = settings.reasoner_provider.strip()
+    name = name.strip().lower()
+    return name if name in PROVIDERS and _available(name) else None
 
 
-def _use_ollama() -> bool:
-    # No API key to check -- provider selection alone is enough. A bad host
-    # or an unpulled model surfaces as a real connection/response error at
-    # call time rather than silently falling back to stub, so it's obvious
-    # something's actually wrong rather than looking like stub mode.
-    return settings.llm_provider == "ollama"
+def _model(provider: str, tier: str) -> str:
+    return {
+        ("anthropic", "router"): settings.router_model,
+        ("anthropic", "reasoner"): settings.reasoner_model,
+        ("groq", "router"): settings.groq_router_model,
+        ("groq", "reasoner"): settings.groq_reasoner_model,
+        ("ollama", "router"): settings.ollama_router_model,
+        ("ollama", "reasoner"): settings.ollama_reasoner_model,
+        ("openrouter", "router"): settings.openrouter_router_model,
+        ("openrouter", "reasoner"): settings.openrouter_reasoner_model,
+    }[(provider, tier)]
 
+
+def using_stub() -> bool:
+    """True when the reasoner tier has no real provider -- shared with
+    evals/run_eval.py, whose scores come from direct_answer (a reasoner
+    call) and aren't meaningful in stub mode."""
+    return _provider("reasoner") is None
+
+
+# ── The one text-completion helper ────────────────────────────────────────────
 
 # OpenRouter + Qwen3.5 (a reasoning model): reasoning tokens count against
 # max_tokens, and when they use the whole budget the API returns
 # finish_reason="length" with EMPTY content
-# (https://openrouter.ai/docs/use-cases/reasoning-tokens). With this file's
-# small budgets (10 for routing, 200-600 elsewhere) that happened often:
-# `None.strip()` crashed the worker ("Eish, something went wrong") and the
-# extra thinking time made later replies miss their 30 s window.
-# Fix: turn reasoning off for short, latency-sensitive calls, keep a little
-# for the calls that must actually solve maths (practice question, eval
-# answer) with a budget big enough to leave room for the answer, and never
-# call .strip() on a missing content field.
-def _openrouter_reasoning(effort: str) -> dict:
-    return {"extra_body": {"reasoning": {"effort": effort}}}
+# (https://openrouter.ai/docs/use-cases/reasoning-tokens). With small budgets
+# that crashed the worker on `None.strip()`. So each call states an OpenRouter
+# reasoning effort ("none" for short, latency-sensitive calls; "low" plus a
+# bigger budget where the model must actually solve maths), and a missing
+# content field is treated as empty text, never stripped.
+
+def _text_or_empty(content, provider: str, call: str, finish_reason=None) -> str:
+    text = content or ""
+    if not text.strip():
+        log.warning("%s: %s returned no visible text (finish_reason=%s)",
+                    call, provider, finish_reason)
+    return text
 
 
-def _openrouter_text(resp, call: str) -> str:
-    choice = resp.choices[0]
-    content = choice.message.content or ""
-    if not content.strip():
-        log.warning(
-            "%s: OpenRouter returned no visible text (finish_reason=%s) -- "
-            "reasoning probably used the whole max_tokens budget",
-            call, choice.finish_reason,
+async def _complete(
+    provider: str,
+    tier: str,
+    call: str,
+    system: str,
+    user: str,
+    max_tokens: int,
+    *,
+    openrouter_max_tokens: int | None = None,
+    openrouter_reasoning: str = "none",
+) -> str:
+    """One system + user turn on `provider`, returning the reply text
+    (possibly empty -- callers decide what empty means)."""
+    model = _model(provider, tier)
+
+    if provider == "anthropic":
+        resp = await _anthropic_client().messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=[{"role": "user", "content": user}],
         )
-    return content
+        return _text_or_empty(resp.content[0].text, provider, call)
 
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
 
-def _use_openrouter() -> bool:
-    return settings.llm_provider == "openrouter" and settings.is_set(
-        settings.openrouter_api_key
-    )
+    if provider == "ollama":
+        # Native Ollama chat API; no token cap (unchanged from before).
+        resp = await _ollama_client().chat(model=model, messages=messages)
+        return _text_or_empty(resp["message"]["content"], provider, call)
 
-
-def using_stub() -> bool:
-    """True when no real provider is configured -- shared with evals/run_eval.py
-    so the "scores aren't meaningful" warning covers every real provider, not
-    just anthropic."""
-    return not (_use_anthropic() or _use_groq() or _use_ollama() or _use_openrouter())
+    # groq + openrouter: OpenAI-style chat completions.
+    if provider == "openrouter":
+        client = _openrouter_client()
+        extra = {
+            "max_tokens": openrouter_max_tokens or max_tokens,
+            "extra_body": {"reasoning": {"effort": openrouter_reasoning}},
+        }
+    else:
+        client = _groq_client()
+        extra = {"max_tokens": max_tokens}
+    resp = await client.chat.completions.create(model=model, messages=messages, **extra)
+    choice = resp.choices[0]
+    return _text_or_empty(choice.message.content, provider, call, choice.finish_reason)
 
 
 # ── Intent routing ────────────────────────────────────────────────────────────
@@ -135,54 +197,11 @@ async def classify_intent(text: str) -> str:
     if lowered in _SMALLTALK_WORDS:
         return "smalltalk"
 
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
-            model=settings.router_model,
-            max_tokens=10,
-            system=prompts.INTENT_SYSTEM,
-            messages=[{"role": "user", "content": text}],
-        )
-        label = resp.content[0].text.strip().lower()
-        return label if label in INTENTS else "homework"
-
-    if _use_groq():
-        client = _groq_client()
-        resp = await client.chat.completions.create(
-            model=settings.groq_router_model,
-            max_tokens=10,
-            messages=[
-                {"role": "system", "content": prompts.INTENT_SYSTEM},
-                {"role": "user", "content": text},
-            ],
-        )
-        label = resp.choices[0].message.content.strip().lower()
-        return label if label in INTENTS else "homework"
-
-    if _use_ollama():
-        client = _ollama_client()
-        resp = await client.chat(
-            model=settings.ollama_router_model,
-            messages=[
-                {"role": "system", "content": prompts.INTENT_SYSTEM},
-                {"role": "user", "content": text},
-            ],
-        )
-        label = resp["message"]["content"].strip().lower()
-        return label if label in INTENTS else "homework"
-
-    if _use_openrouter():
-        client = _openrouter_client()
-        resp = await client.chat.completions.create(
-            model=settings.openrouter_router_model,
-            max_tokens=10,
-            **_openrouter_reasoning("none"),
-            messages=[
-                {"role": "system", "content": prompts.INTENT_SYSTEM},
-                {"role": "user", "content": text},
-            ],
-        )
-        label = _openrouter_text(resp, "classify_intent").strip().lower()
+    provider = _provider("router")
+    if provider:
+        raw = await _complete(provider, "router", "classify_intent",
+                              prompts.INTENT_SYSTEM, text, max_tokens=10)
+        label = raw.strip().lower()
         return label if label in INTENTS else "homework"
 
     # stub: keyword heuristic, no model call
@@ -218,107 +237,27 @@ def _stub_socratic(question: str, chunks: list[dict], grade: int) -> str:
 
 
 async def socratic_reply(question: str, chunks: list[dict], grade: int) -> str:
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
-            model=settings.reasoner_model,
-            max_tokens=600,
-            system=prompts.socratic_system(grade, chunks),
-            messages=[{"role": "user", "content": question}],
-        )
-        return resp.content[0].text.strip()
-
-    if _use_groq():
-        client = _groq_client()
-        resp = await client.chat.completions.create(
-            model=settings.groq_reasoner_model,
-            max_tokens=600,
-            messages=[
-                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        return resp.choices[0].message.content.strip()
-
-    if _use_ollama():
-        client = _ollama_client()
-        resp = await client.chat(
-            model=settings.ollama_reasoner_model,
-            messages=[
-                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        return resp["message"]["content"].strip()
-
-    if _use_openrouter():
-        client = _openrouter_client()
-        resp = await client.chat.completions.create(
-            model=settings.openrouter_reasoner_model,
-            max_tokens=600,
-            **_openrouter_reasoning("none"),
-            messages=[
-                {"role": "system", "content": prompts.socratic_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        text = _openrouter_text(resp, "socratic_reply").strip()
-        if not text:
-            raise RuntimeError("socratic_reply: empty OpenRouter response")
-        return text
-
-    return _stub_socratic(question, chunks, grade)
+    provider = _provider("reasoner")
+    if not provider:
+        return _stub_socratic(question, chunks, grade)
+    text = (await _complete(provider, "reasoner", "socratic_reply",
+                            prompts.socratic_system(grade, chunks), question,
+                            max_tokens=600)).strip()
+    if not text:
+        # An empty message would be sent to the learner as a blank reply.
+        raise RuntimeError(f"socratic_reply: empty {provider} response")
+    return text
 
 
 async def direct_answer(question: str, chunks: list[dict], grade: int) -> str:
     """Full worked answer — used only by the eval harness, never sent to learners."""
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
-            model=settings.reasoner_model,
-            max_tokens=800,
-            system=prompts.eval_system(grade, chunks),
-            messages=[{"role": "user", "content": question}],
-        )
-        return resp.content[0].text.strip()
-
-    if _use_groq():
-        client = _groq_client()
-        resp = await client.chat.completions.create(
-            model=settings.groq_reasoner_model,
-            max_tokens=800,
-            messages=[
-                {"role": "system", "content": prompts.eval_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        return resp.choices[0].message.content.strip()
-
-    if _use_ollama():
-        client = _ollama_client()
-        resp = await client.chat(
-            model=settings.ollama_reasoner_model,
-            messages=[
-                {"role": "system", "content": prompts.eval_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        return resp["message"]["content"].strip()
-
-    if _use_openrouter():
-        client = _openrouter_client()
-        resp = await client.chat.completions.create(
-            model=settings.openrouter_reasoner_model,
-            max_tokens=2000,
-            **_openrouter_reasoning("low"),
-            messages=[
-                {"role": "system", "content": prompts.eval_system(grade, chunks)},
-                {"role": "user", "content": question},
-            ],
-        )
-        return _openrouter_text(resp, "direct_answer").strip()
-
-    return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
+    provider = _provider("reasoner")
+    if not provider:
+        return "(stub LLM cannot produce marked answers — set LLM_PROVIDER and its API key/host)"
+    return (await _complete(provider, "reasoner", "direct_answer",
+                            prompts.eval_system(grade, chunks), question,
+                            max_tokens=800, openrouter_max_tokens=2000,
+                            openrouter_reasoning="low")).strip()
 
 
 # ── Practice questions (see prompts.practice_system for the anti-hallucination
@@ -358,56 +297,15 @@ async def practice_question(
     parses. Callers (app.tutor.engine.practice_reply) must only ever send
     the "question" field to the learner; "model_answer" is the ground
     truth grade_practice_answer() grades against later, never shown."""
-    system = prompts.practice_system(grade, topic, band, excerpts)
-    user_msg = f"Set me a practice question on {topic}."
-
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
-            model=settings.reasoner_model,
-            max_tokens=300,
-            system=system,
-            messages=[{"role": "user", "content": user_msg}],
-        )
-        return _parse_practice_response(resp.content[0].text)
-
-    if _use_groq():
-        client = _groq_client()
-        resp = await client.chat.completions.create(
-            model=settings.groq_reasoner_model,
-            max_tokens=300,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-        )
-        return _parse_practice_response(resp.choices[0].message.content)
-
-    if _use_ollama():
-        client = _ollama_client()
-        resp = await client.chat(
-            model=settings.ollama_reasoner_model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-        )
-        return _parse_practice_response(resp["message"]["content"])
-
-    if _use_openrouter():
-        client = _openrouter_client()
-        resp = await client.chat.completions.create(
-            model=settings.openrouter_reasoner_model,
-            max_tokens=1500,
-            **_openrouter_reasoning("low"),
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-        )
-        return _parse_practice_response(_openrouter_text(resp, "practice_question"))
-
-    return _stub_practice(topic, grade)
+    provider = _provider("reasoner")
+    if not provider:
+        return _stub_practice(topic, grade)
+    raw = await _complete(provider, "reasoner", "practice_question",
+                          prompts.practice_system(grade, topic, band, excerpts),
+                          f"Set me a practice question on {topic}.",
+                          max_tokens=300, openrouter_max_tokens=1500,
+                          openrouter_reasoning="low")
+    return _parse_practice_response(raw)
 
 
 # ── Grading a learner's answer to a practice question (closes the mastery
@@ -440,69 +338,28 @@ async def grade_practice_answer(
     question: str, model_answer: str | None, learner_answer: str, grade: int
 ) -> dict:
     """Returns {"correctness": "correct"|"partial"|"incorrect", "feedback": str}."""
-    system = prompts.grade_practice_system(grade, question, model_answer)
-
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
-            model=settings.reasoner_model,
-            max_tokens=200,
-            system=system,
-            messages=[{"role": "user", "content": learner_answer}],
-        )
-        return _parse_grade_response(resp.content[0].text)
-
-    if _use_groq():
-        client = _groq_client()
-        resp = await client.chat.completions.create(
-            model=settings.groq_reasoner_model,
-            max_tokens=200,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": learner_answer},
-            ],
-        )
-        return _parse_grade_response(resp.choices[0].message.content)
-
-    if _use_ollama():
-        client = _ollama_client()
-        resp = await client.chat(
-            model=settings.ollama_reasoner_model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": learner_answer},
-            ],
-        )
-        return _parse_grade_response(resp["message"]["content"])
-
-    if _use_openrouter():
-        client = _openrouter_client()
-        resp = await client.chat.completions.create(
-            model=settings.openrouter_reasoner_model,
-            max_tokens=200,
-            **_openrouter_reasoning("none"),
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": learner_answer},
-            ],
-        )
-        return _parse_grade_response(_openrouter_text(resp, "grade_practice_answer"))
-
-    return _stub_grade(model_answer, learner_answer)
+    provider = _provider("reasoner")
+    if not provider:
+        return _stub_grade(model_answer, learner_answer)
+    raw = await _complete(provider, "reasoner", "grade_practice_answer",
+                          prompts.grade_practice_system(grade, question, model_answer),
+                          learner_answer, max_tokens=200)
+    return _parse_grade_response(raw)
 
 
 # ── Vision (homework photos) ──────────────────────────────────────────────────
-# anthropic or openrouter only: see module docstring on why groq/ollama don't
-# get a vision path.
+# anthropic or openrouter only (see module docstring). Multimodal message
+# shapes differ per API, so this stays outside _complete().
 
 async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
     prompt_text = (
         caption or "Here is a photo of my homework problem. Help me work through it."
     )
+    provider = _provider("reasoner")
+    b64 = base64.b64encode(image).decode()
 
-    if _use_anthropic():
-        client = _anthropic_client()
-        resp = await client.messages.create(
+    if provider == "anthropic":
+        resp = await _anthropic_client().messages.create(
             model=settings.reasoner_model,
             max_tokens=600,
             system=prompts.socratic_system(grade, []),
@@ -512,38 +369,34 @@ async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
                     "content": [
                         {
                             "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": mime,
-                                "data": base64.b64encode(image).decode(),
-                            },
+                            "source": {"type": "base64", "media_type": mime, "data": b64},
                         },
                         {"type": "text", "text": prompt_text},
                     ],
                 }
             ],
         )
-        return resp.content[0].text.strip()
+        return _text_or_empty(resp.content[0].text, provider, "photo_reply").strip()
 
-    if _use_openrouter():
-        client = _openrouter_client()
-        data_url = f"data:{mime};base64,{base64.b64encode(image).decode()}"
-        resp = await client.chat.completions.create(
+    if provider == "openrouter":
+        resp = await _openrouter_client().chat.completions.create(
             model=settings.openrouter_vision_model,
             max_tokens=600,
-            **_openrouter_reasoning("none"),
+            extra_body={"reasoning": {"effort": "none"}},
             messages=[
                 {"role": "system", "content": prompts.socratic_system(grade, [])},
                 {
                     "role": "user",
                     "content": [
-                        {"type": "image_url", "image_url": {"url": data_url}},
+                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
                         {"type": "text", "text": prompt_text},
                     ],
                 },
             ],
         )
-        return _openrouter_text(resp, "photo_reply").strip()
+        choice = resp.choices[0]
+        return _text_or_empty(choice.message.content, provider, "photo_reply",
+                              choice.finish_reason).strip()
 
     return (
         "I can see you sent a photo of your work 📸 Photo help runs on "
