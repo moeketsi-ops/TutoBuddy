@@ -17,6 +17,25 @@ import httpx
 import pytest
 
 GATEWAY = os.environ.get("GATEWAY_URL", "http://localhost:8000").rstrip("/")
+
+# The suite runs against whatever LLM_PROVIDER .env selects (the tests
+# container shares the app's env_file). With the keyless stub, replies are
+# instant and their wording is fixed, so tests can assert exact phrases.
+# With a real model (openrouter, anthropic, groq, ollama) replies take
+# seconds and are phrased freely, so waits are longer and wording checks
+# become behaviour checks (see stub_wording below).
+REAL_LLM = os.environ.get("LLM_PROVIDER", "stub").strip().lower() not in ("", "stub")
+REPLY_TIMEOUT = float(os.environ.get("TEST_REPLY_TIMEOUT") or (90 if REAL_LLM else 30))
+WORKER_ERROR = "something went wrong on my side"
+NO_CONTENT_FALLBACK = "couldn't find that topic"
+
+
+def assert_tutored(reply: str) -> None:
+    """A real tutoring reply: not the worker's error message, not the
+    no-content fallback, and Socratic (asks the learner something)."""
+    assert WORKER_ERROR not in reply.lower(), reply
+    assert NO_CONTENT_FALLBACK not in reply.lower(), reply
+    assert "?" in reply, reply
 MOCKWA = os.environ.get("MOCKWA_URL", "http://localhost:8001").rstrip("/")
 
 
@@ -80,7 +99,8 @@ class Chat:
         self.cursor = data["next"]
         return [m["body"] for m in data["messages"]]
 
-    def wait_for_reply(self, timeout: float = 30.0) -> str:
+    def wait_for_reply(self, timeout: float | None = None) -> str:
+        timeout = timeout or REPLY_TIMEOUT
         deadline = time.time() + timeout
         while time.time() < deadline:
             got = self.replies()
