@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from app.adapters.embeddings import embed
+from app.cognitive_levels import normalize as normalize_cognitive_level
 from app.db import ensure_schema, get_pool, vector_literal
 
 HERE = Path(__file__).parent
@@ -45,7 +46,8 @@ async def main() -> None:
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 """,
                 q["grade"], q["subject"], q["topic"], q["question"],
-                q["memo_answer"], q["marks"], q["cognitive_level"], q["source"],
+                q["memo_answer"], q["marks"],
+                normalize_cognitive_level(q.get("cognitive_level")), q["source"],
             )
 
     print(f"Seeded {len(chunks)} CAPS chunks and {len(questions)} question-bank items.")

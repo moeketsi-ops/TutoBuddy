@@ -26,9 +26,27 @@ CREATE TABLE IF NOT EXISTS question_bank (
     question text NOT NULL,
     memo_answer text NOT NULL,
     marks int NOT NULL,
-    cognitive_level text,
+    cognitive_level text,   -- one of app/cognitive_levels.LEVELS (CHECK below)
     source text
 );
+-- question_bank.cognitive_level used free text ("routine procedure") while
+-- cognitive_level_weights.level_name uses the enum ("routine_procedures").
+-- Migrate any old free-text rows, then enforce the same four values.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'question_bank_cognitive_level_check') THEN
+        UPDATE question_bank SET cognitive_level = CASE
+            WHEN lower(trim(cognitive_level)) IN ('routine procedure', 'routine procedures') THEN 'routine_procedures'
+            WHEN lower(trim(cognitive_level)) IN ('complex procedure', 'complex procedures') THEN 'complex_procedures'
+            WHEN lower(trim(cognitive_level)) IN ('problem solving', 'problem-solving') THEN 'problem_solving'
+            WHEN lower(trim(cognitive_level)) = 'knowledge' THEN 'knowledge'
+            ELSE NULL END   -- blank or unrecognised: question_bank is seed data, re-seeding restores it
+        WHERE cognitive_level IS NOT NULL;
+        ALTER TABLE question_bank ADD CONSTRAINT question_bank_cognitive_level_check
+            CHECK (cognitive_level IS NULL OR cognitive_level IN
+                   ('knowledge','routine_procedures','complex_procedures','problem_solving'));
+    END IF;
+END $$;
 
 -- Household account model (see tutobuddy-household-account-model-phase1-plan.md).
 -- The phone number is a CHANNEL under an account, never the learner's
