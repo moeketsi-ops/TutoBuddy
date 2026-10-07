@@ -146,6 +146,25 @@ async def grade_scoped_context(
     }
 
 
+async def term_focus_for(learner_id: int, grade: int, term: int) -> dict | None:
+    """The topic this learner should be steered back to: the top of
+    get_term_progress (this term's topics for their grade, weighted-and-weak
+    first) plus its first CAPS learning objective, if one is loaded."""
+    progress = await get_term_progress(learner_id, grade, term)
+    topic = await pick_practice_topic(progress)
+    if topic is None:
+        return None
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        objective = await conn.fetchval(
+            "SELECT objective FROM learning_objectives WHERE topic_id = $1 "
+            "ORDER BY objective_code LIMIT 1",
+            topic["topic_id"],
+        )
+    return {"term": term, "topic": topic["topic"], "objective": objective,
+            "schedule_source": progress.get("schedule_source")}
+
+
 async def get_term_progress(
     learner_id: int, grade: int, term: int, subject: str = "Mathematics"
 ) -> dict:
@@ -313,6 +332,19 @@ async def record_practice_attempt(
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.transaction():
+            # Grade rule: mastery is only ever built on the learner's OWN
+            # grade's topics (profile grade == topic grade). Refuse anything
+            # else rather than record progress on another grade's work.
+            same_grade = await conn.fetchval(
+                "SELECT g.grade_number = l.grade FROM topics t "
+                "JOIN grades g ON g.id = t.grade_id, learners l "
+                "WHERE t.id = $1 AND l.id = $2",
+                topic_id, learner_id,
+            )
+            if not same_grade:
+                raise ValueError(
+                    f"grade rule: topic {topic_id} is not in learner {learner_id}'s grade"
+                )
             await conn.execute(
                 f"""
                 INSERT INTO learner_topic_mastery (learner_id, topic_id, mastery_score)

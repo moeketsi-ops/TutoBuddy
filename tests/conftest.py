@@ -30,6 +30,27 @@ WORKER_ERROR = "something went wrong on my side"
 NO_CONTENT_FALLBACK = "couldn't find that topic"
 
 
+def run_with_app_db(coro_factory):
+    """Run app code that uses app.db's cached asyncpg pool inside its own event
+    loop. The pool is bound to the loop that created it, so reset it before
+    and close it after; otherwise a second test's asyncio.run() inherits a
+    pool from a dead loop."""
+    import asyncio
+
+    import app.db as db
+
+    async def run():
+        db._pool = None
+        try:
+            return await coro_factory()
+        finally:
+            if db._pool is not None:
+                await db._pool.close()
+            db._pool = None
+
+    return asyncio.run(run())
+
+
 def assert_tutored(reply: str) -> None:
     """A real tutoring reply: not the worker's error message, not the
     no-content fallback, and Socratic (asks the learner something)."""

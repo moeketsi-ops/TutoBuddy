@@ -53,3 +53,40 @@ def test_skip_clears_pending_without_grading(chat):
     chat.send_text("SKIP")
     reply2 = chat.wait_for_reply()
     assert "no practice question" in reply2.lower()
+
+
+def test_mastery_is_only_recorded_on_the_learners_own_grade():
+    """Grade rule: a Grade 8 profile can build mastery on Grade 8 topics only.
+    record_practice_attempt refuses a Grade 12 topic and writes nothing."""
+    import os
+
+    import asyncpg
+    import pytest
+
+    from app.tutor.rag import record_practice_attempt
+
+    async def run():
+        conn = await asyncpg.connect(os.environ["DATABASE_URL"])
+        try:
+            account_id = await conn.fetchval("INSERT INTO accounts DEFAULT VALUES RETURNING id")
+            learner_id = await conn.fetchval(
+                "INSERT INTO learners (account_id, nickname, grade) VALUES ($1, 'GradeRule', 8) "
+                "RETURNING id", account_id)
+            topic_for = lambda g: conn.fetchval(  # noqa: E731
+                "SELECT t.id FROM topics t JOIN grades g ON g.id = t.grade_id "
+                "WHERE g.grade_number = $1 ORDER BY t.id LIMIT 1", g)
+            own, other = await topic_for(8), await topic_for(12)
+            await record_practice_attempt(learner_id, own, "q", "a", "a", "correct")
+            with pytest.raises(ValueError, match="grade rule"):
+                await record_practice_attempt(learner_id, other, "q", "a", "a", "correct")
+            rows = await conn.fetch(
+                "SELECT topic_id FROM learner_topic_mastery WHERE learner_id = $1", learner_id)
+            return [r["topic_id"] for r in rows], own
+        finally:
+            await conn.execute("DELETE FROM accounts WHERE id = $1", account_id)
+            await conn.close()
+
+    from tests.conftest import run_with_app_db
+
+    mastered, own = run_with_app_db(run)
+    assert mastered == [own]

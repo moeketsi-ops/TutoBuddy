@@ -1,6 +1,6 @@
 """RAG-grounded Socratic tutoring over the seeded CAPS corpus."""
 
-from tests.conftest import REAL_LLM, WORKER_ERROR, assert_tutored
+from tests.conftest import REAL_LLM, WORKER_ERROR, assert_tutored, run_with_app_db
 
 
 def test_homework_question_gets_grounded_socratic_reply(onboarded_chat):
@@ -11,8 +11,10 @@ def test_homework_question_gets_grounded_socratic_reply(onboarded_chat):
         # (e.g. "two numbers that multiply to 6 and add to 5").
         assert_tutored(reply)
     else:
-        # Grounded in the retrieved CAPS chunk...
-        assert "factoris" in reply.lower()
+        # Grade rule: this learner's profile is Grade 11, so the reply is
+        # grounded in a Grade 11 CAPS note only (factorising trinomials is a
+        # Grade 10 note, which a Grade 11 learner no longer gets)...
+        assert "Grade 11" in reply, reply
         # ...and Socratic: coaches rather than closing the conversation.
         assert "?" in reply
 
@@ -34,7 +36,10 @@ def test_grade_filter_never_retrieves_above_learner_grade(chat):
     # taught -- the Grade 12 first-principles formula must not appear.
     assert "f(x + h)" not in reply, reply
     if not REAL_LLM:
-        assert "Grade 8" in reply, reply  # stub redirects to the learner's grade
+        # Stub: told it's another grade's topic, redirected to this term's
+        # Grade 8 focus (from the ATP / CAPS term topics).
+        assert "Grade 12" in reply and "Grade 8" in reply, reply
+        assert "This term in Grade 8" in reply, reply
 
 
 def test_grade_scoped_context_follows_the_grade_rule():
@@ -42,18 +47,16 @@ def test_grade_scoped_context_follows_the_grade_rule():
     independent: the model only ever gets CAPS extracts from the learner's own
     grade, a higher-grade concept is flagged by grade + topic name only, and
     the learner's grade topic list comes from the curriculum."""
-    import asyncio
-
     from app.tutor.rag import first_taught_above, grade_scoped_context
 
     questions = ("How do I differentiate from first principles?",
                  "How do I collect like terms?", "How do I add fractions?",
                  "What is the theorem of Pythagoras?")
 
-    async def run():  # one event loop: app.db caches its pool
+    async def run():
         return {(g, q): await grade_scoped_context(q, g) for g in (8, 10, 12) for q in questions}
 
-    for (grade, q), ctx in asyncio.run(run()).items():
+    for (grade, q), ctx in run_with_app_db(run).items():
         assert all(c["grade"] == grade for c in ctx["chunks"]), (grade, q, ctx["chunks"])
         assert ctx["grade_topics"], grade  # needs seed.load_curriculum
         if ctx["above"]:

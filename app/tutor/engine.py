@@ -10,6 +10,7 @@ from app.tutor.rag import (
     get_past_paper_excerpts,
     get_term_progress,
     grade_scoped_context,
+    term_focus_for,
     pick_practice_topic,
     record_practice_attempt,
     retrieve,
@@ -18,13 +19,20 @@ from app.tutor.rag import (
 DEFAULT_SUBJECT = "Mathematics"
 
 
-async def tutor_reply(question: str, grade: int) -> str:
+async def tutor_reply(question: str, grade: int, learner_id: int | None = None) -> str:
     """`grade` is the active learner's profile grade. Only that grade's CAPS
     extracts reach the model; see the grade rule in
-    app.tutor.rag.grade_scoped_context."""
+    app.tutor.rag.grade_scoped_context. When the question is about another
+    grade's topic, the learner is told so and redirected to THIS TERM's focus
+    for their grade (ATP for the current year if loaded, else CAPS terms),
+    never taught the other grade's method."""
     ctx = await grade_scoped_context(question, grade)
+    term_focus = None
+    if ctx["above"] and learner_id is not None:
+        term_focus = await term_focus_for(learner_id, grade, current_term())
     return await llm.socratic_reply(
-        question, ctx["chunks"], grade, above=ctx["above"], grade_topics=ctx["grade_topics"],
+        question, ctx["chunks"], grade, above=ctx["above"],
+        grade_topics=ctx["grade_topics"], term_focus=term_focus,
     )
 
 

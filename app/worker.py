@@ -199,7 +199,7 @@ async def handle_active(
             await session.save(sess)
         return reply, intent
     # homework / anything else substantive → the tutor engine
-    return await tutor_reply(text, sess.grade), intent
+    return await tutor_reply(text, sess.grade, sess.active_learner_id), intent
 
 
 async def process_job(wa: WhatsAppClient, job: dict) -> None:

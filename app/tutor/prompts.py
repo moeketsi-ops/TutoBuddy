@@ -39,7 +39,10 @@ def grade_rule(grade: int) -> str:
     )
 
 
-def _off_grade_block(grade: int, above: dict | None, grade_topics: list[str] | None) -> str:
+def _off_grade_block(
+    grade: int, above: dict | None, grade_topics: list[str] | None,
+    term_focus: dict | None = None,
+) -> str:
     lines = []
     if grade_topics:
         lines.append(f"Grade {grade} Mathematics CAPS topics: " + "; ".join(grade_topics) + ".")
@@ -48,11 +51,18 @@ def _off_grade_block(grade: int, above: dict | None, grade_topics: list[str] | N
             f"This question uses a concept CAPS first teaches in Grade {above['grade']} "
             f"({above['topic']}), which is ABOVE this learner's grade."
         )
+    if term_focus:
+        target = f"this term's Grade {grade} focus: Term {term_focus['term']}, {term_focus['topic']}"
+        if term_focus.get("objective"):
+            target += f" (learning objective: {term_focus['objective']})"
+    else:
+        target = f"a Grade {grade} topic from the list above"
     lines.append(
         f"If the question is about a topic that is not part of Grade {grade} (for example a "
         f"higher-grade topic): say which grade it belongs to and give at most TWO sentences on "
-        f"what the topic is about — no method, no steps, no formula, no worked example — then "
-        f"offer a related Grade {grade} topic to work on instead."
+        f"what the topic is about — no method, no steps, no formula, no worked example. Do not "
+        f"set practice or track progress on it. Then redirect the learner to {target}, and "
+        f"invite them to start on it (they can say \"quiz me\")."
     )
     return "\n".join(lines)
 
@@ -62,6 +72,7 @@ def socratic_system(
     chunks: list[dict],
     above: dict | None = None,
     grade_topics: list[str] | None = None,
+    term_focus: dict | None = None,
 ) -> str:
     return f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
 
@@ -73,7 +84,7 @@ Rules (prompt policy {PROMPT_VERSION}):
 5. If the question is outside the school curriculum, gently steer back to schoolwork.
 6. Never invent curriculum facts. If unsure, say so and suggest the learner checks with their teacher.
 
-{_off_grade_block(grade, above, grade_topics)}
+{_off_grade_block(grade, above, grade_topics, term_focus)}
 
 {_context_block(chunks)}"""
 
