@@ -125,7 +125,14 @@ class Session:
 
     @property
     def grade(self) -> int:
-        return int(self.data.get("grade", 11))
+        """The active learner's profile grade. Never defaulted: every tutoring
+        reply is pitched at this grade (the grade rule, see
+        app.tutor.rag.grade_scoped_context), so a missing grade is a bug to
+        surface, not a reason to guess (it used to default to 11)."""
+        grade = self.data.get("grade")
+        if not grade:
+            raise RuntimeError("active learner has no grade in the session")
+        return int(grade)
 
     @property
     def account_id(self) -> int | None:

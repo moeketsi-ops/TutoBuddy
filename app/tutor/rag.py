@@ -70,6 +70,82 @@ async def _grade_id(conn, grade: int) -> int | None:
     )
 
 
+# ── Grade rule (founder, 2026-10-07) ────────────────────────────────────────
+# A learner is taught ONLY their own grade's CAPS methods, notation and
+# strategies -- the grade comes from the ACTIVE LEARNER'S PROFILE
+# (learners.grade, mirrored in the session), never a default. Never a higher
+# grade's method. A missing earlier-grade skill may be revised briefly,
+# labelled as revision and explained the Grade-N way. A question about a
+# higher-grade topic gets at most a two-sentence preview (no method) and a
+# redirect to the learner's own grade.
+#
+# Enforced in code here (what the model is given) and in
+# prompts.socratic_system (how it may use it):
+#   chunks       -- CAPS extracts from the learner's own grade only (not
+#                   "<= grade": no earlier-grade method to drift into)
+#   above        -- grade + topic name when the question uses a concept CAPS
+#                   first teaches in a HIGHER grade (deterministic table
+#                   below); never that grade's content
+#   grade_topics -- the learner's grade topic list (seed/load_curriculum)
+#
+# Why a keyword table and not embedding distance: with the offline hash
+# embedder, "nearest chunk is a higher grade" misfired in testing (Grade 8
+# "theorem of Pythagoras" matched a Grade 11 statistics chunk). The table
+# only lists concepts whose first CAPS grade is unambiguous.
+
+_FIRST_TAUGHT = (
+    # (grade first taught in CAPS Mathematics, topic, keywords)
+    (12, "Differential calculus", ("derivative", "differentiat", "first principles", "calculus")),
+    (12, "Exponential and logarithmic functions", ("logarithm", "log base")),
+    (12, "Trigonometry - compound angles", ("compound angle", "double angle")),
+    (12, "Patterns, sequences and series", ("sigma notation", "arithmetic series", "geometric series")),
+    (11, "Trigonometry (sine, area, cosine rules)", ("sine rule", "cosine rule", "area rule")),
+    (11, "Equations and inequalities", ("quadratic formula", "completing the square")),
+    (10, "Trigonometry", ("trigonometr", "sine of", "cosine of", "tangent ratio", "sin(", "cos(", "tan(")),
+)
+
+
+def first_taught_above(question: str, grade: int) -> dict | None:
+    """{grade, topic} if the question uses a concept CAPS first teaches above
+    `grade` (highest such grade wins), else None."""
+    q = question.lower()
+    for first_grade, topic, keywords in _FIRST_TAUGHT:  # ordered high -> low
+        if first_grade > grade and any(k in q for k in keywords):
+            return {"grade": first_grade, "topic": topic}
+    return None
+
+
+async def grade_scoped_context(
+    question: str, grade: int, subject: str = "Mathematics", k: int = 3
+) -> dict:
+    vec = vector_literal(await embed(question))
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT grade, subject, term, topic, doc_type, content,
+                   embedding <=> $1::vector AS distance
+            FROM caps_chunks
+            WHERE grade = $2 AND subject = $3
+            ORDER BY distance
+            LIMIT $4
+            """,
+            vec, grade, subject, k,
+        )
+        topic_rows = await conn.fetch(
+            "SELECT t.name FROM topics t JOIN grades g ON g.id = t.grade_id "
+            "JOIN subjects s ON s.id = t.subject_id "
+            "WHERE g.grade_number = $1 AND lower(s.name) = lower($2) "
+            "ORDER BY t.term, t.name",
+            grade, subject,
+        )
+    return {
+        "chunks": [dict(r) for r in rows],
+        "above": first_taught_above(question, grade),
+        "grade_topics": [r["name"] for r in topic_rows],
+    }
+
+
 async def get_term_progress(
     learner_id: int, grade: int, term: int, subject: str = "Mathematics"
 ) -> dict:

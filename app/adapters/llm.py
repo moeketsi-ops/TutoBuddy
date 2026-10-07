@@ -214,7 +214,15 @@ async def classify_intent(text: str) -> str:
 
 # ── Socratic tutoring ─────────────────────────────────────────────────────────
 
-def _stub_socratic(question: str, chunks: list[dict], grade: int) -> str:
+def _stub_socratic(question: str, chunks: list[dict], grade: int, above: dict | None = None) -> str:
+    if above:
+        # Grade rule: a higher-grade topic gets named, never taught.
+        return (
+            f"That's a Grade {above['grade']} topic (*{above['topic']}*), so you'll learn "
+            f"it in Grade {above['grade']} 🙂 For now, let's stick to Grade {grade} work. "
+            f"Which Grade {grade} topic are you busy with in class?\n\n"
+            f"_(stub LLM — set LLM_PROVIDER in .env for real Socratic tutoring)_"
+        )
     if not chunks:
         return (
             "Good question! I couldn't find that topic in my CAPS notes yet 📚 "
@@ -236,12 +244,20 @@ def _stub_socratic(question: str, chunks: list[dict], grade: int) -> str:
     )
 
 
-async def socratic_reply(question: str, chunks: list[dict], grade: int) -> str:
+async def socratic_reply(
+    question: str,
+    chunks: list[dict],
+    grade: int,
+    above: dict | None = None,
+    grade_topics: list[str] | None = None,
+) -> str:
+    """`chunks` must already be the learner's own grade only (see
+    app.tutor.rag.grade_scoped_context and the grade rule there)."""
     provider = _provider("reasoner")
     if not provider:
-        return _stub_socratic(question, chunks, grade)
-    text = (await _complete(provider, "reasoner", "socratic_reply",
-                            prompts.socratic_system(grade, chunks), question,
+        return _stub_socratic(question, chunks, grade, above)
+    system = prompts.socratic_system(grade, chunks, above, grade_topics)
+    text = (await _complete(provider, "reasoner", "socratic_reply", system, question,
                             max_tokens=600)).strip()
     if not text:
         # An empty message would be sent to the learner as a blank reply.

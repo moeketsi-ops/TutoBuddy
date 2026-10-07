@@ -29,34 +29,41 @@ def test_grade_filter_never_retrieves_above_learner_grade(chat):
     chat.wait_for_reply()  # welcome
     chat.send_text("How do I differentiate from first principles?")
     reply = chat.wait_for_reply()
-    if REAL_LLM:
-        # A real model may legitimately *say* "that's a Grade 12 topic" while
-        # steering the learner back (seen with Qwen), so the reply text can't
-        # prove what was retrieved. test_retrieve_never_returns_chunks_above_
-        # learner_grade below checks retrieval itself.
-        assert WORKER_ERROR not in reply.lower(), reply
-    else:
-        # Only Grade 8 content may be retrieved for a Grade 8 learner — never
-        # the Grade 12 calculus chunk that matches this question best.
-        assert "Grade 12" not in reply
+    assert WORKER_ERROR not in reply.lower(), reply
+    # Grade rule: a higher-grade topic may be NAMED (brief preview), never
+    # taught -- the Grade 12 first-principles formula must not appear.
+    assert "f(x + h)" not in reply, reply
+    if not REAL_LLM:
+        assert "Grade 8" in reply, reply  # stub redirects to the learner's grade
 
 
-def test_retrieve_never_returns_chunks_above_learner_grade():
-    """The grade filter itself, independent of any LLM: the best match for a
-    calculus question is a Grade 12 chunk, but a Grade 8 learner must only
-    ever get Grade <= 8 chunks (blueprint s5.3)."""
+def test_grade_scoped_context_follows_the_grade_rule():
+    """Grade rule (founder, 2026-10-07), checked at the retrieval layer, LLM
+    independent: the model only ever gets CAPS extracts from the learner's own
+    grade, a higher-grade concept is flagged by grade + topic name only, and
+    the learner's grade topic list comes from the curriculum."""
     import asyncio
 
-    from app.tutor.rag import retrieve
+    from app.tutor.rag import first_taught_above, grade_scoped_context
 
-    async def grades_returned() -> dict:
-        # One event loop for all calls: app.db caches its pool per process.
-        q = "How do I differentiate from first principles?"
-        return {g: [c["grade"] for c in await retrieve(q, g)] for g in (8, 10, 12)}
+    questions = ("How do I differentiate from first principles?",
+                 "How do I collect like terms?", "How do I add fractions?",
+                 "What is the theorem of Pythagoras?")
 
-    for grade, got in asyncio.run(grades_returned()).items():
-        assert got, grade
-        assert all(g <= grade for g in got), (grade, got)
+    async def run():  # one event loop: app.db caches its pool
+        return {(g, q): await grade_scoped_context(q, g) for g in (8, 10, 12) for q in questions}
+
+    for (grade, q), ctx in asyncio.run(run()).items():
+        assert all(c["grade"] == grade for c in ctx["chunks"]), (grade, q, ctx["chunks"])
+        assert ctx["grade_topics"], grade  # needs seed.load_curriculum
+        if ctx["above"]:
+            assert ctx["above"]["grade"] > grade and set(ctx["above"]) == {"grade", "topic"}
+
+    assert first_taught_above("How do I differentiate from first principles?", 8)["grade"] == 12
+    assert first_taught_above("explain the sine rule", 10)["grade"] == 11
+    assert first_taught_above("explain the sine rule", 11) is None   # own grade: taught normally
+    assert first_taught_above("What is the theorem of Pythagoras?", 8) is None
+    assert first_taught_above("How do I add fractions?", 10) is None
 
 
 def test_smalltalk_does_not_trigger_the_tutor_engine(onboarded_chat):

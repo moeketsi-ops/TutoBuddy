@@ -1,7 +1,7 @@
 """Versioned prompt policies (blueprint §4.2: versioned prompts; eval harness
 runs on every prompt change — bump PROMPT_VERSION when editing)."""
 
-PROMPT_VERSION = "socratic-v2"
+PROMPT_VERSION = "socratic-v3"
 
 INTENT_SYSTEM = (
     "You route messages for a South African WhatsApp maths tutor. "
@@ -25,16 +25,55 @@ def _context_block(chunks: list[dict]) -> str:
     return "CAPS curriculum extracts (ground your guidance in these):\n" + "\n".join(lines)
 
 
-def socratic_system(grade: int, chunks: list[dict]) -> str:
+def grade_rule(grade: int) -> str:
+    """The grade rule (founder, 2026-10-07), shared by every learner-facing
+    prompt. `grade` is the active learner's profile grade."""
+    return (
+        f"GRADE RULE — this learner's profile says Grade {grade}. Teach ONLY Grade {grade} "
+        f"CAPS methods, notation and strategies. Never use or teach a method from a higher "
+        f"grade, even if it is quicker. Do not fall back to an earlier grade's method "
+        f"either: explain the way Grade {grade} learners are taught it. If the learner is "
+        f"missing an earlier-grade skill, you may revise it briefly: say it is quick "
+        f"revision, keep it to two sentences in Grade {grade} notation, then go straight "
+        f"back to Grade {grade} work."
+    )
+
+
+def _off_grade_block(grade: int, above: dict | None, grade_topics: list[str] | None) -> str:
+    lines = []
+    if grade_topics:
+        lines.append(f"Grade {grade} Mathematics CAPS topics: " + "; ".join(grade_topics) + ".")
+    if above:
+        lines.append(
+            f"This question uses a concept CAPS first teaches in Grade {above['grade']} "
+            f"({above['topic']}), which is ABOVE this learner's grade."
+        )
+    lines.append(
+        f"If the question is about a topic that is not part of Grade {grade} (for example a "
+        f"higher-grade topic): say which grade it belongs to and give at most TWO sentences on "
+        f"what the topic is about — no method, no steps, no formula, no worked example — then "
+        f"offer a related Grade {grade} topic to work on instead."
+    )
+    return "\n".join(lines)
+
+
+def socratic_system(
+    grade: int,
+    chunks: list[dict],
+    above: dict | None = None,
+    grade_topics: list[str] | None = None,
+) -> str:
     return f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
 
 Rules (prompt policy {PROMPT_VERSION}):
 1. Be SOCRATIC: never give the final answer immediately. Guide with one small step or leading question at a time, and ask the learner to attempt it.
-2. Stay within Grade {grade} CAPS methods and notation. If the retrieved extracts cover the topic, follow their approach.
+2. {grade_rule(grade)} If the retrieved extracts cover the topic, follow their approach.
 3. WhatsApp style: short paragraphs, plain language, a little warmth and the occasional emoji. No markdown headings. Keep replies under 120 words.
 4. If the learner is clearly stuck after attempts, reveal the next step, then check understanding.
 5. If the question is outside the school curriculum, gently steer back to schoolwork.
 6. Never invent curriculum facts. If unsure, say so and suggest the learner checks with their teacher.
+
+{_off_grade_block(grade, above, grade_topics)}
 
 {_context_block(chunks)}"""
 
@@ -114,7 +153,8 @@ def practice_system(grade: int, topic: str, band: str | None, excerpts: list[dic
 {_past_paper_block(excerpts)}
 
 CRITICAL: the excerpts above came from OCR (optical character recognition) on scanned exam papers and are KNOWN to garble numbers, fractions, exponents and symbols. Do NOT copy any number, question or answer from them verbatim, and do NOT trust any digit in them. Use them only to gauge realistic topic coverage, phrasing style and difficulty for a Grade {grade} CAPS paper on this topic. Then:
-1. Write ONE original practice question in that style, within Grade {grade} CAPS scope.
+{grade_rule(grade)}
+1. Write ONE original practice question in that style, within Grade {grade} CAPS scope, solvable with Grade {grade} methods.
 2. Solve it yourself, step by step, to be certain of the correct answer — never assume an excerpt's numbers are right.
 3. Reply in EXACTLY this two-line format, nothing else, nothing before or after:
 QUESTION: <the question and any given values, WhatsApp style — short, warm, plain language, under 80 words, at most one emoji>
@@ -145,6 +185,8 @@ def grade_practice_system(grade: int, question: str, model_answer: str | None) -
 QUESTION: {question}
 
 {answer_block}
+
+{grade_rule(grade)} Any correction in your feedback must use a Grade {grade} method.
 
 Reply in EXACTLY this two-line format, nothing else, nothing before or after:
 CORRECTNESS: correct | partial | incorrect

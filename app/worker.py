@@ -59,6 +59,20 @@ ERROR_REPLY = (
 )
 
 
+def _activate_without_grade(sess, learner: dict) -> None:
+    """Make `learner` active but ask for their grade first. Grade rule
+    (app.tutor.rag.grade_scoped_context): every reply is pitched at the
+    active learner's profile grade, so a profile with no grade must never
+    fall back to a default (it used to be silently treated as Grade 11)."""
+    sess.data.update(
+        state="awaiting_grade",
+        active_learner_id=learner["id"],
+        grade=None,
+        name=learner["nickname"],
+        onboarding_reason="add_learner",
+    )
+
+
 async def _send_with_retry(wa: WhatsAppClient, phone: str, body: str) -> None:
     """One retry on a transport error, for messages that must get through
     (the safety referral). Anything else follows the normal error path."""
@@ -119,16 +133,25 @@ async def handle_active(
         remaining = await session.list_learners(sess.account_id)
         if remaining:
             nxt = remaining[0]
+            if not nxt["grade"]:
+                # Grade rule: never guess a grade. Ask for it before tutoring.
+                _activate_without_grade(sess, nxt)
+                await session.save(sess)
+                return (
+                    f"{deleted_name}'s profile was deleted. ✅ Switched to "
+                    f"{nxt['nickname']}.\n\n{session.grade_prompt(nxt['nickname'])}",
+                    "admin",
+                )
             sess.data.update(
                 state="active",
                 active_learner_id=nxt["id"],
-                grade=nxt["grade"] or 11,
+                grade=nxt["grade"],
                 name=nxt["nickname"],
             )
             await session.save(sess)
             return (
                 f"{deleted_name}'s profile was deleted. ✅ Switched to "
-                f"{nxt['nickname']} (Grade {nxt['grade'] or 11}).",
+                f"{nxt['nickname']} (Grade {nxt['grade']}).",
                 "admin",
             )
         # Last learner gone → the whole household record goes too (POPIA:
@@ -276,16 +299,22 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     elif sess.state == "choosing_learner":
         learners = await session.list_learners(sess.account_id)
         matched = session.match_learner(text, learners)
-        if matched:
+        if matched and not matched["grade"]:
+            # Grade rule: tutoring follows the profile's grade, never a default.
+            sess.data.pop("pending_practice", None)
+            _activate_without_grade(sess, matched)
+            await session.save(sess)
+            reply = session.grade_prompt(matched["nickname"])
+        elif matched:
             sess.data.pop("pending_practice", None)
             sess.data.update(
                 state="active",
                 active_learner_id=matched["id"],
-                grade=matched["grade"] or 11,
+                grade=matched["grade"],
                 name=matched["nickname"],
             )
             await session.save(sess)
-            reply = session.switch_confirmation(matched["nickname"], matched["grade"] or 11)
+            reply = session.switch_confirmation(matched["nickname"], matched["grade"])
         else:
             reply = session.SWITCH_REPROMPT
     else:  # active

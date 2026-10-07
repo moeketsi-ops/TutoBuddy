@@ -9,6 +9,7 @@ from app.tutor import prompts
 from app.tutor.rag import (
     get_past_paper_excerpts,
     get_term_progress,
+    grade_scoped_context,
     pick_practice_topic,
     record_practice_attempt,
     retrieve,
@@ -18,8 +19,13 @@ DEFAULT_SUBJECT = "Mathematics"
 
 
 async def tutor_reply(question: str, grade: int) -> str:
-    chunks = await retrieve(question, grade)
-    return await llm.socratic_reply(question, chunks, grade)
+    """`grade` is the active learner's profile grade. Only that grade's CAPS
+    extracts reach the model; see the grade rule in
+    app.tutor.rag.grade_scoped_context."""
+    ctx = await grade_scoped_context(question, grade)
+    return await llm.socratic_reply(
+        question, ctx["chunks"], grade, above=ctx["above"], grade_topics=ctx["grade_topics"],
+    )
 
 
 async def eval_answer(question: str, grade: int) -> str:
