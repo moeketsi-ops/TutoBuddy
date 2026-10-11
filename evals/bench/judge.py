@@ -57,13 +57,24 @@ def _parse(text: str) -> dict:
 
 
 async def _ask(model: str, user: str, schema: dict) -> dict:
-    resp = await _client().chat.completions.create(
+    kwargs = dict(
         model=model,
         max_tokens=JUDGE_MAX_TOKENS,
         messages=[{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
-        response_format={"type": "json_schema", "json_schema": {"name": "verdict", "strict": True, "schema": schema}},
         extra_body={"reasoning": {"effort": JUDGE_EFFORT}, "usage": {"include": True}},
     )
+    try:
+        resp = await _client().chat.completions.create(
+            **kwargs,
+            response_format={"type": "json_schema", "json_schema": {"name": "verdict", "strict": True, "schema": schema}},
+        )
+    except Exception as exc:
+        if "400" not in repr(exc):
+            raise
+        # Some providers refuse structured output; the prompt already asks for
+        # JSON, so retry plain rather than silently losing a judge.
+        kwargs["messages"][1]["content"] += "\n\nReturn only a JSON object with keys: " + ", ".join(schema["properties"])
+        resp = await _client().chat.completions.create(**kwargs)
     verdict = _parse(resp.choices[0].message.content)
     return {"model": model, "verdict": verdict, **_usage_dict(resp.usage)}
 

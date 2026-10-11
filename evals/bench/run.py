@@ -44,7 +44,7 @@ STAGES = {
 GUESS_TOKENS = {"router": (350, 5), "maths": (1400, 500), "tutoring": (1800, 250),
                 "marking": (700, 80), "practice": (2200, 150)}
 GUESS_REASONING = {"": 0, "none": 0, "minimal": 300, "low": 800, "medium": 2000, "high": 4000}
-GUESS_JUDGE = (1200, 900)  # per judge call
+GUESS_JUDGE = (1200, 2500)  # per judge call; medium effort reasoning counts as output
 
 
 def load_cases(suite: str) -> list[dict]:

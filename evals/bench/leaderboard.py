@@ -81,6 +81,7 @@ def suite_metrics(suite: str, rows: list[dict], live: dict) -> dict:
         m["off_grade_pass"] = _mean([r["judge"]["per_criterion"].get("meets_expectation")
                                      for r in judged if r["tags"][0] == "off_grade"])
         m["judge_disagree"] = _mean([float(r["judge"]["disagree"]) for r in judged])
+        m["judge_errors"] = _mean([float(bool(r["judge"].get("errors"))) for r in judged])
     if suite == "marking":
         m["accuracy"] = _mean([g(r, "exact") or 0 for r in rows])
         wrong = [r for r in rows if r["tags"][0] != "correct"]
@@ -92,6 +93,7 @@ def suite_metrics(suite: str, rows: list[dict], live: dict) -> dict:
         judged = [r for r in ok if (r.get("judge") or {}).get("score") is not None]
         for k in ("answer_correct", "in_scope", "well_posed"):
             m[k] = _mean([r["judge"]["per_criterion"].get(k) for r in judged])
+        m["judge_errors"] = _mean([float(bool(r["judge"].get("errors"))) for r in judged])
     return m
 
 
@@ -229,7 +231,7 @@ def main() -> None:
     md += ["", "## Per-suite detail\n", "Failures (empty, cut off, unparseable) count as wrong. "
            "Harness errors are retried on resume and are not scored.\n"]
     keys = ["n", "failure_rate", "accuracy", "judge_score", "leak_rate", "off_grade_pass", "false_correct",
-            "parsed", "answer_correct", "p50_s", "p95_s", "reasoning_tokens", "cost_per_call", "judge_cost_per_case"]
+            "parsed", "answer_correct", "judge_errors", "p50_s", "p95_s", "reasoning_tokens", "cost_per_call", "judge_cost_per_case"]
     md += ["| Suite | Model | Effort | " + " | ".join(keys) + " | harness errors |", "|" + "---|" * (len(keys) + 4)]
     with (RESULTS / args.stage / "leaderboard.csv").open("w", newline="") as f:
         w = csv.writer(f)

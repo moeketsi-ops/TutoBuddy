@@ -1,6 +1,6 @@
-suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,false_correct,parsed,answer_correct,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
-marking,stub,default,40,0.0,0.375,,,,0.038461538461538464,,,0.0,0.0,0.0,0.0,0.0,0
-maths,stub,default,40,0.0,0.0,,,,,,,0.002,0.027,0.0,0.0,0.0,0
-practice,stub,default,20,0.0,,,,,,0.0,,0.002,0.013,0.0,0.0,0.0,0
-router,stub,default,80,0.0,0.4375,,,,,,,0.0,0.0,0.0,0.0,0.0,0
-tutoring,stub,default,36,0.0,,,0.038461538461538464,,,,,0.003,0.009,0.0,0.0,0.0,0
+suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,false_correct,parsed,answer_correct,judge_errors,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
+marking,stub,default,40,0.0,0.375,,,,0.038461538461538464,,,,0.0,0.0,0.0,0.0,0.0,0
+maths,stub,default,40,0.0,0.0,,,,,,,,0.004,0.048,0.0,0.0,0.0,0
+practice,stub,default,20,0.0,,,,,,0.0,,,0.004,0.006,0.0,0.0,0.0,0
+router,stub,default,80,0.0,0.4375,,,,,,,,0.0,0.0,0.0,0.0,0.0,0
+tutoring,stub,default,36,0.0,,,0.038461538461538464,,,,,,0.005,0.008,0.0,0.0,0.0,0

@@ -204,6 +204,7 @@ async def _complete(
     *,
     openrouter_max_tokens: int | None = None,
     openrouter_reasoning: str = "none",
+    effort_override: str | None = None,
 ) -> str:
     """One system + user turn on `provider`, returning the reply text
     (possibly empty -- callers decide what empty means).
@@ -212,7 +213,9 @@ async def _complete(
     default and widen the token limit by EFFORT_HEADROOM; when blank,
     behaviour is exactly as before."""
     model = _model(provider, tier)
-    effort = _effort(tier)
+    # effort_override lets a caller's own retry (e.g. practice_question's
+    # "retry without reasoning") win over the configured effort.
+    effort = effort_override if effort_override is not None else _effort(tier)
     headroom = EFFORT_HEADROOM.get(effort, 0)
     started = time.perf_counter()
 
@@ -254,7 +257,7 @@ async def _complete(
         if settings.openrouter_provider.strip():
             body["provider"] = {"order": [settings.openrouter_provider.strip()], "allow_fallbacks": False}
         base = openrouter_max_tokens or max_tokens
-        extra = {"max_tokens": max_tokens + headroom if effort else base, "extra_body": body}
+        extra = {"max_tokens": max(base, max_tokens + headroom) if effort else base, "extra_body": body}
     else:
         client = _groq_client()
         extra = {"max_tokens": max_tokens + headroom}
@@ -423,7 +426,7 @@ async def practice_question(
         # 1500-token budget, leaving no question. Retry once without it.
         raw = await _complete(provider, "reasoner", "practice_question", system, user,
                               max_tokens=300, openrouter_max_tokens=1500,
-                              openrouter_reasoning="none")
+                              openrouter_reasoning="none", effort_override="none")
     if not raw.strip():
         # Never send the learner a blank "question" (the worker replies with
         # its error message instead and no practice question is left pending).
