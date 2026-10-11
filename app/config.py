@@ -57,6 +57,17 @@ class Settings(BaseSettings):
     # Uses that provider's *_REASONER_MODEL setting.
     reasoner_provider: str = ""
 
+    # Reasoning effort per tier (blank = each call's built-in default, which
+    # is today's behaviour). none | minimal | low | medium | high. Sent as
+    # OpenRouter reasoning.effort, Anthropic output_config.effort, or Groq
+    # reasoning_effort; the output-token limit grows with it so reasoning
+    # can't eat the visible reply. Chosen by evals/bench (model bake-off).
+    router_effort: str = ""
+    reasoner_effort: str = ""
+    # Pin OpenRouter to one host for open models (e.g. "Groq"); sent with
+    # allow_fallbacks=false so a silent reroute can't change quality.
+    openrouter_provider: str = ""
+
     typesafe_api_key: str = PLACEHOLDER
     jev_model: str = "jev-1.13.0"
     jev_min_confidence: float = 0.6

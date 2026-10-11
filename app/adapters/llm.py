@@ -31,8 +31,11 @@ providers fall back to the stub photo message.
 """
 
 import base64
+import contextlib
+import contextvars
 import logging
 import re
+import time
 
 from app.config import settings
 from app.tutor import prompts
@@ -134,6 +137,63 @@ def _text_or_empty(content, provider: str, call: str, finish_reason=None) -> str
     return text
 
 
+# ── Effort + per-call telemetry ──────────────────────────────────────────────
+
+# Extra output tokens per effort level, on top of each call's visible budget,
+# because reasoning tokens count against max_tokens on every provider.
+# ponytail: fixed headroom per level; per-model tuning if the bench shows truncation.
+EFFORT_HEADROOM = {"none": 0, "minimal": 512, "low": 1024, "medium": 2048, "high": 4096}
+
+_calls: contextvars.ContextVar[list | None] = contextvars.ContextVar("llm_calls", default=None)
+
+
+@contextlib.contextmanager
+def capture_calls():
+    """Collect telemetry for every model call made inside the block (served
+    model, tokens incl. reasoning, billed cost, latency, stop reason, host).
+    Used by evals/bench; a no-op cost in production, where nothing captures."""
+    calls: list[dict] = []
+    token = _calls.set(calls)
+    try:
+        yield calls
+    finally:
+        _calls.reset(token)
+
+
+def _record(**fields) -> None:
+    calls = _calls.get()
+    if calls is not None:
+        calls.append(fields)
+
+
+def _effort(tier: str) -> str:
+    value = settings.router_effort if tier == "router" else settings.reasoner_effort
+    value = (value or "").strip().lower()
+    return value if value in EFFORT_HEADROOM else ""
+
+
+def _usage_dict(usage) -> dict:
+    """Normalise an SDK usage object (Anthropic or OpenAI-style) to plain ints.
+    OpenRouter adds `cost` (USD actually billed) as an extra field."""
+    if usage is None:
+        return {}
+    get = (lambda k: getattr(usage, k, None))
+    details = get("completion_tokens_details")
+    extra = getattr(usage, "model_extra", None) or {}
+    return {
+        "input_tokens": get("input_tokens") or get("prompt_tokens") or 0,
+        "output_tokens": get("output_tokens") or get("completion_tokens") or 0,
+        "reasoning_tokens": (getattr(details, "reasoning_tokens", None) or 0) if details else 0,
+        "cost_usd": extra.get("cost", get("cost")),
+    }
+
+
+def _anthropic_text(resp) -> str:
+    """First text block. Claude 5.x models think by default, so content[0]
+    can be a thinking block with no .text."""
+    return next((b.text for b in resp.content if getattr(b, "type", "") == "text"), "")
+
+
 async def _complete(
     provider: str,
     tier: str,
@@ -146,17 +206,33 @@ async def _complete(
     openrouter_reasoning: str = "none",
 ) -> str:
     """One system + user turn on `provider`, returning the reply text
-    (possibly empty -- callers decide what empty means)."""
+    (possibly empty -- callers decide what empty means).
+
+    ROUTER_EFFORT / REASONER_EFFORT, when set, override the per-call effort
+    default and widen the token limit by EFFORT_HEADROOM; when blank,
+    behaviour is exactly as before."""
     model = _model(provider, tier)
+    effort = _effort(tier)
+    headroom = EFFORT_HEADROOM.get(effort, 0)
+    started = time.perf_counter()
 
     if provider == "anthropic":
+        kwargs = {}
+        if effort:
+            # Anthropic levels are low|medium|high|xhigh|max; thinking can't be
+            # switched off on Claude 5.5 models, so none/minimal map to low.
+            kwargs["output_config"] = {"effort": effort if effort in ("low", "medium", "high") else "low"}
         resp = await _anthropic_client().messages.create(
             model=model,
-            max_tokens=max_tokens,
+            max_tokens=max_tokens + headroom,
             system=system,
             messages=[{"role": "user", "content": user}],
+            **kwargs,
         )
-        return _text_or_empty(resp.content[0].text, provider, call)
+        _record(call=call, tier=tier, provider=provider, requested_model=model,
+                served_model=resp.model, finish_reason=resp.stop_reason, host="anthropic",
+                latency_s=round(time.perf_counter() - started, 3), **_usage_dict(resp.usage))
+        return _text_or_empty(_anthropic_text(resp), provider, call)
 
     messages = [
         {"role": "system", "content": system},
@@ -166,20 +242,31 @@ async def _complete(
     if provider == "ollama":
         # Native Ollama chat API; no token cap (unchanged from before).
         resp = await _ollama_client().chat(model=model, messages=messages)
+        _record(call=call, tier=tier, provider=provider, requested_model=model,
+                served_model=model, finish_reason=None, host="ollama",
+                latency_s=round(time.perf_counter() - started, 3))
         return _text_or_empty(resp["message"]["content"], provider, call)
 
     # groq + openrouter: OpenAI-style chat completions.
     if provider == "openrouter":
         client = _openrouter_client()
-        extra = {
-            "max_tokens": openrouter_max_tokens or max_tokens,
-            "extra_body": {"reasoning": {"effort": openrouter_reasoning}},
-        }
+        body = {"reasoning": {"effort": effort or openrouter_reasoning}, "usage": {"include": True}}
+        if settings.openrouter_provider.strip():
+            body["provider"] = {"order": [settings.openrouter_provider.strip()], "allow_fallbacks": False}
+        base = openrouter_max_tokens or max_tokens
+        extra = {"max_tokens": max_tokens + headroom if effort else base, "extra_body": body}
     else:
         client = _groq_client()
-        extra = {"max_tokens": max_tokens}
+        extra = {"max_tokens": max_tokens + headroom}
+        if effort:
+            # gpt-oss on Groq takes low|medium|high.
+            extra["reasoning_effort"] = effort if effort in ("low", "medium", "high") else "low"
     resp = await client.chat.completions.create(model=model, messages=messages, **extra)
     choice = resp.choices[0]
+    _record(call=call, tier=tier, provider=provider, requested_model=model,
+            served_model=getattr(resp, "model", model), finish_reason=choice.finish_reason,
+            host=(getattr(resp, "model_extra", None) or {}).get("provider", provider),
+            latency_s=round(time.perf_counter() - started, 3), **_usage_dict(getattr(resp, "usage", None)))
     return _text_or_empty(choice.message.content, provider, call, choice.finish_reason)
 
 
@@ -412,7 +499,7 @@ async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
                 }
             ],
         )
-        return _text_or_empty(resp.content[0].text, provider, "photo_reply").strip()
+        return _text_or_empty(_anthropic_text(resp), provider, "photo_reply").strip()
 
     if provider == "openrouter":
         resp = await _openrouter_client().chat.completions.create(
