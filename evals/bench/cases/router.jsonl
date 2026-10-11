@@ -1,0 +1,80 @@
+{"id": "r01", "text": "How do I factorise x² + 5x + 6?", "intent": "homework", "tags": ["homework"]}
+{"id": "r02", "text": "solve for x: 3x + 5 = 20", "intent": "homework", "tags": ["homework"]}
+{"id": "r03", "text": "i dont get like terms", "intent": "homework", "tags": ["homework"]}
+{"id": "r04", "text": "wat is the HCF of 24 and 36", "intent": "homework", "tags": ["homework"]}
+{"id": "r05", "text": "Ngicela ungisize nge fractions 🙏", "intent": "homework", "tags": ["homework"]}
+{"id": "r06", "text": "eish this exponents thing is hard, 2^3 x 2^4 = ?", "intent": "homework", "tags": ["homework"]}
+{"id": "r07", "text": "area of a triangle base 12 height 7", "intent": "homework", "tags": ["homework"]}
+{"id": "r08", "text": "why is a negative times a negative positive", "intent": "homework", "tags": ["homework"]}
+{"id": "r09", "text": "my teacher said use BODMAS but I got 14 and she got 8", "intent": "homework", "tags": ["homework"]}
+{"id": "r10", "text": "convert 0,625 to a percentage pls", "intent": "homework", "tags": ["homework"]}
+{"id": "r11", "text": "Ke kopa thuso ka pattern e: 5; 8; 11; 14", "intent": "homework", "tags": ["homework"]}
+{"id": "r12", "text": "is 1/3 bigger than 0.3", "intent": "homework", "tags": ["homework"]}
+{"id": "r13", "text": "quiz me", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r14", "text": "test me on fractions", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r15", "text": "give me a practice question", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r16", "text": "can we do some exercises on algebra", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r17", "text": "ngiphe umbuzo", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r18", "text": "ready for another one 🎯", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r19", "text": "lets practise integers", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r20", "text": "ask me something on probability", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r21", "text": "I want to revise for my test tomorrow, throw questions at me", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r22", "text": "drill me", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r23", "text": "hi", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r24", "text": "howzit Katlego", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r25", "text": "thanks that helped 😊", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r26", "text": "sawubona", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r27", "text": "lol ok", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r28", "text": "im so tired today", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r29", "text": "are you a robot", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r30", "text": "good night", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r31", "text": "sharp sharp", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r32", "text": "dumela, u kae?", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r33", "text": "how do I change my grade", "intent": "admin", "tags": ["admin"]}
+{"id": "r34", "text": "can my sister also use this number", "intent": "admin", "tags": ["admin"]}
+{"id": "r35", "text": "what can you do", "intent": "admin", "tags": ["admin"]}
+{"id": "r36", "text": "delete my account", "intent": "admin", "tags": ["admin"]}
+{"id": "r37", "text": "how do you use my data", "intent": "admin", "tags": ["admin"]}
+{"id": "r38", "text": "is this free", "intent": "admin", "tags": ["admin"]}
+{"id": "r39", "text": "I want to switch to Thabo's profile", "intent": "admin", "tags": ["admin"]}
+{"id": "r40", "text": "how do I see my progress", "intent": "admin", "tags": ["admin"]}
+{"id": "r41", "text": "um so like how do you do the the fractions thing where you add them", "intent": "homework", "tags": ["homework", "voice"]}
+{"id": "r42", "text": "can you check if my answer x=4 is right for 2x+3=11", "intent": "homework", "tags": ["homework", "check"]}
+{"id": "r43", "text": "2x+3=11", "intent": "homework", "tags": ["homework", "bare"]}
+{"id": "r44", "text": "photo didn't send, the question is find the perimeter of a square with side 9cm", "intent": "homework", "tags": ["homework"]}
+{"id": "r45", "text": "wat is 3/4 of 20", "intent": "homework", "tags": ["homework", "typo"]}
+{"id": "r46", "text": "Ngicela ungichazele ama-integers", "intent": "homework", "tags": ["homework", "code_switch"]}
+{"id": "r47", "text": "how do i do number 4.2 in my textbook its about patterns", "intent": "homework", "tags": ["homework"]}
+{"id": "r48", "text": "explain like im 12 what a variable is", "intent": "homework", "tags": ["homework"]}
+{"id": "r49", "text": "can I get a practice question on integers", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r50", "text": "give me 5 questions on exponents", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r51", "text": "quiz", "intent": "quiz", "tags": ["quiz", "bare"]}
+{"id": "r52", "text": "another question please", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r53", "text": "test my knowledge on probability", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r54", "text": "I want to practise for my June exam", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r55", "text": "ngifuna ukuzivivinya nge-algebra", "intent": "quiz", "tags": ["quiz", "code_switch"]}
+{"id": "r56", "text": "challenge me with a hard one", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r57", "text": "can you give me a question to try", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r58", "text": "revision questions for term 3 please", "intent": "quiz", "tags": ["quiz"]}
+{"id": "r59", "text": "good morning katlego", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r60", "text": "thank u so much 🙏🏾", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r61", "text": "ok cool", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r62", "text": "lol you're funny", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r63", "text": "hello?", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r64", "text": "bye", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r65", "text": "molo", "intent": "smalltalk", "tags": ["smalltalk", "code_switch"]}
+{"id": "r66", "text": "I passed my test!!", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r67", "text": "how are you today", "intent": "smalltalk", "tags": ["smalltalk"]}
+{"id": "r68", "text": "😂😂", "intent": "smalltalk", "tags": ["smalltalk", "emoji"]}
+{"id": "r69", "text": "I want to change my grade to 9", "intent": "admin", "tags": ["admin"]}
+{"id": "r70", "text": "how do I add my sister", "intent": "admin", "tags": ["admin"]}
+{"id": "r71", "text": "switch to Lerato", "intent": "admin", "tags": ["admin"]}
+{"id": "r72", "text": "stop sending me messages", "intent": "admin", "tags": ["admin"]}
+{"id": "r73", "text": "how much does this cost", "intent": "admin", "tags": ["admin"]}
+{"id": "r74", "text": "is my data safe with you", "intent": "admin", "tags": ["admin"]}
+{"id": "r75", "text": "how do I delete my info", "intent": "admin", "tags": ["admin"]}
+{"id": "r76", "text": "my dad wants to know what you do", "intent": "admin", "tags": ["admin"]}
+{"id": "r77", "text": "how many questions can I ask per day", "intent": "admin", "tags": ["admin"]}
+{"id": "r78", "text": "how do I see what I've learnt so far", "intent": "admin", "tags": ["admin"]}
+{"id": "r79", "text": "I typed the wrong grade at the start", "intent": "admin", "tags": ["admin"]}
+{"id": "r80", "text": "who can see my chats", "intent": "admin", "tags": ["admin"]}

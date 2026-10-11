@@ -86,6 +86,10 @@ services:
     command: python -m evals.run_eval
     env_file: .env
     profiles: ["tools"]
+    volumes:
+      # Bake-off code, cases and results live on the host, so results survive
+      # the container and case edits need no rebuild (see evals/bench/README.md).
+      - ./evals/bench:/srv/evals/bench
     depends_on:
       db:
         condition: service_healthy

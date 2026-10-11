@@ -1,0 +1,20 @@
+{"id": "p01", "grade": 8, "topic": "Algebraic Equations", "band": "practice", "tags": ["Algebraic Equations", "practice"]}
+{"id": "p02", "grade": 8, "topic": "Algebraic Equations", "band": "challenge", "tags": ["Algebraic Equations", "challenge"]}
+{"id": "p03", "grade": 8, "topic": "Algebraic Expressions", "band": "remediate", "tags": ["Algebraic Expressions", "remediate"]}
+{"id": "p04", "grade": 8, "topic": "Algebraic Expressions", "band": null, "tags": ["Algebraic Expressions", "unassessed"]}
+{"id": "p05", "grade": 8, "topic": "Exponents", "band": "practice", "tags": ["Exponents", "practice"]}
+{"id": "p06", "grade": 8, "topic": "Integers", "band": "remediate", "tags": ["Integers", "remediate"]}
+{"id": "p07", "grade": 8, "topic": "Integers", "band": "advance", "tags": ["Integers", "advance"]}
+{"id": "p08", "grade": 8, "topic": "Whole numbers", "band": "practice", "tags": ["Whole numbers", "practice"]}
+{"id": "p09", "grade": 8, "topic": "Numeric and Geometric Patterns", "band": "challenge", "tags": ["Numeric and Geometric Patterns", "challenge"]}
+{"id": "p10", "grade": 8, "topic": "Functions and Relationships", "band": null, "tags": ["Functions and Relationships", "unassessed"]}
+{"id": "p11", "grade": 8, "topic": "Common Fractions", "band": "remediate", "tags": ["Common Fractions", "remediate"]}
+{"id": "p12", "grade": 8, "topic": "Common Fractions", "band": "challenge", "tags": ["Common Fractions", "challenge"]}
+{"id": "p13", "grade": 8, "topic": "Decimal Fractions", "band": "practice", "tags": ["Decimal Fractions", "practice"]}
+{"id": "p14", "grade": 8, "topic": "Area and Perimeter", "band": "practice", "tags": ["Area and Perimeter", "practice"]}
+{"id": "p15", "grade": 8, "topic": "Surface Area and Volume", "band": "challenge", "tags": ["Surface Area and Volume", "challenge"]}
+{"id": "p16", "grade": 8, "topic": "Theorem of Pythagoras", "band": "practice", "tags": ["Theorem of Pythagoras", "practice"]}
+{"id": "p17", "grade": 8, "topic": "Geometry of Straight Lines", "band": null, "tags": ["Geometry of Straight Lines", "unassessed"]}
+{"id": "p18", "grade": 8, "topic": "Probability", "band": "practice", "tags": ["Probability", "practice"]}
+{"id": "p19", "grade": 8, "topic": "Interpret, Analyse and Report Data", "band": "remediate", "tags": ["Interpret, Analyse and Report Data", "remediate"]}
+{"id": "p20", "grade": 8, "topic": "Graphs", "band": "advance", "tags": ["Graphs", "advance"]}

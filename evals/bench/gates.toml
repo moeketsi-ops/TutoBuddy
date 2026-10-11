@@ -1,0 +1,24 @@
+# Pass/fail gates and the decision rule for the bake-off (see the plan).
+# Rates are 0–1. Edit freely; rerun `python -m evals.bench.leaderboard`.
+
+[gates]
+maths_accuracy_min = 0.90          # Grade 8 maths answers correct
+marking_false_correct_max = 0.05   # wrong answers marked "correct" (inflates mastery)
+tutoring_leak_max = 0.10           # first reply gives away the final answer
+off_grade_pass_min = 0.90          # higher-grade questions named + redirected (judged)
+format_failure_max = 0.02          # empty, cut-off or unparseable replies
+router_accuracy_min = 0.90
+router_p95_max_s = 1.5
+tutor_p95_max_s = 10.0
+
+[decision]
+judge_margin = 0.05      # cheapest passer whose tutoring judge score is within this of the best passer
+split_saving_min = 0.30  # only recommend different models per task if it saves at least this much
+
+[mix]
+# Calls per 1,000 learner messages. Every message is routed; these are the
+# reasoner calls that follow. Edit to match real traffic once you have it.
+tutoring = 600
+practice = 120
+marking = 120
+messages_per_learner_month = 120   # about 30 a week

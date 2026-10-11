@@ -1,0 +1,40 @@
+{"id": "m01", "grade": 8, "topic": "Whole numbers", "question": "Find the HCF of 84 and 126.", "answer": "42", "answers": ["42"], "tags": ["Whole numbers"]}
+{"id": "m02", "grade": 8, "topic": "Whole numbers", "question": "Find the LCM of 12 and 18.", "answer": "36", "answers": ["36"], "tags": ["Whole numbers"]}
+{"id": "m03", "grade": 8, "topic": "Whole numbers", "question": "R360 is shared between three friends in the ratio 2 : 3 : 4. How much does the person with the largest share get?", "answer": "R160", "answers": ["160"], "tags": ["Whole numbers"]}
+{"id": "m04", "grade": 8, "topic": "Whole numbers", "question": "A taxi travels 240 km in 3 hours. What is its average speed in km/h?", "answer": "80 km/h", "answers": ["80"], "tags": ["Whole numbers"]}
+{"id": "m05", "grade": 8, "topic": "Whole numbers", "question": "Calculate the simple interest earned on R5 000 invested at 8% per year for 3 years.", "answer": "R1 200", "answers": ["1200"], "tags": ["Whole numbers"]}
+{"id": "m06", "grade": 8, "topic": "Whole numbers", "question": "Calculate 15% of R640.", "answer": "R96", "answers": ["96"], "tags": ["Whole numbers"]}
+{"id": "m07", "grade": 8, "topic": "Exponents", "question": "Calculate 2³ × 2².", "answer": "32", "answers": ["32"], "tags": ["Exponents"]}
+{"id": "m08", "grade": 8, "topic": "Exponents", "question": "Calculate (−3)² + (−2)³.", "answer": "1", "answers": ["1"], "tags": ["Exponents"]}
+{"id": "m09", "grade": 8, "topic": "Exponents", "question": "Calculate √144 + ∛27.", "answer": "15", "answers": ["15"], "tags": ["Exponents"]}
+{"id": "m10", "grade": 8, "topic": "Exponents", "question": "Write 45 000 000 in scientific notation.", "answer": "4,5 × 10⁷", "answers": ["4.5x10^7", "4.5 x 10^7", "4.5 10^7", "4.5e7"], "tags": ["Exponents"]}
+{"id": "m11", "grade": 8, "topic": "Common Fractions", "question": "Calculate 3/4 + 2/3. Give your answer as a mixed number.", "answer": "1 5/12", "answers": ["1 5/12", "17/12"], "tags": ["Common Fractions"]}
+{"id": "m12", "grade": 8, "topic": "Common Fractions", "question": "Calculate 2/5 × 15/4 and simplify.", "answer": "3/2 (1 1/2)", "answers": ["3/2", "1 1/2", "1.5"], "tags": ["Common Fractions"]}
+{"id": "m13", "grade": 8, "topic": "Decimal Fractions", "question": "Calculate 0,6 × 0,4 without a calculator.", "answer": "0,24", "answers": ["0.24"], "tags": ["Decimal Fractions"]}
+{"id": "m14", "grade": 8, "topic": "Decimal Fractions", "question": "Write 7/8 as a decimal fraction.", "answer": "0,875", "answers": ["0.875"], "tags": ["Decimal Fractions"]}
+{"id": "m15", "grade": 8, "topic": "Decimal Fractions", "question": "Round 3,14159 to two decimal places.", "answer": "3,14", "answers": ["3.14"], "tags": ["Decimal Fractions"]}
+{"id": "m16", "grade": 8, "topic": "Geometry of Straight Lines", "question": "Two angles lie on a straight line. One angle is 125°. Calculate the other angle.", "answer": "55°", "answers": ["55"], "tags": ["Geometry of Straight Lines"]}
+{"id": "m17", "grade": 8, "topic": "Interpret, Analyse and Report Data", "question": "Calculate the mean of 4; 7; 9; 10 and 15.", "answer": "9", "answers": ["9"], "tags": ["Interpret, Analyse and Report Data"]}
+{"id": "m18", "grade": 8, "topic": "Geometry of Straight Lines", "question": "Two parallel lines are cut by a transversal. One co-interior angle is 110°. Calculate the other co-interior angle.", "answer": "70°", "answers": ["70"], "tags": ["Geometry of Straight Lines"]}
+{"id": "m19", "grade": 8, "topic": "Geometry of 2D Shapes", "question": "The angles around a point are x, 2x and 3x. Calculate x.", "answer": "x = 60°", "answers": ["x=60", "60"], "tags": ["Geometry of 2D Shapes"]}
+{"id": "m20", "grade": 8, "topic": "Numeric and Geometric Patterns", "question": "Determine the general term (Tn) of the pattern 3; 7; 11; 15; …", "answer": "Tn = 4n − 1", "answers": ["4n-1"], "tags": ["Numeric and Geometric Patterns"]}
+{"id": "m21", "grade": 8, "topic": "Numeric and Geometric Patterns", "question": "The pattern 2; 7; 12; 17; … continues. Calculate the 15th term.", "answer": "72", "answers": ["72"], "tags": ["Numeric and Geometric Patterns"]}
+{"id": "m22", "grade": 8, "topic": "Functions and Relationships", "question": "If y = 3x − 2, calculate y when x = 4.", "answer": "y = 10", "answers": ["10"], "tags": ["Functions and Relationships"]}
+{"id": "m23", "grade": 8, "topic": "Functions and Relationships", "question": "A table shows x = 1, 2, 3 and y = 5, 9, 13. Write the rule in the form y = …", "answer": "y = 4x + 1", "answers": ["4x+1"], "tags": ["Functions and Relationships"]}
+{"id": "m24", "grade": 8, "topic": "Algebraic Expressions", "question": "Simplify 3a + 5b − a + 2b.", "answer": "2a + 7b", "answers": ["2a+7b"], "tags": ["Algebraic Expressions"]}
+{"id": "m25", "grade": 8, "topic": "Algebraic Expressions", "question": "Expand 2x(x + 3).", "answer": "2x² + 6x", "answers": ["2x^2+6x"], "tags": ["Algebraic Expressions"]}
+{"id": "m26", "grade": 8, "topic": "Algebraic Expressions", "question": "Simplify 6x²y ÷ 2xy.", "answer": "3x", "answers": ["3x"], "tags": ["Algebraic Expressions"]}
+{"id": "m27", "grade": 8, "topic": "Interpret, Analyse and Report Data", "question": "Find the median of 3; 8; 5; 12 and 9.", "answer": "8", "answers": ["8"], "tags": ["Interpret, Analyse and Report Data"]}
+{"id": "m28", "grade": 8, "topic": "Algebraic Equations", "question": "Solve for x: 2(x − 3) = 14", "answer": "x = 10", "answers": ["x=10"], "tags": ["Algebraic Equations"]}
+{"id": "m29", "grade": 8, "topic": "Algebraic Equations", "question": "Solve for x: x/4 + 3 = 7", "answer": "x = 16", "answers": ["x=16"], "tags": ["Algebraic Equations"]}
+{"id": "m30", "grade": 8, "topic": "Algebraic Equations", "question": "Solve for x: 5x − 7 = 3x + 9", "answer": "x = 8", "answers": ["x=8"], "tags": ["Algebraic Equations"]}
+{"id": "m31", "grade": 8, "topic": "Algebraic Expressions", "question": "If a = −2 and b = 3, calculate a² − 2ab.", "answer": "16", "answers": ["16"], "tags": ["Algebraic Expressions"]}
+{"id": "m32", "grade": 8, "topic": "Integers", "question": "Calculate −6 + 4 × (−3) − (−5).", "answer": "−13", "answers": ["-13"], "tags": ["Integers"]}
+{"id": "m33", "grade": 8, "topic": "Integers", "question": "Calculate (−24) ÷ (−6) + (−3) × 2.", "answer": "−2", "answers": ["-2"], "tags": ["Integers"]}
+{"id": "m34", "grade": 8, "topic": "Area and Perimeter", "question": "Calculate the area of a triangle with base 10 cm and perpendicular height 6 cm.", "answer": "30 cm²", "answers": ["30"], "tags": ["Area and Perimeter"]}
+{"id": "m35", "grade": 8, "topic": "Area and Perimeter", "question": "Calculate the area of a circle with radius 7 cm. Use π = 22/7.", "answer": "154 cm²", "answers": ["154"], "tags": ["Area and Perimeter"]}
+{"id": "m36", "grade": 8, "topic": "Area and Perimeter", "question": "Calculate the perimeter of a rectangle that is 12 m long and 7,5 m wide.", "answer": "39 m", "answers": ["39"], "tags": ["Area and Perimeter"]}
+{"id": "m37", "grade": 8, "topic": "Surface Area and Volume", "question": "Calculate the volume of a rectangular prism measuring 5 cm × 4 cm × 3 cm.", "answer": "60 cm³", "answers": ["60"], "tags": ["Surface Area and Volume"]}
+{"id": "m38", "grade": 8, "topic": "Surface Area and Volume", "question": "Calculate the total surface area of a cube with sides of 4 cm.", "answer": "96 cm²", "answers": ["96"], "tags": ["Surface Area and Volume"]}
+{"id": "m39", "grade": 8, "topic": "Theorem of Pythagoras", "question": "A right-angled triangle has shorter sides of 6 cm and 8 cm. Calculate the length of the hypotenuse.", "answer": "10 cm", "answers": ["10"], "tags": ["Theorem of Pythagoras"]}
+{"id": "m40", "grade": 8, "topic": "Probability", "question": "A bag has 3 red, 5 blue and 2 green beads. One bead is picked at random. What is the probability that it is blue?", "answer": "1/2", "answers": ["1/2", "0.5", "50%", "5/10"], "tags": ["Probability"]}

@@ -1,0 +1,125 @@
+# Models in the bake-off. Edit freely; `python -m evals.bench.prices` checks
+# every slug exists on OpenRouter and prints live prices before any paid run.
+#
+# route:    openrouter (default) | anthropic (direct API, needs ANTHROPIC_API_KEY) | stub | jev
+# tiers:    which suites the model enters: router, reasoner
+# host:     optional OpenRouter host pin (sent with allow_fallbacks=false)
+# vision:   true if it can take homework photos (photo suite, optional)
+# group:    for the leaderboard; "open" models are guaranteed a finalist slot
+
+[judges]
+models = ["anthropic/claude-opus-5.5", "openai/gpt-6.1-sol"]
+
+[[model]]
+slug = "stub"
+route = "stub"
+tiers = ["router", "reasoner"]
+group = "floor"
+
+[[model]]
+slug = "jev"
+route = "jev"
+tiers = ["router"]
+group = "floor"
+
+# ── Claude ───────────────────────────────────────────────────────────────────
+[[model]]
+slug = "anthropic/claude-haiku-5.5"
+tiers = ["router", "reasoner"]
+group = "claude"
+vision = true
+
+[[model]]
+slug = "anthropic/claude-sonnet-5.5"
+tiers = ["reasoner"]
+group = "claude"
+vision = true
+
+# ── ChatGPT ──────────────────────────────────────────────────────────────────
+[[model]]
+slug = "openai/gpt-6-luna"
+tiers = ["reasoner"]
+group = "openai"
+vision = true
+
+[[model]]
+slug = "openai/gpt-5.4-mini"
+tiers = ["router", "reasoner"]
+group = "openai"
+vision = true
+
+[[model]]
+slug = "openai/gpt-5.4-nano"
+tiers = ["router"]
+group = "openai"
+
+# ── xAI ──────────────────────────────────────────────────────────────────────
+[[model]]
+slug = "x-ai/grok-4.7"
+tiers = ["reasoner"]
+group = "xai"
+vision = true
+
+[[model]]
+slug = "x-ai/grok-4.3"   # cheapest current general Grok (grok-4.1-fast is no longer listed)
+tiers = ["router", "reasoner"]
+group = "xai"
+vision = true
+
+# ── Groq-hosted open models ──────────────────────────────────────────────────
+[[model]]
+slug = "openai/gpt-oss-20b"
+host = "Groq"
+tiers = ["router"]
+group = "open"
+
+[[model]]
+slug = "openai/gpt-oss-120b"
+host = "Groq"
+tiers = ["router", "reasoner"]
+group = "open"
+
+# ── Open-weight: quality ─────────────────────────────────────────────────────
+[[model]]
+slug = "moonshotai/kimi-k3"
+tiers = ["reasoner"]
+group = "open"
+
+[[model]]
+slug = "deepseek/deepseek-v4-pro"
+tiers = ["reasoner"]
+group = "open"
+
+# ── Open-weight: value ───────────────────────────────────────────────────────
+[[model]]
+slug = "deepseek/deepseek-v4-flash"
+tiers = ["router", "reasoner"]
+group = "open"
+
+[[model]]
+slug = "z-ai/glm-5.3-flash"
+tiers = ["router", "reasoner"]
+group = "open"
+
+# ── Open-weight: small ───────────────────────────────────────────────────────
+[[model]]
+slug = "qwen/qwen3.6-35b-a3b"
+tiers = ["router", "reasoner"]
+group = "open"
+
+[[model]]
+slug = "qwen/qwen3.8-27b"
+tiers = ["router", "reasoner"]
+group = "open"
+
+[[model]]
+slug = "meta-llama/llama-4-scout"
+tiers = ["router"]
+group = "open"
+
+# ── Incumbent (Moeketsi's current OpenRouter default) ────────────────────────
+[[model]]
+slug = "qwen/qwen3.5-35b-a3b"
+tiers = ["router", "reasoner"]
+group = "open"
+vision = true
