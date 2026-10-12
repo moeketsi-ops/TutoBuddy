@@ -1,12 +1,14 @@
 """Load OCR'd past-paper text into Postgres as document_sections, tagged
-(best-effort) to a Grade 8 Mathematics topic and embedded for retrieval by
+(best-effort) to a Mathematics topic of the paper's grade and embedded for retrieval by
 app/tutor/rag.py's get_past_paper_excerpts().
 
     docker compose run --rm seed python -m seed.load_past_papers
 
-Source: seed/past_papers/*.json, copied in from the founder's own OCR run
-(ingestion/ocr_pdf.py in the standalone curriculum-engine repo — see project
-doc tutobuddy-past-papers-ocr-pipeline.md). Each file is
+Source: seed/past_papers/grade_XX/YYYY/<province>_<session>_<paper>_<kind>.json,
+copied in by ingestion/sync_past_papers.py in the TutoBuddy data repo (naming
+convention and manifest.csv: data/raw/past_papers/README.md there). The grade
+comes from the folder, the year from the year folder, and the document type
+from the kind (memo -> marking_memo; qp and qp-memo -> past_paper). Each file is
 {source_pdf, page_count, pages: [{page, text, tables}]} — one row per PAGE,
 not per question: the OCR pass did not segment individual questions.
 
@@ -25,11 +27,16 @@ similarity, so a mistagged page just falls back to being found (or not) by
 similarity alone.
 
 Idempotent by title: skips a JSON file whose document title has already
-been loaded, so re-running after adding more papers to seed/past_papers/
-only loads the new ones.
+been loaded, so re-running after adding more papers only loads the new ones.
+Rows loaded before the grade-folder layout (Oct 2026) are renamed in place via
+LEGACY_TITLES, so they are not loaded twice.
 
-Requires seed/load_curriculum.py to have already run (needs the Grade 8 /
-Mathematics rows it creates).
+Requires seed/load_curriculum.py to have already run (needs the grade /
+Mathematics rows it creates). A grade folder whose curriculum isn't loaded is
+skipped with a warning.
+
+The keyword table below is Grade 8 only. Other grades fall back to matching a
+topic's own name in the page text, which is rougher.
 """
 
 import asyncio
@@ -42,8 +49,22 @@ from app.db import ensure_schema, get_pool, vector_literal
 HERE = Path(__file__).parent
 PAPERS_DIR = HERE / "past_papers"
 
-GRADE_NUMBER = 8
 SUBJECT = "Mathematics"
+
+# Old flat-layout title -> new path stem, so a DB loaded before Oct 2026 keeps
+# its rows (and their embeddings) instead of loading the same papers twice.
+LEGACY_TITLES: dict[str, str] = {
+    "EC ORT Maths Grade 8 June 2024 QP and Memo": "grade_08/2024/ec-ort_jun-exam_p1_qp-memo",
+    "FS Maths Grade 8 MOCK November 2025 P1 and Memo": "grade_08/2025/fs_nov-mock_p1_qp-memo",
+    "FS Maths Grade 8 MOCK November 2025 P2 and Memo": "grade_08/2025/fs_nov-mock_p2_qp-memo",
+    "GP Maths Grade 8 Revision TEST Term 1 2025 and Memo": "grade_08/2025/gp_t1-revision_p1_qp-memo",
+    "GR 8 MATH MARCH CONTROLLED TEST 1": "grade_08/2024/ec_mar-test_p1_qp",
+    "GR 8 MATH MARCH CONTROLLED TEST MEMORANDUM 1": "grade_08/2024/ec_mar-test_p1_memo",
+    "KZN Maths Grade 8 November 2023 P1 and Memo": "grade_08/2023/kzn_nov-exam_p1_qp-memo",
+    "KZN Maths Grade 8 November 2023 P2 and Memo": "grade_08/2023/kzn_nov-exam_p2_qp-memo",
+    "LP VW Maths Grade 8 March 2024 QP and Memo": "grade_08/2024/lp-vw_mar-test_p1_qp-memo",
+    "Maths Grade 8 June 2025 QP and Memo": "grade_08/2025/unk_jun-exam_p1_qp-memo",
+}
 
 TOPIC_KEYWORDS: dict[str, list[str]] = {
     "Whole numbers": ["whole number", "hcf", "lcm", "common factor", "common multiple"],
@@ -70,66 +91,108 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
 }
 
 
-def _guess_topic(text: str, topic_ids: dict[str, int]) -> int | None:
+def _guess_topic(text: str, topic_ids: dict[str, int], grade: int) -> int | None:
     lowered = text.lower()
-    for name, keywords in TOPIC_KEYWORDS.items():
-        if any(kw in lowered for kw in keywords):
-            return topic_ids.get(name)
+    if grade == 8:
+        for name, keywords in TOPIC_KEYWORDS.items():
+            if any(kw in lowered for kw in keywords):
+                return topic_ids.get(name)
+        return None
+    for name, tid in topic_ids.items():
+        if name.lower() in lowered:
+            return tid
     return None
+
+
+def paper_meta(path: Path) -> dict | None:
+    """grade_08/2024/ec_mar-test_p1_qp.json -> grade, year, kind, title."""
+    rel = path.relative_to(PAPERS_DIR)
+    grade = int(rel.parts[0].removeprefix("grade_"))
+    year = int(rel.parts[1])
+    kind = path.stem.rsplit("_", 1)[-1]
+    if kind in ("ab", "erratum"):
+        return None  # answer books and errata are catalogued, not loaded
+    if kind not in ("qp", "memo", "qp-memo"):
+        raise ValueError(f"{rel}: file name must end in _qp, _memo or _qp-memo")
+    return {
+        "grade": grade,
+        "year": year,
+        "document_type": "marking_memo" if kind == "memo" else "past_paper",
+        "title": rel.with_suffix("").as_posix(),
+    }
+
+
+async def _grade_context(conn, grade: int):
+    grade_id = await conn.fetchval("SELECT id FROM grades WHERE grade_number = $1", grade)
+    if grade_id is None:
+        return None
+    # One Mathematics subject row exists per phase (Senior Phase, FET Phase),
+    # so pick the one in this grade's phase.
+    subject_id = await conn.fetchval(
+        "SELECT s.id FROM subjects s JOIN grades g ON g.phase_id = s.phase_id "
+        "WHERE g.id = $1 AND lower(s.name) = lower($2)",
+        grade_id, SUBJECT,
+    )
+    if subject_id is None:
+        return None
+    rows = await conn.fetch(
+        "SELECT id, name FROM topics WHERE grade_id = $1 AND subject_id = $2",
+        grade_id, subject_id,
+    )
+    return grade_id, subject_id, {r["name"]: r["id"] for r in rows}
 
 
 async def main() -> None:
     await ensure_schema()
     pool = await get_pool()
     async with pool.acquire() as conn:
-        grade_id = await conn.fetchval(
-            "SELECT id FROM grades WHERE grade_number = $1", GRADE_NUMBER
-        )
-        # One Mathematics subject row exists per phase (Senior Phase, FET
-        # Phase) since Grades 10-12 were loaded, so pick the one in this
-        # grade's phase rather than whichever row comes back first.
-        subject_id = await conn.fetchval(
-            "SELECT s.id FROM subjects s JOIN grades g ON g.phase_id = s.phase_id "
-            "WHERE g.id = $1 AND lower(s.name) = lower($2)",
-            grade_id, SUBJECT,
-        )
-        if grade_id is None or subject_id is None:
-            raise RuntimeError(
-                "No Grade 8 / Mathematics rows found -- run "
-                "`docker compose run --rm seed python -m seed.load_curriculum` first."
+        for old, new in LEGACY_TITLES.items():
+            await conn.execute(
+                "UPDATE documents SET title = $2, document_type = $3, year = $4, file_path = $5 "
+                "WHERE title = $1 AND NOT EXISTS (SELECT 1 FROM documents WHERE title = $2)",
+                old, new,
+                "marking_memo" if new.endswith("_memo") else "past_paper",
+                int(new.split("/")[1]), new + ".pdf",
             )
-        topic_rows = await conn.fetch(
-            "SELECT id, name FROM topics WHERE grade_id = $1 AND subject_id = $2",
-            grade_id, subject_id,
-        )
-        topic_ids = {r["name"]: r["id"] for r in topic_rows}
 
+        contexts: dict[int, tuple | None] = {}
         n_docs = n_skipped = n_pages = n_tagged = 0
-        for path in sorted(PAPERS_DIR.glob("*.json")):
-            data = json.loads(path.read_text())
-            title = path.stem.replace("-", " ").replace("_", " ")
+        for path in sorted(PAPERS_DIR.glob("grade_*/[0-9][0-9][0-9][0-9]/*.json")):
+            meta = paper_meta(path)
+            if meta is None:
+                continue
+            g = meta["grade"]
+            if g not in contexts:
+                contexts[g] = await _grade_context(conn, g)
+                if contexts[g] is None:
+                    print(f"WARN Grade {g} / {SUBJECT} curriculum not loaded, skipping its papers")
+            if contexts[g] is None:
+                continue
+            grade_id, subject_id, topic_ids = contexts[g]
 
             existing = await conn.fetchval(
-                "SELECT id FROM documents WHERE title = $1", title
+                "SELECT id FROM documents WHERE title = $1", meta["title"]
             )
             if existing:
                 n_skipped += 1
                 continue
 
+            data = json.loads(path.read_text(encoding="utf-8"))
             doc_id = await conn.fetchval(
                 """
-                INSERT INTO documents (title, document_type, file_path, grade_id, subject_id)
-                VALUES ($1, 'past_paper', $2, $3, $4)
+                INSERT INTO documents (title, document_type, year, file_path, grade_id, subject_id)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id
                 """,
-                title, data.get("source_pdf"), grade_id, subject_id,
+                meta["title"], meta["document_type"], meta["year"],
+                data.get("source_pdf"), grade_id, subject_id,
             )
             n_docs += 1
             for page in data["pages"]:
                 text = page["text"].strip()
                 if not text:
                     continue
-                topic_id = _guess_topic(text, topic_ids)
+                topic_id = _guess_topic(text, topic_ids, g)
                 if topic_id:
                     n_tagged += 1
                 vec = vector_literal(await embed(text))

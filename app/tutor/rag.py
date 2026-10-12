@@ -9,7 +9,7 @@ The second half of this module reads from the curriculum-engine merge (see
 project doc tutobuddy-database-merge-decision.md):
   - `topics` / `learner_topic_mastery` — structured curriculum + mastery,
     used for term progress and picking what to practise next.
-  - `document_sections` (document_type='past_paper') — OCR'd real exam
+  - `document_sections` (document_type 'past_paper' or 'marking_memo') — OCR'd real exam
     papers, loaded by seed/load_past_papers.py.
 
 IMPORTANT about past papers: the OCR pass is known to garble maths notation
@@ -279,7 +279,7 @@ async def get_past_paper_excerpts(topic_name: str, grade: int, k: int = 2) -> li
                    ds.embedding <=> $1::vector AS distance
             FROM document_sections ds
             JOIN documents d ON d.id = ds.document_id
-            WHERE d.document_type = 'past_paper'
+            WHERE d.document_type IN ('past_paper', 'marking_memo')
               AND ds.embedding IS NOT NULL
               AND (d.grade_id IS NULL OR d.grade_id = $2)
             ORDER BY distance
