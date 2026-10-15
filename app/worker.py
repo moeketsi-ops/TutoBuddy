@@ -19,11 +19,12 @@ import os
 import httpx
 import redis.asyncio as aioredis
 
-from app.adapters import llm, router, stt
+from app.adapters import ledger, llm, router, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
+from app.tutor import memory
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
 
 log = logging.getLogger("katlego.worker")
@@ -113,6 +114,7 @@ async def handle_active(
     if command == "HELP":
         return HELP_MESSAGE, "admin"
     if command == "RESET":
+        await memory.forget(sess.active_learner_id)
         await session.reset(phone)
         return "Okay, starting fresh! Say hi to begin again. 👋", "admin"
     if command == "ADD LEARNER":
@@ -128,6 +130,7 @@ async def handle_active(
         return session.switch_prompt(learners), "admin"
     if command == "DELETE":
         deleted_name = sess.name
+        await memory.forget(sess.active_learner_id)
         await session.delete_active_learner(sess.active_learner_id)
         sess.data.pop("pending_practice", None)
         remaining = await session.list_learners(sess.account_id)
@@ -189,6 +192,13 @@ async def handle_active(
         await session.save(sess)
         return reply, "quiz_answer"
 
+    # A short reply to the problem we're already working on ("minus 5?",
+    # "x = 4") goes straight back to the tutor: the router would see it out
+    # of context (and might call it smalltalk), and skipping it saves a call.
+    mem = await memory.load(sess.active_learner_id)
+    if memory.continues_problem(mem, text):
+        return await tutor_reply(text, sess.grade, sess.active_learner_id, sess.name), "homework"
+
     intent = await router.classify_intent(text)
     if intent == "smalltalk":
         return SMALLTALK_REPLY, intent
@@ -199,7 +209,7 @@ async def handle_active(
             await session.save(sess)
         return reply, intent
     # homework / anything else substantive → the tutor engine
-    return await tutor_reply(text, sess.grade, sess.active_learner_id), intent
+    return await tutor_reply(text, sess.grade, sess.active_learner_id, sess.name), intent
 
 
 async def process_job(wa: WhatsAppClient, job: dict) -> None:
@@ -209,6 +219,11 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     msg_type = message.get("type", "text")
 
     sess = await session.load(phone)
+    # Jobs run one after another in one task: reset per-job ledger context so
+    # one learner's id/strategy can never be written onto another's calls.
+    ledger.current_learner.set(sess.data.get("active_learner_id"))
+    ledger.current_strategy.set(None)
+    ledger.last_call_id.set(None)
 
     # 1. Extract text (running STT for voice notes first)
     text = ""

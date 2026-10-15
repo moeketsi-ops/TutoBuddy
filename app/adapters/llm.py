@@ -33,10 +33,12 @@ providers fall back to the stub photo message.
 import base64
 import contextlib
 import contextvars
+import json
 import logging
 import re
 import time
 
+from app.adapters import ledger
 from app.config import settings
 from app.tutor import prompts
 
@@ -166,6 +168,24 @@ def _record(**fields) -> None:
         calls.append(fields)
 
 
+async def _emit(**fields) -> None:
+    """Telemetry for one real call: the bench's capture list (_record) and
+    the production ledger (llm_calls table, app.adapters.ledger)."""
+    _record(**fields)
+    await ledger.persist(fields)
+
+
+async def _log_stub(call: str, system: str, user: str, reply: str) -> None:
+    """Stub calls go to the ledger as estimates (chars / 4) so prompt sizes
+    can be compared offline. Not added to capture_calls(): the bench's stub
+    floor stays exactly as before."""
+    await ledger.persist({
+        "call": call, "provider": "stub", "requested_model": "stub", "served_model": "stub",
+        "input_tokens": ledger.estimate_tokens(system + user),
+        "output_tokens": ledger.estimate_tokens(reply), "estimated": True,
+    })
+
+
 def _effort(tier: str) -> str:
     value = settings.router_effort if tier == "router" else settings.reasoner_effort
     value = (value or "").strip().lower()
@@ -205,9 +225,15 @@ async def _complete(
     openrouter_max_tokens: int | None = None,
     openrouter_reasoning: str = "none",
     effort_override: str | None = None,
+    json_schema: dict | None = None,
 ) -> str:
     """One system + user turn on `provider`, returning the reply text
     (possibly empty -- callers decide what empty means).
+
+    `json_schema`, when given, asks the provider to constrain the output to
+    it (OpenAI-style response_format json_schema strict, Anthropic
+    output_config.format, Ollama format). A provider that refuses raises;
+    callers that can live without it catch and retry (socratic_reply).
 
     ROUTER_EFFORT / REASONER_EFFORT, when set, override the per-call effort
     default and widen the token limit by EFFORT_HEADROOM; when blank,
@@ -225,6 +251,8 @@ async def _complete(
             # Anthropic levels are low|medium|high|xhigh|max; thinking can't be
             # switched off on Claude 5.5 models, so none/minimal map to low.
             kwargs["output_config"] = {"effort": effort if effort in ("low", "medium", "high") else "low"}
+        if json_schema:
+            kwargs.setdefault("output_config", {})["format"] = {"type": "json_schema", "schema": json_schema}
         resp = await _anthropic_client().messages.create(
             model=model,
             max_tokens=max_tokens + headroom,
@@ -232,7 +260,7 @@ async def _complete(
             messages=[{"role": "user", "content": user}],
             **kwargs,
         )
-        _record(call=call, tier=tier, provider=provider, requested_model=model,
+        await _emit(call=call, tier=tier, provider=provider, requested_model=model,
                 served_model=resp.model, finish_reason=resp.stop_reason, host="anthropic",
                 latency_s=round(time.perf_counter() - started, 3), **_usage_dict(resp.usage))
         return _text_or_empty(_anthropic_text(resp), provider, call)
@@ -244,8 +272,9 @@ async def _complete(
 
     if provider == "ollama":
         # Native Ollama chat API; no token cap (unchanged from before).
-        resp = await _ollama_client().chat(model=model, messages=messages)
-        _record(call=call, tier=tier, provider=provider, requested_model=model,
+        resp = await _ollama_client().chat(model=model, messages=messages,
+                                           **({"format": json_schema} if json_schema else {}))
+        await _emit(call=call, tier=tier, provider=provider, requested_model=model,
                 served_model=model, finish_reason=None, host="ollama",
                 latency_s=round(time.perf_counter() - started, 3))
         return _text_or_empty(resp["message"]["content"], provider, call)
@@ -264,9 +293,18 @@ async def _complete(
         if effort:
             # gpt-oss on Groq takes low|medium|high.
             extra["reasoning_effort"] = effort if effort in ("low", "medium", "high") else "low"
+    if json_schema:
+        extra["response_format"] = {"type": "json_schema", "json_schema": {
+            "name": call, "strict": True, "schema": json_schema}}
+        if provider == "openrouter":
+            # Route only to hosts that honour the schema; without this
+            # OpenRouter may silently drop response_format.
+            extra["extra_body"] = {**extra["extra_body"],
+                                   "provider": {**extra["extra_body"].get("provider", {}),
+                                                "require_parameters": True}}
     resp = await client.chat.completions.create(model=model, messages=messages, **extra)
     choice = resp.choices[0]
-    _record(call=call, tier=tier, provider=provider, requested_model=model,
+    await _emit(call=call, tier=tier, provider=provider, requested_model=model,
             served_model=getattr(resp, "model", model), finish_reason=choice.finish_reason,
             host=(getattr(resp, "model_extra", None) or {}).get("provider", provider),
             latency_s=round(time.perf_counter() - started, 3), **_usage_dict(getattr(resp, "usage", None)))
@@ -343,6 +381,39 @@ def _stub_socratic(
     )
 
 
+# How the last socratic_reply came back: "json" (schema enforced),
+# "json_prompt" (provider refused the schema; JSON asked for in the prompt),
+# "state_line" (STRUCTURED_OUTPUT=state_line) or "plain" (no pedagogy).
+last_output_mode: contextvars.ContextVar[str] = contextvars.ContextVar("last_output_mode", default="plain")
+
+
+def _stub_state(question: str, pedagogy: dict, lo_candidates: list[dict] | None,
+                continuing: bool) -> dict:
+    """A deterministic state for the offline stub, so the memory, mastery
+    and pedagogy paths run end to end in CI. It never claims a correct
+    answer it didn't check: an attempt is always 'partial'."""
+    q = question.lower()
+    if "explain" in q and ("because" in q or "i did" in q):
+        ev = "explained_back"
+    elif any(p in q for p in ("give me the answer", "tell me the answer", "just the answer")):
+        ev = "asked_for_answer"
+    elif continuing and re.search(r"\d|=", q):
+        ev = "attempt_partial"
+    else:
+        ev = "none"
+    return {"ev": ev, "lo": lo_candidates[0]["code"] if lo_candidates else "none",
+            "misc": "none", "strat": pedagogy["strategy"], "hint": str(pedagogy["hint"]),
+            "step": "1/3"}
+
+
+def _is_refusal(exc: Exception) -> bool:
+    """A provider rejecting the request shape (unsupported response_format /
+    output_config), as opposed to an outage."""
+    msg = repr(exc).lower()
+    return any(k in msg for k in ("400", "422", "response_format", "not supported",
+                                  "no endpoints", "output_config", "json_schema"))
+
+
 async def socratic_reply(
     question: str,
     chunks: list[dict],
@@ -350,18 +421,70 @@ async def socratic_reply(
     above: dict | None = None,
     grade_topics: list[str] | None = None,
     term_focus: dict | None = None,
+    *,
+    memory_block: str | None = None,
+    pedagogy: dict | None = None,
+    lo_candidates: list[dict] | None = None,
+    misconceptions: list[dict] | None = None,
+    continuing: bool = False,
 ) -> str:
     """`chunks` must already be the learner's own grade only (see
-    app.tutor.rag.grade_scoped_context and the grade rule there)."""
+    app.tutor.rag.grade_scoped_context and the grade rule there).
+
+    With `pedagogy` set (app.tutor.engine) the output carries the turn's
+    state: by default a schema-constrained JSON object {state, reply}
+    (STRUCTURED_OUTPUT=json); with STRUCTURED_OUTPUT=state_line, or when the
+    provider refuses the schema, the hidden STATE line / prompt-only JSON.
+    The engine parses it (app.tutor.state.parse_turn); this function never
+    decides what reaches the learner."""
+    from app.tutor import pedagogy as ped
+    from app.tutor.state import turn_schema
+
+    output = "plain"
+    schema = None
+    if pedagogy:
+        output = "json" if settings.structured_output.strip().lower() != "state_line" else "state_line"
+        if output == "json":
+            schema = turn_schema([lo["code"] for lo in (lo_candidates or [])],
+                                 [m["code"] for m in (misconceptions or [])],
+                                 list(ped.STRATEGIES))
+    system = prompts.socratic_system(
+        grade, chunks, above, grade_topics, term_focus,
+        memory_block=memory_block, pedagogy=pedagogy,
+        lo_candidates=lo_candidates, misconceptions=misconceptions,
+        output="json" if output == "json" else "state_line",
+    )
     provider = _provider("reasoner")
     if not provider:
-        return _stub_socratic(question, chunks, grade, above, term_focus)
-    system = prompts.socratic_system(grade, chunks, above, grade_topics, term_focus)
-    text = (await _complete(provider, "reasoner", "socratic_reply", system, question,
-                            max_tokens=600)).strip()
+        reply = _stub_socratic(question, chunks, grade, above, term_focus)
+        if output == "json":
+            st = _stub_state(question, pedagogy, lo_candidates, continuing)
+            reply = json.dumps({"state": st, "reply": reply}, ensure_ascii=False)
+        elif output == "state_line":
+            st = _stub_state(question, pedagogy, lo_candidates, continuing)
+            reply += "\n<<STATE " + " ".join(f"{k}={v}" for k, v in st.items()) + ">>"
+        last_output_mode.set(output)
+        await _log_stub("socratic_reply", system, question, reply)
+        return reply
+    # 400 (was 600): a 120-word reply is ~160 tokens, plus ~40 for the state.
+    # Effort headroom (REASONER_EFFORT) is added on top by _complete.
+    mode = output
+    try:
+        text = await _complete(provider, "reasoner", "socratic_reply", system, question,
+                               max_tokens=400, json_schema=schema)
+    except Exception as exc:
+        if schema is None or not _is_refusal(exc):
+            raise
+        log.warning("socratic_reply: %s refused the JSON schema (%s); asking in the prompt instead",
+                    provider, repr(exc)[:200])
+        mode = "json_prompt"
+        text = await _complete(provider, "reasoner", "socratic_reply", system, question,
+                               max_tokens=400)
+    text = text.strip()
     if not text:
         # An empty message would be sent to the learner as a blank reply.
         raise RuntimeError(f"socratic_reply: empty {provider} response")
+    last_output_mode.set(mode)
     return text
 
 
@@ -414,10 +537,12 @@ async def practice_question(
     the "question" field to the learner; "model_answer" is the ground
     truth grade_practice_answer() grades against later, never shown."""
     provider = _provider("reasoner")
-    if not provider:
-        return _stub_practice(topic, grade)
     system = prompts.practice_system(grade, topic, band, excerpts)
     user = f"Set me a practice question on {topic}."
+    if not provider:
+        out = _stub_practice(topic, grade)
+        await _log_stub("practice_question", system, user, out["question"])
+        return out
     raw = await _complete(provider, "reasoner", "practice_question", system, user,
                           max_tokens=300, openrouter_max_tokens=1500,
                           openrouter_reasoning="low")
@@ -465,11 +590,13 @@ async def grade_practice_answer(
 ) -> dict:
     """Returns {"correctness": "correct"|"partial"|"incorrect", "feedback": str}."""
     provider = _provider("reasoner")
+    system = prompts.grade_practice_system(grade, question, model_answer)
     if not provider:
-        return _stub_grade(model_answer, learner_answer)
+        out = _stub_grade(model_answer, learner_answer)
+        await _log_stub("grade_practice_answer", system, learner_answer, out["feedback"])
+        return out
     raw = await _complete(provider, "reasoner", "grade_practice_answer",
-                          prompts.grade_practice_system(grade, question, model_answer),
-                          learner_answer, max_tokens=200)
+                          system, learner_answer, max_tokens=200)
     return _parse_grade_response(raw)
 
 

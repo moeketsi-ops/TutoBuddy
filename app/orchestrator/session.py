@@ -287,6 +287,11 @@ async def delete_active_learner(learner_id: int) -> None:
         await conn.execute(
             "DELETE FROM conversation_log WHERE learner_id = $1", learner_id
         )
+        # llm_calls carries learner_id as a plain value (no FK, so the cost
+        # ledger survives schema churn); erase it explicitly. Memory tables
+        # (learner_events, learner_lo_mastery, learner_strategy_stats,
+        # learners.memory_digest) cascade with the learner row.
+        await conn.execute("DELETE FROM llm_calls WHERE learner_id = $1", learner_id)
         await conn.execute("DELETE FROM learners WHERE id = $1", learner_id)
 
 

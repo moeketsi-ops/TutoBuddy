@@ -467,6 +467,120 @@ CREATE INDEX IF NOT EXISTS idx_safeguarding_flags_status ON safeguarding_flags(s
 -- same reason phone isn't (see the comment on this table above): a
 -- duty-of-care record must survive learner deletion.
 ALTER TABLE safeguarding_flags ADD COLUMN IF NOT EXISTS learner_id int;
+
+-- ── Memory + pedagogy (moeketsi/memory-pedagogy; spec: "Katlego memory +
+-- pedagogy spec v0.1") ─────────────────────────────────────────────────────
+-- Placeholder LOs: a topic with no real CAPS learning objective yet gets one
+-- "<topic>.00" objective so LO-level mastery works everywhere. Real LOs
+-- replace it as they are loaded; learner_events keeps the raw evidence, so
+-- history can be recomputed onto them.
+ALTER TABLE learning_objectives ADD COLUMN IF NOT EXISTS is_placeholder boolean NOT NULL DEFAULT false;
+-- CAPS-derived LOs (seed/load_learning_objectives.py): where each came from
+-- and whether a teacher still needs to check its wording.
+ALTER TABLE learning_objectives ADD COLUMN IF NOT EXISTS subtopic_label text;
+ALTER TABLE learning_objectives ADD COLUMN IF NOT EXISTS lo_kind varchar(10) NOT NULL DEFAULT 'new';
+ALTER TABLE learning_objectives ADD COLUMN IF NOT EXISTS source_ref text;
+ALTER TABLE learning_objectives ADD COLUMN IF NOT EXISTS needs_review boolean NOT NULL DEFAULT false;
+
+-- Raw evidence, append-only. Mastery is a function of this table, so a new
+-- mastery formula can always be replayed over history.
+CREATE TABLE IF NOT EXISTS learner_events (
+    id                 bigserial PRIMARY KEY,
+    learner_id         int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    topic_id           int NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    lo_id              int REFERENCES learning_objectives(id) ON DELETE SET NULL,
+    source             varchar(12) NOT NULL CHECK (source IN ('chat', 'quiz', 'photo', 'diagnostic')),
+    evidence           varchar(20) NOT NULL,
+    hint_level         smallint NOT NULL DEFAULT 0,
+    strategy           varchar(40),
+    misconception_code varchar(40),
+    weight             numeric(4,3) NOT NULL,
+    mastery_before     numeric(5,2),
+    mastery_after      numeric(5,2),
+    created_at         timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_learner_events_learner ON learner_events(learner_id, created_at);
+
+-- Current estimate per learning objective (rolled up into
+-- learner_topic_mastery, which PROGRESS and quiz topic-picking already read).
+CREATE TABLE IF NOT EXISTS learner_lo_mastery (
+    learner_id     int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    lo_id          int NOT NULL REFERENCES learning_objectives(id) ON DELETE CASCADE,
+    mastery_score  numeric(5,2) NOT NULL CHECK (mastery_score BETWEEN 0 AND 100),
+    evidence_count int NOT NULL DEFAULT 0,
+    last_seen_at   timestamptz NOT NULL DEFAULT now(),
+    next_review_at timestamptz,
+    PRIMARY KEY (learner_id, lo_id)
+);
+
+-- What works for whom: Beta-Bernoulli counts per learner x topic x strategy
+-- (app/tutor/pedagogy.py samples from these).
+CREATE TABLE IF NOT EXISTS learner_strategy_stats (
+    learner_id int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    topic_id   int NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    strategy   varchar(40) NOT NULL,
+    tries      int NOT NULL DEFAULT 0,
+    successes  int NOT NULL DEFAULT 0,
+    PRIMARY KEY (learner_id, topic_id, strategy)
+);
+
+-- Misconception taxonomy (seeded, small). topic_id NULL = applies to any
+-- topic (e.g. sign errors).
+CREATE TABLE IF NOT EXISTS misconceptions (
+    code        varchar(40) PRIMARY KEY,
+    topic_id    int REFERENCES topics(id) ON DELETE CASCADE,
+    description text NOT NULL
+);
+
+-- Cross-session memory: the code-built digest of earlier work (no LLM).
+-- Erased with the learner row.
+ALTER TABLE learners ADD COLUMN IF NOT EXISTS memory_digest text;
+
+-- Per-call token + cost ledger for live traffic (app/adapters/ledger.py):
+-- the same telemetry fields the bake-off captures in memory, persisted.
+-- Stub rows are estimates (chars/4). learner_id is a plain value, erased
+-- with the learner by session.delete_active_learner.
+CREATE TABLE IF NOT EXISTS llm_calls (
+    id                bigserial PRIMARY KEY,
+    learner_id        int,
+    call              varchar(40) NOT NULL,
+    provider          varchar(20) NOT NULL,
+    model             varchar(80) NOT NULL,
+    prompt_version    varchar(30),
+    prompt_tokens     int,
+    completion_tokens int,
+    reasoning_tokens  int,
+    estimated         boolean NOT NULL DEFAULT false,
+    latency_ms        int,
+    cost_usd          numeric(12,8),
+    billed            boolean NOT NULL DEFAULT false,
+    finish_reason     varchar(30),
+    host              varchar(40),
+    strategy          varchar(40),
+    state_valid       boolean,
+    created_at        timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS reasoning_tokens int;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS billed boolean NOT NULL DEFAULT false;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS finish_reason varchar(30);
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS host varchar(40);
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS output_mode varchar(30);
+CREATE INDEX IF NOT EXISTS idx_llm_calls_created ON llm_calls(created_at);
+
+-- Starter misconception list: cross-topic, common in Senior Phase and FET
+-- algebra/number work. Teachers extend it per topic (topic_id set).
+INSERT INTO misconceptions (code, topic_id, description) VALUES
+    ('SIGN_ERR', NULL, 'Sign error with negative numbers'),
+    ('ONE_SIDE_OP', NULL, 'Applies an operation to one side of an equation only'),
+    ('UNLIKE_TERMS', NULL, 'Combines unlike terms (e.g. 2x + 3 = 5x)'),
+    ('PARTIAL_DISTRIB', NULL, 'Multiplies only the first term inside brackets'),
+    ('ORDER_OPS', NULL, 'Ignores the order of operations'),
+    ('EXP_AS_MULT', NULL, 'Treats an exponent as multiplication (3^2 = 6)'),
+    ('FRAC_ADD_ACROSS', NULL, 'Adds numerators and denominators separately'),
+    ('PLACE_VALUE', NULL, 'Place-value or decimal-point error'),
+    ('UNITS', NULL, 'Missing or wrong units'),
+    ('MISREAD', NULL, 'Answers a different question than the one asked')
+ON CONFLICT (code) DO NOTHING;
 """
 
 

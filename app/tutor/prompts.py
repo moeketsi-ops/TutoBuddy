@@ -1,7 +1,7 @@
 """Versioned prompt policies (blueprint §4.2: versioned prompts; eval harness
 runs on every prompt change — bump PROMPT_VERSION when editing)."""
 
-PROMPT_VERSION = "socratic-v3"
+PROMPT_VERSION = "socratic-v4"
 
 INTENT_SYSTEM = (
     "You route messages for a South African WhatsApp maths tutor. "
@@ -67,26 +67,79 @@ def _off_grade_block(
     return "\n".join(lines)
 
 
+STATE_RULES = """After your reply, on its own final line, add this hidden line (the learner never sees it):
+<<STATE lo=CODE ev=EVIDENCE misc=CODE strat=STRATEGY hint=N step=N/M>>
+Example: <<STATE lo=ZA-MATH-G08-ALG-EQ-001 ev=attempt_wrong misc=SIGN_ERR strat=SCAFFOLDED_EXAMPLE hint=1 step=2/3>>
+- lo: the objective code from OBJECTIVES this turn is about, or none.
+- ev: judge the learner's LATEST message only: attempt_correct, attempt_partial, attempt_wrong (an attempt at a step), asked_for_answer (wants the answer without trying), explained_back (explained the method in their own words), or none (a new question, chit-chat, no attempt).
+- misc: a code from MISCONCEPTIONS if their attempt shows one, else none.
+- strat: the strategy your reply used (normally the one in PEDAGOGY).
+- hint: the hint level your reply gave (0 none, 3 = gave the answer).
+- step: which step of the working problem the learner is on, e.g. 2/3, or done when it is solved."""
+
+
+JSON_RULES = """Respond with ONE JSON object and nothing else (no text before or after it):
+{"state": {"ev": ..., "lo": ..., "misc": ..., "strat": ..., "hint": ..., "step": ...}, "reply": "..."}
+Fill "state" FIRST, then write "reply":
+- ev: judge the learner's LATEST message only: attempt_correct, attempt_partial, attempt_wrong (an attempt at a step), asked_for_answer (wants the answer without trying), explained_back (explained the method in their own words), or none (a new question, chit-chat, no attempt).
+- lo: the objective code from OBJECTIVES this turn is about, or "none".
+- misc: a code from MISCONCEPTIONS if their attempt shows one, else "none".
+- strat: the strategy your reply uses (normally the one in PEDAGOGY).
+- hint: the hint level your reply gives, "0" (none) to "3" (gives the answer).
+- step: which step of the working problem the learner is on, e.g. "2/3", or "done" when it is solved.
+- reply: the WhatsApp message the learner will see, following every rule above (use \\n for line breaks)."""
+
+
 def socratic_system(
     grade: int,
     chunks: list[dict],
     above: dict | None = None,
     grade_topics: list[str] | None = None,
     term_focus: dict | None = None,
+    *,
+    memory_block: str | None = None,
+    pedagogy: dict | None = None,
+    lo_candidates: list[dict] | None = None,
+    misconceptions: list[dict] | None = None,
+    output: str = "state_line",
 ) -> str:
-    return f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
+    """`output` = "json" (structured: JSON_RULES) or "state_line"
+    (STATE_RULES). Prompt order is static-first (rules, grade rule, STATE rules), then
+    per-learner and per-turn parts, so the shared prefix can be cached once
+    providers allow it. Without `pedagogy` (photo help, older callers) the
+    prompt is the socratic-v3 one minus the STATE contract."""
+    if pedagogy:
+        stuck_rule = (
+            "4. Follow the PEDAGOGY line below: use its strategy, give at most its hint "
+            "level, and reveal the final answer ONLY if it says reveal=yes."
+        )
+    else:
+        stuck_rule = "4. If the learner is clearly stuck after attempts, reveal the next step, then check understanding."
+    parts = [f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
 
 Rules (prompt policy {PROMPT_VERSION}):
 1. Be SOCRATIC: never give the final answer immediately. Guide with one small step or leading question at a time, and ask the learner to attempt it.
 2. {grade_rule(grade)} If the retrieved extracts cover the topic, follow their approach.
 3. WhatsApp style: short paragraphs, plain language, a little warmth and the occasional emoji. No markdown headings. Keep replies under 120 words.
-4. If the learner is clearly stuck after attempts, reveal the next step, then check understanding.
+{stuck_rule}
 5. If the question is outside the school curriculum, gently steer back to schoolwork.
 6. Never invent curriculum facts. If unsure, say so and suggest the learner checks with their teacher.
-
-{_off_grade_block(grade, above, grade_topics, term_focus)}
-
-{_context_block(chunks)}"""
+7. Praise specific behaviour (\"you caught your own sign error\"), never generic praise."""]
+    if pedagogy:
+        parts.append(JSON_RULES if output == "json" else STATE_RULES)
+        from app.tutor.pedagogy import decision_line
+        parts.append(decision_line(pedagogy))
+    if memory_block:
+        parts.append(memory_block)
+    if above or grade_topics:
+        parts.append(_off_grade_block(grade, above, grade_topics, term_focus))
+    parts.append(_context_block(chunks))
+    if pedagogy:
+        los = "; ".join(f"{lo['code']} = {lo['objective'][:70]}" for lo in (lo_candidates or []))
+        parts.append("OBJECTIVES: " + (los or "none"))
+        miscs = ", ".join(m["code"] for m in (misconceptions or []))
+        parts.append("MISCONCEPTIONS: " + (miscs or "none"))
+    return "\n\n".join(parts)
 
 
 def eval_system(grade: int, chunks: list[dict]) -> str:
@@ -109,7 +162,10 @@ _BAND_EMOJI = {
 }
 
 
-def progress_message(progress: dict) -> str:
+def progress_message(progress: dict, objectives: dict | None = None) -> str:
+    """`objectives` (mastery.objective_progress) adds the CAPS-objective view:
+    coverage (objectives with evidence) and understanding (mastery over the
+    covered ones), weighted by CAPS teaching hours. Pure formatting."""
     topics = progress["topics"]
     term, subject = progress["term"], progress["subject"]
     if not topics:
@@ -118,21 +174,28 @@ def progress_message(progress: dict) -> str:
             "Ask me a question and we'll get going!"
         )
 
-    filled = round(progress["coverage_pct"] / 10)
+    pct = objectives["coverage_pct"] if objectives and objectives["total"] else progress["coverage_pct"]
+    filled = round(pct / 10)
     bar = "🟩" * filled + "⬜" * (10 - filled)
-    lines = [
-        f"*Term {term} {subject} progress*",
-        f"{bar}  {progress['coverage_pct']}% of topics started",
-    ]
-    if progress["avg_mastery"] is not None:
-        lines.append(f"Average score so far: {progress['avg_mastery']}%")
+    lines = [f"*Term {term} {subject} progress*"]
+    if objectives and objectives["total"]:
+        lines.append(f"{bar}  {objectives['covered']} of {objectives['total']} CAPS objectives started")
+        if objectives["understanding"] is not None:
+            lines.append(f"Understanding so far: {objectives['understanding']:.0f}%")
+    else:
+        lines.append(f"{bar}  {progress['coverage_pct']}% of topics started")
+        if progress["avg_mastery"] is not None:
+            lines.append(f"Average score so far: {progress['avg_mastery']}%")
     lines.append("")
+    per = (objectives or {}).get("topics", {})
     for t in topics:
+        o = per.get(t.get("topic_id"))
+        objs = f" · {o['covered']}/{o['total']} objectives" if o and o["total"] > 1 else ""
         if t["mastery_score"] is None:
-            lines.append(f"◻️ {t['topic']} — not started yet")
+            lines.append(f"◻️ {t['topic']} — not started yet{objs}")
         else:
             emoji = _BAND_EMOJI.get(t["band"], "◻️")
-            lines.append(f"{emoji} {t['topic']} — {t['mastery_score']}% ({t['band']})")
+            lines.append(f"{emoji} {t['topic']} — {float(t['mastery_score']):.0f}% ({t['band']}){objs}")
     return "\n".join(lines)
 
 

@@ -300,18 +300,10 @@ async def get_past_paper_excerpts(topic_name: str, grade: int, k: int = 2) -> li
 
 # ── Closing the mastery loop: grading a practice attempt updates mastery ────
 
-# Placeholder mastery-delta magnitudes -- a simple, transparent heuristic
-# (not a calibrated learning model): a correct answer nudges mastery up
-# more than a partial one costs on an incorrect answer, and a
-# never-assessed topic starts at a neutral midpoint (50, which already
-# lands in the 'practice' band per the <40/<70/<85 bands on
-# learner_topic_mastery). Revisit once there's enough real attempt data to
-# calibrate against, per tutobuddy-dynamic-pedagogy-engine-design.md
-# section 9 (strategy-effectiveness tracking) and section 16 (adaptive
-# intervention threshold) -- this is the foundation those build on, not a
-# finished version of them.
-MASTERY_BASELINE = 50.0
-MASTERY_DELTA = {"correct": 12.0, "partial": 4.0, "incorrect": -6.0}
+# Quiz answers now move mastery through the same evidence rule as chat steps
+# (app.tutor.mastery: m += w * (target - m), quiz weight 0.25), replacing the
+# earlier flat +12 / +4 / -6 deltas. learner_practice_attempts.mastery_delta
+# still records the change, now computed rather than fixed.
 
 
 async def record_practice_attempt(
@@ -322,40 +314,19 @@ async def record_practice_attempt(
     learner_answer: str,
     correctness: str,
 ) -> None:
-    """Logs the attempt (learner_practice_attempts) and upserts
-    learner_topic_mastery, clamped to [0, 100]. This is the write side that
-    was missing since the progress/practice-question step shipped -- see
-    tutobuddy-pedagogy-mastery-pace-step.md's "known gaps" and
-    tutobuddy-dynamic-pedagogy-engine-design.md's "relationship to what's
-    already built"."""
-    delta = MASTERY_DELTA[correctness]
+    """Logs the attempt (learner_practice_attempts) and records it as quiz
+    evidence (learner_events -> learner_lo_mastery -> learner_topic_mastery).
+
+    Grade rule: mastery.record_event refuses (ValueError) a topic outside
+    the learner's own grade, and the transaction writes nothing."""
+    from app.tutor import mastery
+
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.transaction():
-            # Grade rule: mastery is only ever built on the learner's OWN
-            # grade's topics (profile grade == topic grade). Refuse anything
-            # else rather than record progress on another grade's work.
-            same_grade = await conn.fetchval(
-                "SELECT g.grade_number = l.grade FROM topics t "
-                "JOIN grades g ON g.id = t.grade_id, learners l "
-                "WHERE t.id = $1 AND l.id = $2",
-                topic_id, learner_id,
-            )
-            if not same_grade:
-                raise ValueError(
-                    f"grade rule: topic {topic_id} is not in learner {learner_id}'s grade"
-                )
-            await conn.execute(
-                f"""
-                INSERT INTO learner_topic_mastery (learner_id, topic_id, mastery_score)
-                VALUES ($1, $2, GREATEST(0, LEAST(100, {MASTERY_BASELINE} + $3)))
-                ON CONFLICT (learner_id, topic_id) DO UPDATE
-                    SET mastery_score = GREATEST(0, LEAST(100,
-                            learner_topic_mastery.mastery_score + $3)),
-                        last_assessed_at = now()
-                """,
-                learner_id, topic_id, delta,
-            )
+            moved = await mastery.record_event(
+                conn, learner_id, topic_id, source="quiz",
+                evidence=mastery.QUIZ_EVIDENCE[correctness])
             await conn.execute(
                 """
                 INSERT INTO learner_practice_attempts
@@ -364,5 +335,5 @@ async def record_practice_attempt(
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 """,
                 learner_id, topic_id, question, model_answer, learner_answer,
-                correctness, delta,
+                correctness, round(moved["after"] - moved["before"], 2),
             )

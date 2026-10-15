@@ -57,6 +57,12 @@ class Settings(BaseSettings):
     # Uses that provider's *_REASONER_MODEL setting.
     reasoner_provider: str = ""
 
+    # How a tutoring turn reports its state (spec v0.1; founder chose
+    # structured output, 16 Oct): "json" = schema-constrained JSON object
+    # (state + reply), falling back to the STATE line if the provider
+    # refuses the schema; "state_line" = the hidden STATE line only.
+    structured_output: str = "json"
+
     # Reasoning effort per tier (blank = each call's built-in default, which
     # is today's behaviour). none | minimal | low | medium | high. Sent as
     # OpenRouter reasoning.effort, Anthropic output_config.effort, or Groq
