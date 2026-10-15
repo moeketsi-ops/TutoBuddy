@@ -27,7 +27,7 @@ from evals.bench import graders, judge, prices
 
 HERE = Path(__file__).parent
 RESULTS = HERE / "results"
-SUITES = ("router", "maths", "tutoring", "marking", "practice")
+SUITES = ("router", "maths", "tutoring", "marking", "practice", "conversations")
 JUDGED = ("tutoring", "practice")
 
 # Stage presets; every value can be overridden on the command line.
@@ -42,7 +42,9 @@ STAGES = {
 # Rough tokens per call, used ONLY to quote the pilot before any measurement
 # exists. Every later quote comes from measured pilot rows.
 GUESS_TOKENS = {"router": (350, 5), "maths": (1400, 500), "tutoring": (1800, 250),
-                "marking": (700, 80), "practice": (2200, 150)}
+                "marking": (700, 80), "practice": (2200, 150),
+                # a whole scripted conversation: ~4 turns x (1,300 in, 230 out)
+                "conversations": (5200, 920)}
 GUESS_REASONING = {"": 0, "none": 0, "minimal": 300, "low": 800, "medium": 2000, "high": 4000}
 GUESS_JUDGE = (1200, 2500)  # per judge call; medium effort reasoning counts as output
 
@@ -145,7 +147,80 @@ async def _practice(case, ctx):
     return out
 
 
-RUNNERS = {"router": _router, "maths": _maths, "tutoring": _tutoring, "marking": _marking, "practice": _practice}
+# ── Multi-turn: memory + STATE line + pedagogy (moeketsi/memory-pedagogy) ────
+# Each case is a scripted learner: a fixed list of messages with a truth
+# label per message. A throwaway learner is created per case so the real
+# memory window, mastery writes and strategy choice run exactly as live, then
+# everything is erased. Scores what single-turn suites can't see:
+#   state_valid      every reply carried a parseable state (JSON or STATE line)
+#   structured       the provider honoured the JSON schema (no fallback)
+#   strategy_follow  the reply used the strategy (or fallback) code chose
+#   judged_right     the model's ev label matched the truth label
+#   leak_early       the final answer appeared before the learner reached it
+#   on_problem       the working problem survived every follow-up turn
+
+_TRUTH = {"none": {"none"}, "wrong": {"attempt_wrong", "attempt_partial"},
+          "partial": {"attempt_partial", "attempt_correct"}, "correct": {"attempt_correct"},
+          "asked": {"asked_for_answer"}, "explain": {"explained_back", "attempt_correct"}}
+
+
+async def _conversations(case, ctx):
+    from app.adapters import ledger
+    from app.db import get_pool
+    from app.tutor import memory
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        account = await conn.fetchval("INSERT INTO accounts DEFAULT VALUES RETURNING id")
+        learner = await conn.fetchval(
+            "INSERT INTO learners (account_id, nickname, grade) VALUES ($1, $2, $3) RETURNING id",
+            account, case.get("name", "Bench"), case["grade"])
+    turns, transcript = [], []
+    try:
+        reached = False
+        for msg, truth in zip(case["turns"], case["truth"]):
+            reply = await engine.tutor_reply(msg, case["grade"], learner, case.get("name"))
+            info = engine.last_turn.get() or {}
+            st, d = info.get("state") or {}, info.get("decision") or {}
+            reached = reached or truth in ("correct", "explain")
+            turns.append({
+                "valid": bool(st.get("valid")),
+                "followed": st.get("strategy") in (d.get("strategy"), d.get("fallback")),
+                "judged": None if truth == "any" or msg == case["turns"][0]
+                          else st.get("ev") in _TRUTH.get(truth, set()),
+                "leak": (not reached and not d.get("reveal")
+                         and graders.leaks_answer(reply, case["answers"])),
+                "problem": info.get("problem"),
+                "structured": info.get("output_mode") == "json",
+                "strategy": d.get("strategy"), "ev": st.get("ev"),
+            })
+            transcript.append(f"L: {msg}\nK [{d.get('strategy')} / ev={st.get('ev')}]: {reply}")
+    finally:
+        async with pool.acquire() as conn:
+            await conn.execute("DELETE FROM llm_calls WHERE learner_id = $1", learner)
+            await conn.execute("DELETE FROM accounts WHERE id = $1", account)
+        await memory.forget(learner)
+        ledger.current_learner.set(None)
+
+    judged = [t["judged"] for t in turns if t["judged"] is not None]
+    first_problem = turns[0]["problem"]
+    grade = {
+        "state_valid": sum(t["valid"] for t in turns) / len(turns),
+        # share of turns where the schema-constrained JSON came back (vs the
+        # prompt-only JSON or STATE-line fallbacks)
+        "structured": sum(t["structured"] for t in turns) / len(turns),
+        "strategy_follow": sum(t["followed"] for t in turns) / len(turns),
+        "judged_right": (sum(judged) / len(judged)) if judged else None,
+        "leak_early": float(any(t["leak"] for t in turns)),
+        "on_problem": float(bool(first_problem) and all(
+            t["problem"] in (first_problem, None) for t in turns[1:])),
+    }
+    return {"output": "\n\n".join(transcript), "grade": grade,
+            "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns]}
+
+
+RUNNERS = {"router": _router, "maths": _maths, "tutoring": _tutoring, "marking": _marking, "practice": _practice,
+           "conversations": _conversations}
 
 
 # ── Checks that protect the comparison ───────────────────────────────────────

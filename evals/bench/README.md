@@ -10,7 +10,7 @@ Every model call goes through OpenRouter with one key (`OPENROUTER_API_KEY` in `
 |---|---|
 | `candidates.toml` | Models under test, their tiers, and the two judges. Edit freely |
 | `gates.toml` | Pass/fail gates, decision rule, and the message mix used for cost |
-| `cases/*.jsonl` | 216 Grade 8 cases: router 80, maths 40, tutoring 36, marking 40, practice 20 |
+| `cases/*.jsonl` | 216 Grade 8 cases: router 80, maths 40, tutoring 36, marking 40, practice 20; plus 8 multi-turn `conversations` (memory, STATE line, strategy choice; see `docs/memory-pedagogy.md`) |
 | `CASES.md` | All cases in one readable file for sign-off (`python -m evals.bench.cases`) |
 | `run.py` | Runs the suites. Resumable; one row per case per repeat |
 | `graders.py` / `judge.py` | Automatic checks, and the two blind AI judges |
