@@ -1,0 +1,1057 @@
+{
+ "grade": 9,
+ "source": "CAPS Senior Phase Mathematics Gr 7-9, s.2.7 Specification of content (phase overview)",
+ "objectives": [
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Properties of numbers",
+   "code": "ZA-MATH-G09-WN-001",
+   "objective": "Describe the real number system by recognising, defining and distinguishing properties of: natural numbers; whole numbers; integers; rational numbers; irrational numbers",
+   "term": 1,
+   "kind": "new",
+   "source_page": 17
+  },
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Calculations using whole numbers",
+   "code": "ZA-MATH-G09-WN-002",
+   "objective": "Revise calculations using all four operations on whole numbers, estimating and using calculators where appropriate",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 17
+  },
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-WN-003",
+   "objective": "Use a range of techniques to perform and check written and mental calculations of whole numbers including: long division; adding, subtracting and multiplying in columns; estimation; rounding off and compensating; using a calculator",
+   "term": 1,
+   "kind": "new",
+   "source_page": 17
+  },
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Multiples and factors",
+   "code": "ZA-MATH-G09-WN-004",
+   "objective": "Use prime factorisation of numbers to find LCM and HCF",
+   "term": 1,
+   "kind": "new",
+   "source_page": 18
+  },
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-WN-005",
+   "objective": "Solve problems in contexts involving: ratio and rate; direct and indirect proportion",
+   "term": 1,
+   "kind": "new",
+   "source_page": 18
+  },
+  {
+   "topic": "Whole numbers",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-WN-006",
+   "objective": "Solve problems that involve whole numbers, percentages and decimal fractions in financial contexts such as: profit, loss, discount and VAT; budgets; accounts; loans; simple interest; hire purchase; exchange rates; commission; rentals; compound interest",
+   "term": 1,
+   "kind": "new",
+   "source_page": 18
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Comparing and representing numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-001",
+   "objective": "Revise: compare and represent integers in exponential form",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Comparing and representing numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-002",
+   "objective": "Revise: compare and represent numbers in scientific notation",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Comparing and representing numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-003",
+   "objective": "Extend scientific notation to include negative exponents",
+   "term": 1,
+   "kind": "new",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-004",
+   "objective": "Revise the general law of exponents: aᵐ × aⁿ = aᵐ⁺ⁿ",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-005",
+   "objective": "Revise the general law of exponents: aᵐ ÷ aⁿ = aᵐ⁻ⁿ, if m > n",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-006",
+   "objective": "Revise the general law of exponents: (aᵐ)ⁿ = a^(m × n)",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-007",
+   "objective": "Revise the general law of exponents: (a × t)ⁿ = aⁿ × tⁿ",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-008",
+   "objective": "Revise the general law of exponents: a⁰ = 1",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-009",
+   "objective": "Extend the general laws of exponents to include integer exponents",
+   "term": 1,
+   "kind": "new",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-010",
+   "objective": "Extend the general laws of exponents to include a⁻ᵐ = 1/aᵐ",
+   "term": 1,
+   "kind": "new",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Calculations using numbers in exponential form",
+   "code": "ZA-MATH-G09-EXP-011",
+   "objective": "Perform calculations involving all four operations using numbers in exponential form, using the laws of exponents",
+   "term": 1,
+   "kind": "new",
+   "source_page": 19
+  },
+  {
+   "topic": "Exponents",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-EXP-012",
+   "objective": "Solve problems in contexts involving numbers in exponential form, including scientific notation",
+   "term": 1,
+   "kind": "new",
+   "source_page": 19
+  },
+  {
+   "topic": "Integers",
+   "subtopic": "Calculations with integers",
+   "code": "ZA-MATH-G09-INT-001",
+   "objective": "Revise: perform calculations involving all four operations with integers",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 20
+  },
+  {
+   "topic": "Integers",
+   "subtopic": "Calculations with integers",
+   "code": "ZA-MATH-G09-INT-002",
+   "objective": "Revise: perform calculations involving all four operations with numbers that involve the squares, cubes, square roots and cube roots of integers",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 20
+  },
+  {
+   "topic": "Integers",
+   "subtopic": "Properties of integers",
+   "code": "ZA-MATH-G09-INT-003",
+   "objective": "Revise: commutative, associative and distributive properties of addition and multiplication for integers",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 20
+  },
+  {
+   "topic": "Integers",
+   "subtopic": "Properties of integers",
+   "code": "ZA-MATH-G09-INT-004",
+   "objective": "Revise: additive and multiplicative inverses for integers",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 20
+  },
+  {
+   "topic": "Integers",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-INT-005",
+   "objective": "Solve problems in contexts involving multiple operations with integers",
+   "term": 1,
+   "kind": "new",
+   "source_page": 20
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculations with fractions",
+   "code": "ZA-MATH-G09-CF-001",
+   "objective": "All four operations with common fractions and mixed numbers",
+   "term": 1,
+   "kind": "new",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculations with fractions",
+   "code": "ZA-MATH-G09-CF-002",
+   "objective": "All four operations, with numbers that involve the squares, cubes, square roots and cube roots of common fractions",
+   "term": 1,
+   "kind": "new",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-CF-003",
+   "objective": "Revise: convert mixed numbers to common fractions in order to perform calculations with them",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-CF-004",
+   "objective": "Revise: use knowledge of multiples and factors to write fractions in the simplest form before or after calculations",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-CF-005",
+   "objective": "Revise: use knowledge of equivalent fractions to add and subtract common fractions",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-CF-006",
+   "objective": "Revise: use knowledge of reciprocal relationships to divide common fractions",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-CF-007",
+   "objective": "Solve problems in contexts involving common fractions, mixed numbers and percentages",
+   "term": 1,
+   "kind": "new",
+   "source_page": 21
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-CF-008",
+   "objective": "Revise equivalent forms between common fractions where one denominator is a multiple of another",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 22
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-CF-009",
+   "objective": "Revise equivalent forms between common fraction and decimal fraction forms of the same number",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 22
+  },
+  {
+   "topic": "Common Fractions",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-CF-010",
+   "objective": "Revise equivalent forms between common fraction, decimal fraction and percentage forms of the same number",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 22
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Calculations with decimal fractions",
+   "code": "ZA-MATH-G09-DF-001",
+   "objective": "Multiple operations with decimal fractions, using a calculator where appropriate",
+   "term": 1,
+   "kind": "new",
+   "source_page": 23
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Calculations with decimal fractions",
+   "code": "ZA-MATH-G09-DF-002",
+   "objective": "Multiple operations with or without brackets, with numbers that involve the squares, cubes, square roots and cube roots of decimal fractions",
+   "term": 1,
+   "kind": "new",
+   "source_page": 23
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-DF-003",
+   "objective": "Use knowledge of place value to estimate the number of decimal places in the result before performing calculations",
+   "term": 1,
+   "kind": "new",
+   "source_page": 23
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Calculation techniques",
+   "code": "ZA-MATH-G09-DF-004",
+   "objective": "Use rounding off and a calculator to check results where appropriate",
+   "term": 1,
+   "kind": "new",
+   "source_page": 23
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-DF-005",
+   "objective": "Solve problems in context involving decimal fractions",
+   "term": 1,
+   "kind": "new",
+   "source_page": 24
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-DF-006",
+   "objective": "Revise equivalent forms between common fraction and decimal fraction forms of the same number",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 24
+  },
+  {
+   "topic": "Decimal Fractions",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-DF-007",
+   "objective": "Revise equivalent forms between common fraction, decimal fraction and percentage forms of the same number",
+   "term": 1,
+   "kind": "revision",
+   "source_page": 24
+  },
+  {
+   "topic": "Numeric and Geometric Patterns",
+   "subtopic": "Investigate and extend patterns",
+   "code": "ZA-MATH-G09-PAT-001",
+   "objective": "Investigate and extend numeric and geometric patterns looking for relationships between numbers, including patterns: represented in physical or diagram form; not limited to sequences involving a constant difference or ratio; of learner’s own creation; represented in tables; represented algebraically",
+   "term": 1,
+   "kind": "new",
+   "source_page": 25
+  },
+  {
+   "topic": "Numeric and Geometric Patterns",
+   "subtopic": "Investigate and extend patterns",
+   "code": "ZA-MATH-G09-PAT-002",
+   "objective": "Describe and justify the general rules for observed relationships between numbers in own words or in algebraic language",
+   "term": 1,
+   "kind": "new",
+   "source_page": 25
+  },
+  {
+   "topic": "Functions and Relationships",
+   "subtopic": "Input and output values",
+   "code": "ZA-MATH-G09-FUNC-001",
+   "objective": "Determine input values, output values or rules for patterns and relationships using: flow diagrams; tables; formulae; equations",
+   "term": null,
+   "kind": "new",
+   "source_page": 26
+  },
+  {
+   "topic": "Functions and Relationships",
+   "subtopic": "Equivalent forms",
+   "code": "ZA-MATH-G09-FUNC-002",
+   "objective": "Determine, interpret and justify equivalence of different descriptions of the same relationship or rule presented: verbally; in flow diagrams; in tables; by formulae; by equations; by graphs on a Cartesian plane",
+   "term": null,
+   "kind": "new",
+   "source_page": 26
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Algebraic language",
+   "code": "ZA-MATH-G09-ALGEXP-001",
+   "objective": "Revise (done in Grade 8): recognize and identify conventions for writing algebraic expressions",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Algebraic language",
+   "code": "ZA-MATH-G09-ALGEXP-002",
+   "objective": "Revise (done in Grade 8): identify and classify like and unlike terms in algebraic expressions",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Algebraic language",
+   "code": "ZA-MATH-G09-ALGEXP-003",
+   "objective": "Revise (done in Grade 8): recognize and identify coefficients and exponents in algebraic expressions",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Algebraic language",
+   "code": "ZA-MATH-G09-ALGEXP-004",
+   "objective": "Recognize and differentiate between monomials, binomials and trinomials",
+   "term": null,
+   "kind": "new",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-005",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: add and subtract like terms in algebraic expressions",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-006",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: multiply integers and monomials by: monomials; binomials; trinomials",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-007",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: divide the following by integers or monomials: monomials; binomials; trinomials",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-008",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: simplify algebraic expressions involving the above operations",
+   "term": null,
+   "kind": "revision",
+   "source_page": 27
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-009",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: determine the squares, cubes, square roots and cube roots of single algebraic terms or like algebraic terms",
+   "term": null,
+   "kind": "revision",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-010",
+   "objective": "Revise (done in Grade 8), using the commutative, associative and distributive laws for rational numbers and laws of exponents: determine the numerical value of algebraic expressions by substitution",
+   "term": null,
+   "kind": "revision",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-011",
+   "objective": "Extend the above algebraic manipulations to include: multiply integers and monomials by polynomials",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-012",
+   "objective": "Extend the above algebraic manipulations to include: divide polynomials by integers or monomials",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-013",
+   "objective": "Extend the above algebraic manipulations to include: the product of two binomials",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Expand and simplify algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-014",
+   "objective": "Extend the above algebraic manipulations to include: the square of a binomial",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Factorize algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-015",
+   "objective": "Factorize algebraic expressions that involve: common factors; difference of two squares; trinomials of the form x² + bx + c and ax² + bx + c, where a is a common factor",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Factorize algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-016",
+   "objective": "Simplify algebraic expressions that involve the above factorisation processes",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Expressions",
+   "subtopic": "Factorize algebraic expressions",
+   "code": "ZA-MATH-G09-ALGEXP-017",
+   "objective": "Simplify algebraic fractions using factorisation",
+   "term": null,
+   "kind": "new",
+   "source_page": 28
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-001",
+   "objective": "Revise (done in Grade 8): set up equations to describe problem situations",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-002",
+   "objective": "Revise (done in Grade 8): analyse and interpret equations that describe a given situation",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-003",
+   "objective": "Revise (done in Grade 8): solve equations by inspection",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-004",
+   "objective": "Revise (done in Grade 8): solve equations using additive and multiplicative inverses",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-005",
+   "objective": "Revise (done in Grade 8): solve equations using laws of exponents",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-006",
+   "objective": "Revise (done in Grade 8): determine the numerical value of an expression by substitution",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-007",
+   "objective": "Revise (done in Grade 8): use substitution in equations to generate tables of ordered pairs",
+   "term": null,
+   "kind": "revision",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-008",
+   "objective": "Extend solving equations to include using factorisation",
+   "term": null,
+   "kind": "new",
+   "source_page": 29
+  },
+  {
+   "topic": "Algebraic Equations",
+   "subtopic": "Equations",
+   "code": "ZA-MATH-G09-ALGEQ-009",
+   "objective": "Extend solving equations to include equations of the form: a product of factors = 0",
+   "term": null,
+   "kind": "new",
+   "source_page": 29
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Interpreting graphs",
+   "code": "ZA-MATH-G09-GRAPH-001",
+   "objective": "Revise (done in Grade 8): analyse and interpret global graphs of problem situations, with a special focus on the following trends and features: linear or non-linear; constant, increasing or decreasing; maximum or minimum; discrete or continuous",
+   "term": 3,
+   "kind": "revision",
+   "source_page": 30
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Interpreting graphs",
+   "code": "ZA-MATH-G09-GRAPH-002",
+   "objective": "Extend the analysis and interpretation of graphs with special focus on the following features of linear graphs: x-intercept and y-intercept; gradient",
+   "term": 3,
+   "kind": "new",
+   "source_page": 30
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Drawing graphs",
+   "code": "ZA-MATH-G09-GRAPH-003",
+   "objective": "Revise (done in Grade 8): draw global graphs from given descriptions of a problem situation, identifying features listed above (linear or non-linear; constant, increasing or decreasing; maximum or minimum; discrete or continuous)",
+   "term": 3,
+   "kind": "revision",
+   "source_page": 30
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Drawing graphs",
+   "code": "ZA-MATH-G09-GRAPH-004",
+   "objective": "Revise (done in Grade 8): use tables of ordered pairs to plot points and draw graphs on the Cartesian plane",
+   "term": 3,
+   "kind": "revision",
+   "source_page": 30
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Drawing graphs",
+   "code": "ZA-MATH-G09-GRAPH-005",
+   "objective": "Extend drawing graphs with special focus on drawing linear graphs from given equations",
+   "term": 3,
+   "kind": "new",
+   "source_page": 30
+  },
+  {
+   "topic": "Graphs",
+   "subtopic": "Drawing graphs",
+   "code": "ZA-MATH-G09-GRAPH-006",
+   "objective": "Extend drawing graphs with special focus on determining equations from given linear graphs",
+   "term": 3,
+   "kind": "new",
+   "source_page": 30
+  },
+  {
+   "topic": "Geometry of 2D Shapes",
+   "subtopic": "Classifying 2D shapes",
+   "code": "ZA-MATH-G09-SHAPES-001",
+   "objective": "Revise properties and definitions of triangles in terms of their sides and angles, distinguishing between: equilateral triangles; isosceles triangles; right-angled triangles",
+   "term": 2,
+   "kind": "revision",
+   "source_page": 31
+  },
+  {
+   "topic": "Geometry of 2D Shapes",
+   "subtopic": "Classifying 2D shapes",
+   "code": "ZA-MATH-G09-SHAPES-002",
+   "objective": "Revise and write clear definitions of quadrilaterals in terms of their sides, angles and diagonals, distinguishing between: parallelogram; rectangle; square; rhombus; trapezium; kite",
+   "term": 2,
+   "kind": "revision",
+   "source_page": 31
+  },
+  {
+   "topic": "Geometry of 2D Shapes",
+   "subtopic": "Similar and congruent triangles",
+   "code": "ZA-MATH-G09-SHAPES-003",
+   "objective": "Through investigation, establish the minimum conditions for congruent triangles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of 2D Shapes",
+   "subtopic": "Similar and congruent triangles",
+   "code": "ZA-MATH-G09-SHAPES-004",
+   "objective": "Through investigation, establish the minimum conditions for similar triangles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of 2D Shapes",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-SHAPES-005",
+   "objective": "Solve geometric problems involving unknown sides and angles in triangles and quadrilaterals, using known properties of triangles and quadrilaterals, as well as properties of congruent and similar triangles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of 3D Objects",
+   "subtopic": "Classifying 3D objects",
+   "code": "ZA-MATH-G09-OBJECTS-001",
+   "objective": "Revise properties and definitions of the 5 Platonic solids in terms of the shape and number of faces, the number of vertices and the number of edges",
+   "term": 4,
+   "kind": "revision",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of 3D Objects",
+   "subtopic": "Classifying 3D objects",
+   "code": "ZA-MATH-G09-OBJECTS-002",
+   "objective": "Recognize and describe the properties of: spheres; cylinders",
+   "term": 4,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of 3D Objects",
+   "subtopic": "Building 3D models",
+   "code": "ZA-MATH-G09-OBJECTS-003",
+   "objective": "Use nets to create models of geometric solids, including: cubes; prisms; pyramids; cylinders",
+   "term": 4,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of Straight Lines",
+   "subtopic": "Angle relationships",
+   "code": "ZA-MATH-G09-LINES-001",
+   "objective": "Revise and write clear descriptions of the relationship between angles formed by: perpendicular lines; intersecting lines; parallel lines cut by a transversal",
+   "term": 2,
+   "kind": "revision",
+   "source_page": 32
+  },
+  {
+   "topic": "Geometry of Straight Lines",
+   "subtopic": "Solving problems",
+   "code": "ZA-MATH-G09-LINES-002",
+   "objective": "Solve geometric problems using the relationships between pairs of angles described above (formed by perpendicular lines, intersecting lines, and parallel lines cut by a transversal)",
+   "term": 2,
+   "kind": "new",
+   "source_page": 32
+  },
+  {
+   "topic": "Transformation Geometry",
+   "subtopic": "Transformations",
+   "code": "ZA-MATH-G09-TRANS-001",
+   "objective": "Recognize, describe and perform transformations with points, line segments and simple geometric figures on a co-ordinate plane, focusing on: reflection in the X-axis or Y-axis; translation within and across quadrants; reflection in the line y = x",
+   "term": 4,
+   "kind": "new",
+   "source_page": 33
+  },
+  {
+   "topic": "Transformation Geometry",
+   "subtopic": "Transformations",
+   "code": "ZA-MATH-G09-TRANS-002",
+   "objective": "Identify what the transformation of a point is, if given the co-ordinates of its image",
+   "term": 4,
+   "kind": "new",
+   "source_page": 33
+  },
+  {
+   "topic": "Transformation Geometry",
+   "subtopic": "Enlargements and reductions",
+   "code": "ZA-MATH-G09-TRANS-003",
+   "objective": "Use proportion to describe the effect of enlargement or reduction on area and perimeter of geometric figures",
+   "term": 4,
+   "kind": "new",
+   "source_page": 33
+  },
+  {
+   "topic": "Transformation Geometry",
+   "subtopic": "Enlargements and reductions",
+   "code": "ZA-MATH-G09-TRANS-004",
+   "objective": "Investigate the co-ordinates of the vertices of figures that have been enlarged or reduced by a given scale factor",
+   "term": 4,
+   "kind": "new",
+   "source_page": 33
+  },
+  {
+   "topic": "Construction of Geometric Figures",
+   "subtopic": "Constructions",
+   "code": "ZA-MATH-G09-CONSTR-001",
+   "objective": "Accurately construct geometric figures appropriately using a compass, ruler and protractor, including bisecting angles of a triangle",
+   "term": 2,
+   "kind": "new",
+   "source_page": 34
+  },
+  {
+   "topic": "Construction of Geometric Figures",
+   "subtopic": "Constructions",
+   "code": "ZA-MATH-G09-CONSTR-002",
+   "objective": "Construct angles of 30°, 45°, 60° and their multiples without using a protractor",
+   "term": 2,
+   "kind": "new",
+   "source_page": 34
+  },
+  {
+   "topic": "Construction of Geometric Figures",
+   "subtopic": "Investigating properties of geometric figures",
+   "code": "ZA-MATH-G09-CONSTR-003",
+   "objective": "By construction, investigate the angles in a triangle, focusing on the relationship between the exterior angle of a triangle and its interior angles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 34
+  },
+  {
+   "topic": "Construction of Geometric Figures",
+   "subtopic": "Investigating properties of geometric figures",
+   "code": "ZA-MATH-G09-CONSTR-004",
+   "objective": "By construction, investigate sides, angles and diagonals in quadrilaterals, focusing on: the diagonals of rectangles, squares, parallelograms, rhombi and kites; exploring the sum of the interior angles of polygons",
+   "term": 2,
+   "kind": "new",
+   "source_page": 34
+  },
+  {
+   "topic": "Construction of Geometric Figures",
+   "subtopic": "Investigating properties of geometric figures",
+   "code": "ZA-MATH-G09-CONSTR-005",
+   "objective": "By construction, explore the minimum conditions for two triangles to be congruent",
+   "term": 2,
+   "kind": "new",
+   "source_page": 34
+  },
+  {
+   "topic": "Area and Perimeter",
+   "subtopic": "Area and perimeter",
+   "code": "ZA-MATH-G09-AREA-001",
+   "objective": "Use appropriate formulae and conversions between SI units, to solve problems and calculate perimeter and area of: polygons; circles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 35
+  },
+  {
+   "topic": "Area and Perimeter",
+   "subtopic": "Area and perimeter",
+   "code": "ZA-MATH-G09-AREA-002",
+   "objective": "Investigate how doubling any or all of the dimensions of a 2D figure affects its perimeter and its area",
+   "term": 2,
+   "kind": "new",
+   "source_page": 35
+  },
+  {
+   "topic": "Surface Area and Volume",
+   "subtopic": "Surface area and volume",
+   "code": "ZA-MATH-G09-SURFVOL-001",
+   "objective": "Use appropriate formulae and conversions between SI units to solve problems and calculate the surface area, volume and capacity of: cubes; rectangular prisms; triangular prisms; cylinders",
+   "term": 3,
+   "kind": "new",
+   "source_page": 36
+  },
+  {
+   "topic": "Surface Area and Volume",
+   "subtopic": "Surface area and volume",
+   "code": "ZA-MATH-G09-SURFVOL-002",
+   "objective": "Investigate how doubling any or all the dimensions of right prisms and cylinders affects their volume",
+   "term": 3,
+   "kind": "new",
+   "source_page": 36
+  },
+  {
+   "topic": "Theorem of Pythagoras",
+   "subtopic": "Solve problems using the Theorem of Pythagoras",
+   "code": "ZA-MATH-G09-PYTH-001",
+   "objective": "Use the Theorem of Pythagoras to solve problems involving unknown lengths in geometric figures that contain right-angled triangles",
+   "term": 2,
+   "kind": "new",
+   "source_page": 36
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Collect data",
+   "code": "ZA-MATH-G09-COLLECT-001",
+   "objective": "Pose questions relating to social, economic, and environmental issues",
+   "term": 4,
+   "kind": "new",
+   "source_page": 37
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Collect data",
+   "code": "ZA-MATH-G09-COLLECT-002",
+   "objective": "Select and justify appropriate sources for the collection of data",
+   "term": 4,
+   "kind": "new",
+   "source_page": 37
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Collect data",
+   "code": "ZA-MATH-G09-COLLECT-003",
+   "objective": "Distinguish between samples and populations, and suggest appropriate samples for investigation",
+   "term": 4,
+   "kind": "new",
+   "source_page": 37
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Collect data",
+   "code": "ZA-MATH-G09-COLLECT-004",
+   "objective": "Select and justify appropriate methods for collecting data",
+   "term": 4,
+   "kind": "new",
+   "source_page": 37
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Organize and summarize data",
+   "code": "ZA-MATH-G09-COLLECT-005",
+   "objective": "Organize numerical data in different ways in order to summarize by determining: measures of central tendency; measures of dispersion, including extremes and outliers",
+   "term": 4,
+   "kind": "new",
+   "source_page": 38
+  },
+  {
+   "topic": "Collect, Organize and Summarize Data",
+   "subtopic": "Organize and summarize data",
+   "code": "ZA-MATH-G09-COLLECT-006",
+   "objective": "Organize data according to more than one criteria",
+   "term": 4,
+   "kind": "new",
+   "source_page": 38
+  },
+  {
+   "topic": "Represent Data",
+   "subtopic": "Represent data",
+   "code": "ZA-MATH-G09-REPDATA-001",
+   "objective": "Draw a variety of graphs by hand/technology to display and interpret data including: bar graphs and double bar graphs; histograms with given and own intervals; pie charts; broken-line graphs; scatter plots",
+   "term": 4,
+   "kind": "new",
+   "source_page": 38
+  },
+  {
+   "topic": "Interpret, Analyse and Report Data",
+   "subtopic": "Interpret data",
+   "code": "ZA-MATH-G09-INTERP-001",
+   "objective": "Critically read and interpret data represented in a variety of ways",
+   "term": 4,
+   "kind": "new",
+   "source_page": 39
+  },
+  {
+   "topic": "Interpret, Analyse and Report Data",
+   "subtopic": "Interpret data",
+   "code": "ZA-MATH-G09-INTERP-002",
+   "objective": "Critically compare two sets of data related to the same issue",
+   "term": 4,
+   "kind": "new",
+   "source_page": 39
+  },
+  {
+   "topic": "Interpret, Analyse and Report Data",
+   "subtopic": "Analyse data",
+   "code": "ZA-MATH-G09-INTERP-003",
+   "objective": "Critically analyse data by answering questions related to: data collection methods; summary of data; sources of error and bias in the data",
+   "term": 4,
+   "kind": "new",
+   "source_page": 39
+  },
+  {
+   "topic": "Interpret, Analyse and Report Data",
+   "subtopic": "Report data",
+   "code": "ZA-MATH-G09-INTERP-004",
+   "objective": "Summarize data in short paragraphs that include: drawing conclusions about the data; making predictions based on the data; making comparisons between two sets of data",
+   "term": 4,
+   "kind": "new",
+   "source_page": 39
+  },
+  {
+   "topic": "Interpret, Analyse and Report Data",
+   "subtopic": "Report data",
+   "code": "ZA-MATH-G09-INTERP-005",
+   "objective": "Summarize data in short paragraphs that include: identifying sources of error and bias in the data; choosing appropriate summary statistics for the data (mean, median, mode, range); the role of extremes and outliers in the data",
+   "term": 4,
+   "kind": "new",
+   "source_page": 39
+  },
+  {
+   "topic": "Probability",
+   "subtopic": "Probability",
+   "code": "ZA-MATH-G09-PROB-001",
+   "objective": "Consider situations with equally probable outcomes, and determine probabilities for compound events using two-way tables and tree diagrams",
+   "term": 4,
+   "kind": "new",
+   "source_page": 40
+  },
+  {
+   "topic": "Probability",
+   "subtopic": "Probability",
+   "code": "ZA-MATH-G09-PROB-002",
+   "objective": "Consider situations with equally probable outcomes, and determine the probabilities for outcomes of events and predict their relative frequency in simple experiments",
+   "term": 4,
+   "kind": "new",
+   "source_page": 40
+  },
+  {
+   "topic": "Probability",
+   "subtopic": "Probability",
+   "code": "ZA-MATH-G09-PROB-003",
+   "objective": "Consider situations with equally probable outcomes, and compare relative frequency with probability and explains possible differences",
+   "term": 4,
+   "kind": "new",
+   "source_page": 40
+  }
+ ],
+ "unmapped_caps_topics": [],
+ "topics_without_objectives": [],
+ "uncertain": [],
+ "notes": [
+  "Grade 9 column of the phase overview table (pp.17-40); phase-introduction prose ignored.",
+  "Superscripts restored in exponent laws (EXP-004..EXP-010) and factorisation trinomials (ALGEXP-015); a–m= a1m read as a⁻ᵐ = 1/aᵐ.",
+  "EXP-001/002: 'Revise compare and represent integers in exponential form' and its sub-item split into two revision LOs.",
+  "ALGEQ-004/005: CAPS sub-items 'using additive and multiplicative inverses' and 'using laws of exponents' continue 'solve equations'; verb restored.",
+  "GRAPH-002/005/006 and LINES-002: 'the above' made explicit from the preceding statement for standalone readability.",
+  "INTERP-004/005: Report-data statement exceeds 300 chars as one LO; split into two at a sub-item boundary.",
+  "INT-005: 'Solve problems' statement has no bullet marker in the source but is a curriculum statement; included.",
+  "CAPS 3.1 'Geometry of 2D shapes' -> app 'Geometry of 2D Shapes'; CAPS 4.1/4.2/4.3 full names map to the shorter app names.",
+  "PROB-003 keeps the CAPS wording 'explains'.",
+  "VERIFY: corrected note cross-references: superscript repairs are in EXP-004..EXP-010 (EXP-011 has none) and the trinomial repair is in ALGEXP-015 (no ALGEXP-018 exists). No objective text changed.",
+  "VERIFY: PROB-003 ending 'and explains possible differences' is cut off in sp_gr9_overview.txt but confirmed in sp_pages/p40.txt (Grade 9 column); kept."
+ ]
+}

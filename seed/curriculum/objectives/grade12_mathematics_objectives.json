@@ -1,0 +1,402 @@
+{
+  "grade": 12,
+  "source": "CAPS FET Mathematics Gr 10-12, s.3.2.3 Topic allocation per term",
+  "objectives": [
+    {
+      "topic": "Patterns, sequences and series",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PAT-001",
+      "objective": "Number patterns, including arithmetic and geometric sequences and series",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Patterns, sequences and series",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PAT-002",
+      "objective": "Sigma notation",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Patterns, sequences and series",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PAT-003",
+      "objective": "Derivation and application of the formulae for the sum of arithmetic and geometric series (the three formulae listed as 3.1, 3.2 and 3.3 are lost in the source extraction)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Functions and inverse functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FUNC-001",
+      "objective": "Definition of a function",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Functions and inverse functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FUNC-002",
+      "objective": "General concept of the inverse of a function and how the domain of the function may need to be restricted (in order to obtain a one-to-one function) to ensure that the inverse is a function",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Functions and inverse functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FUNC-003",
+      "objective": "Determine and sketch graphs of the inverses of the functions defined by the listed function forms (the defining equations are lost in the source extraction)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Functions and inverse functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FUNC-004",
+      "objective": "Focus on the following characteristics of the inverse graphs: domain and range, intercepts with the axes, turning points, minima, maxima, asymptotes (horizontal and vertical), shape and symmetry, average gradient (average rate of change), intervals on which the function increases/decreases",
+      "term": 1,
+      "kind": "new",
+      "source_page": 45
+    },
+    {
+      "topic": "Exponential and logarithmic functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-EXPLOG-001",
+      "objective": "Revision of the exponential function and the exponential laws and graph of the function defined by an exponential equation with conditions on the base (the equation and its conditions are lost in the source extraction)",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 46
+    },
+    {
+      "topic": "Exponential and logarithmic functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-EXPLOG-002",
+      "objective": "Understand the definition of a logarithm (the defining statement and its conditions are lost in the source extraction)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 46
+    },
+    {
+      "topic": "Exponential and logarithmic functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-EXPLOG-003",
+      "objective": "The graph of the function defined by y = log_b x for both the cases 0 < b < 1 and b > 1",
+      "term": 1,
+      "kind": "new",
+      "source_page": 46
+    },
+    {
+      "topic": "Finance, growth and decay",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FIN-001",
+      "objective": "Solve problems involving present value and future value annuities",
+      "term": 1,
+      "kind": "new",
+      "source_page": 47
+    },
+    {
+      "topic": "Finance, growth and decay",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FIN-002",
+      "objective": "Make use of logarithms to calculate the value of n, the time period, in the equations A = P(1 + i)ⁿ or a second compound growth/decay equation (lost in the source extraction)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 47
+    },
+    {
+      "topic": "Finance, growth and decay",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-FIN-003",
+      "objective": "Critically analyse investment and loan options and make informed decisions as to best option(s) (including pyramid)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 47
+    },
+    {
+      "topic": "Trigonometry - compound angles",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-TRIGCOMP-001",
+      "objective": "Compound angle identities (the list of identities is lost in the source extraction)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 47
+    },
+    {
+      "topic": "Trigonometry 2D and 3D",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-TRIGDIM-001",
+      "objective": "Solve problems in two and three dimensions",
+      "term": 2,
+      "kind": "new",
+      "source_page": 49
+    },
+    {
+      "topic": "Polynomial functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-POLY-001",
+      "objective": "Factorise third-degree polynomials. Apply the Remainder and Factor Theorems to polynomials of degree at most 3 (no proofs required)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 49
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-001",
+      "objective": "An intuitive understanding of the limit concept, in the context of approximating the rate of change or gradient of a function at a point",
+      "term": 2,
+      "kind": "new",
+      "source_page": 50
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-002",
+      "objective": "Use limits to define the derivative of a function f at any x (limit formula lost in the source extraction). Generalise to find the derivative of f at any point x in the domain of f, i.e., define the derivative function f'(x) of the function f(x)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 50
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-003",
+      "objective": "Understand intuitively that f'(a) is the gradient of the tangent to the graph of f at the point with x-coordinate a",
+      "term": 2,
+      "kind": "new",
+      "source_page": 50
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-004",
+      "objective": "Using the definition (first principle), find the derivative, f'(x) for a, b and c constants, of the listed functions (3.1 and 3.2 lost in the source extraction); f(x) = a/x; and f(x) = c",
+      "term": 2,
+      "kind": "new",
+      "source_page": 50
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-005",
+      "objective": "Use the formula for the derivative of xⁿ (for any real number n) together with the rules 4.1 (sum rule) and 4.2 (k a constant); the formulae themselves are lost in the source extraction",
+      "term": 2,
+      "kind": "new",
+      "source_page": 51
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-006",
+      "objective": "Find equations of tangents to graphs of functions",
+      "term": 2,
+      "kind": "new",
+      "source_page": 51
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-007",
+      "objective": "Introduce the second derivative of f(x) and how it determines the concavity of a function",
+      "term": 2,
+      "kind": "new",
+      "source_page": 51
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-008",
+      "objective": "Sketch graphs of cubic polynomial functions using differentiation to determine the co-ordinate of stationary points, and points of inflection (where concavity changes). Also, determine the x-intercepts of the graph using the factor theorem and other techniques",
+      "term": 2,
+      "kind": "new",
+      "source_page": 51
+    },
+    {
+      "topic": "Differential calculus",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-CALC-009",
+      "objective": "Solve practical problems concerning optimisation and rate of change, including calculus of motion",
+      "term": 2,
+      "kind": "new",
+      "source_page": 51
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-AG-001",
+      "objective": "The equation of a circle with radius r and centre (a; b) (the equation itself is lost in the source extraction)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 52
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-AG-002",
+      "objective": "Determination of the equation of a tangent to a given circle",
+      "term": 2,
+      "kind": "new",
+      "source_page": 52
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-GEOM-001",
+      "objective": "Revise earlier work on the necessary and sufficient conditions for polygons to be similar",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 53
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-GEOM-002",
+      "objective": "Prove (accepting results established in earlier grades) that a line drawn parallel to one side of a triangle divides the other two sides proportionally (and the Mid-point Theorem as a special case of this theorem)",
+      "term": 3,
+      "kind": "new",
+      "source_page": 53
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-GEOM-003",
+      "objective": "Prove (accepting results established in earlier grades) that equiangular triangles are similar",
+      "term": 3,
+      "kind": "new",
+      "source_page": 53
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-GEOM-004",
+      "objective": "Prove (accepting results established in earlier grades) that triangles with sides in proportion are similar",
+      "term": 3,
+      "kind": "new",
+      "source_page": 53
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-GEOM-005",
+      "objective": "Prove (accepting results established in earlier grades) the Pythagorean Theorem by similar triangles",
+      "term": 3,
+      "kind": "new",
+      "source_page": 53
+    },
+    {
+      "topic": "Statistics (regression and correlation)",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-STAT-001",
+      "objective": "Revise symmetric and skewed data",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 53
+    },
+    {
+      "topic": "Statistics (regression and correlation)",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-STAT-002",
+      "objective": "Use statistical summaries, scatterplots, regression (in particular the least squares regression line) and correlation to analyse and make meaningful comments on the context associated with given bivariate data, including interpolation, extrapolation and discussions on skewness",
+      "term": 3,
+      "kind": "new",
+      "source_page": 53
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-001",
+      "objective": "Revise dependent and independent events",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-002",
+      "objective": "Revise the product rule for independent events: P(A and B) = P(A) × P(B)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-003",
+      "objective": "Revise the sum rule for mutually exclusive events A and B: P(A or B) = P(A) + P(B)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-004",
+      "objective": "Revise the identity for P(A or B) in terms of P(A), P(B) and P(A and B) (formula partly lost in the source extraction)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-005",
+      "objective": "Revise the complementary rule for P(not A) (formula partly lost in the source extraction)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-006",
+      "objective": "Probability problems using Venn diagrams, trees, two-way contingency tables and other techniques (like the fundamental counting principle) to solve probability problems (where events are not necessarily independent)",
+      "term": 3,
+      "kind": "new",
+      "source_page": 54
+    },
+    {
+      "topic": "Counting and Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G12-PROB-007",
+      "objective": "Apply the fundamental counting principle to solve probability problems",
+      "term": 3,
+      "kind": "new",
+      "source_page": 54
+    }
+  ],
+  "unmapped_caps_topics": [],
+  "topics_without_objectives": [],
+  "uncertain": [
+    "ZA-MATH-G12-PAT-003",
+    "ZA-MATH-G12-FUNC-003",
+    "ZA-MATH-G12-EXPLOG-001",
+    "ZA-MATH-G12-EXPLOG-002",
+    "ZA-MATH-G12-FIN-002",
+    "ZA-MATH-G12-TRIGCOMP-001",
+    "ZA-MATH-G12-CALC-002",
+    "ZA-MATH-G12-CALC-004",
+    "ZA-MATH-G12-CALC-005",
+    "ZA-MATH-G12-AG-001",
+    "ZA-MATH-G12-PROB-004",
+    "ZA-MATH-G12-PROB-005"
+  ],
+  "notes": [
+    "Term 3 'Examinations / Revision' and Term 4 'Revision'/'Examinations' rows carry no curriculum statements and are not LOs.",
+    "Many formulae are blank in the extracted text (pages 45-47, 50-52, 54); those LOs describe the formula in words and are listed in 'uncertain'. Restore them from the CAPS PDF before learner-facing use.",
+    "Page 45 CAPS topic 'Functions' mapped to 'Functions and inverse functions'; page 46 'Functions: exponential and logarithmic' to 'Exponential and logarithmic functions'; page 49 'Functions: polynomials' to 'Polynomial functions'.",
+    "Page 47 'Trigonometry' (compound angles, term 1) mapped to 'Trigonometry - compound angles'; page 49 'Trigonometry continued' (2D/3D, term 2) to 'Trigonometry 2D and 3D'.",
+    "Calculus statement 2 split into two LOs (CALC-002/003) to stay under 300 chars; Functions statement 3 split into FUNC-003/004.",
+    "Probability statement 2 starts lower-case and may continue the 'Revise:' list; kept as kind 'new' since it does not itself say revise.",
+    "Source numbers calculus sub-items '3.3' twice (a/x and c); both kept in CALC-004.",
+    "VERIFY: EXPLOG-001 reworded to follow source ('graph of the function defined by ... where ...') instead of the paraphrase 'graph of the exponential function'.",
+    "VERIFY: Checked all 41 objectives and all 12 'uncertain' items against fet_gr12.txt pp.45-55 curriculum-statement column; grade, column, term and topic assignment correct; no missing Grade 12 curriculum statements found (p.48, p.52 mid-year, p.54-55 exam/revision rows carry assessment only). Lost formulae remain 'uncertain'."
+  ]
+}

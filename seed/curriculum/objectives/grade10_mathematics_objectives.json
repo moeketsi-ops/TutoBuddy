@@ -1,0 +1,535 @@
+{
+  "grade": 10,
+  "source": "CAPS FET Mathematics Gr 10-12, s.3.2.3 Topic allocation per term",
+  "objectives": [
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-001",
+      "objective": "Understand that real numbers can be rational or irrational.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-002",
+      "objective": "Establish between which two integers a given simple surd lies.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-003",
+      "objective": "Round real numbers to an appropriate degree of accuracy.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-004",
+      "objective": "Multiplication of a binomial by a trinomial.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-005",
+      "objective": "Factorisation to include types taught in grade 9 and: trinomials; grouping in pairs; sum and difference of two cubes.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Algebraic expressions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ALGEXP-006",
+      "objective": "Simplification of algebraic fractions using factorization with denominators of cubes (limited to sum and difference of cubes).",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-001",
+      "objective": "Revise the law of exponents learnt in Grade 9: xᵐ × xⁿ = xᵐ⁺ⁿ, where x, y > 0 and m, n ∈ Z.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-002",
+      "objective": "Revise the law of exponents learnt in Grade 9: xᵐ ÷ xⁿ = xᵐ⁻ⁿ, where x, y > 0 and m, n ∈ Z.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-003",
+      "objective": "Revise the law of exponents learnt in Grade 9: (xᵐ)ⁿ = xᵐⁿ, where x, y > 0 and m, n ∈ Z.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-004",
+      "objective": "Revise the law of exponents learnt in Grade 9: xᵐ × yᵐ = (xy)ᵐ, where x, y > 0 and m, n ∈ Z.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-005",
+      "objective": "Revise, by definition: x⁻ⁿ = 1/xⁿ, x ≠ 0.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-006",
+      "objective": "Revise, by definition: x⁰ = 1, x ≠ 0.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 26
+    },
+    {
+      "topic": "Exponents",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EXP-007",
+      "objective": "Use the laws of exponents to simplify expressions and solve equations, accepting that the rules also hold for m, n ∈ Q.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 26
+    },
+    {
+      "topic": "Number patterns",
+      "subtopic": "Patterns",
+      "code": "ZA-MATH-G10-NP-001",
+      "objective": "Investigate number patterns leading to those where there is a constant difference between consecutive terms, and the general term (without using a formula - see content overview) is therefore linear.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-001",
+      "objective": "Revise the solution of linear equations.",
+      "term": 1,
+      "kind": "revision",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-002",
+      "objective": "Solve quadratic equations (by factorisation).",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-003",
+      "objective": "Solve simultaneous linear equations in two unknowns.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-004",
+      "objective": "Solve word problems involving linear, quadratic or simultaneous linear equations.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-005",
+      "objective": "Solve literal equations (changing the subject of a formula).",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EQINEQ-006",
+      "objective": "Solve linear inequalities (and show solution graphically). Interval notation must be known.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 27
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-001",
+      "objective": "Define the trigonometric ratios sin θ, cos θ and tan θ, using right-angled triangles.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-002",
+      "objective": "Extend the definitions of sin θ, cos θ and tan θ for 0° ≤ θ ≤ 360°.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-003",
+      "objective": "Define the reciprocals of the trigonometric ratios cosec θ, sec θ and cot θ, using right-angled triangles (these three reciprocals should be examined in grade 10 only).",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-004",
+      "objective": "Derive values of the trigonometric ratios for the special cases (without using a calculator) θ ∈ {0°; 30°; 45°; 60°; 90°}.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-005",
+      "objective": "Solve two-dimensional problems involving right-angled triangles.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-006",
+      "objective": "Solve simple trigonometric equations for angles between 0° and 90°.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-007",
+      "objective": "Use diagrams to determine the numerical values of ratios for angles from 0° to 360°.",
+      "term": 1,
+      "kind": "new",
+      "source_page": 28
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FUNC-001",
+      "objective": "The concept of a function, where a certain quantity (output value) uniquely depends on another quantity (input value). Work with relationships between variables using tables, graphs, words and formulae. Convert flexibly between these representations.",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FUNC-002",
+      "objective": "Point by point plotting of basic graphs defined by y = x², y = 1/x and y = bˣ; b > 0 and b ≠ 1 to discover shape, domain (input values), range (output values), asymptotes, axes of symmetry, turning points and intercepts on the axes (where applicable).",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FUNC-003",
+      "objective": "Investigate the effect of a and q on the graphs defined by y = a.f(x) + q, where f(x) = x, f(x) = x², f(x) = 1/x and f(x) = bˣ, b > 0, b ≠ 1.",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FUNC-004",
+      "objective": "Sketch graphs, find the equations of given graphs and interpret graphs.",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Trigonometric functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIGFN-001",
+      "objective": "Point by point plotting of basic graphs defined by y = sin θ, y = cos θ and y = tan θ for θ ∈ [0°; 360°].",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Trigonometric functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIGFN-002",
+      "objective": "Study the effect of a and q on the graphs defined by: y = a.sin θ + q; y = a.cos θ + q; and y = a.tan θ + q, where a, q ∈ Q for θ ∈ [0°; 360°].",
+      "term": 2,
+      "kind": "new",
+      "source_page": 29
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EUCGEO-001",
+      "objective": "Revise basic results established in earlier grades regarding lines, angles and triangles, especially the similarity and congruence of triangles.",
+      "term": 2,
+      "kind": "revision",
+      "source_page": 30
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EUCGEO-002",
+      "objective": "Investigate line segments joining the mid-points of two sides of a triangle.",
+      "term": 2,
+      "kind": "new",
+      "source_page": 30
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EUCGEO-003",
+      "objective": "Define the following special quadrilaterals: the kite, parallelogram, rectangle, rhombus, square and trapezium. Investigate and make conjectures about the properties of the sides, angles, diagonals and areas of these quadrilaterals. Prove these conjectures.",
+      "term": 2,
+      "kind": "new",
+      "source_page": 30
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-EUCGEO-004",
+      "objective": "Solve problems and prove riders using the properties of parallel lines, triangles and quadrilaterals.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 33
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ANGEO-001",
+      "objective": "Represent geometric figures on a Cartesian co-ordinate system.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ANGEO-002",
+      "objective": "Derive and apply, for any two points (x₁; y₁) and (x₂; y₂), the formula for calculating the distance between the two points.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ANGEO-003",
+      "objective": "Derive and apply, for any two points (x₁; y₁) and (x₂; y₂), the formula for calculating the gradient of the line segment connecting the two points (and from that identify parallel and perpendicular lines).",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-ANGEO-004",
+      "objective": "Derive and apply, for any two points (x₁; y₁) and (x₂; y₂), the formula for calculating the coordinates of the mid-point of the line segment joining the two points.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Finance and growth",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FIN-001",
+      "objective": "Use the simple and compound growth formulae [A = P(1 + in) and A = P(1 + i)ⁿ] to solve problems, including annual interest, hire purchase, inflation, population growth and other real-life problems.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Finance and growth",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-FIN-002",
+      "objective": "Understand the implication of fluctuating foreign exchange rates (e.g. on the petrol price, imports, exports, overseas travel).",
+      "term": 3,
+      "kind": "new",
+      "source_page": 31
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-STATS-001",
+      "objective": "Revise measures of central tendency in ungrouped data.",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 32
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-STATS-002",
+      "objective": "Measures of central tendency in grouped data: calculation of mean estimate of grouped and ungrouped data and identification of modal interval and interval in which the median lies.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 32
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-STATS-003",
+      "objective": "Revision of range as a measure of dispersion and extension to include percentiles, quartiles, interquartile and semi interquartile range.",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 32
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-STATS-004",
+      "objective": "Five number summary (maximum, minimum and quartiles) and box and whisker diagram.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 32
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-STATS-005",
+      "objective": "Use the statistical summaries (measures of central tendency and dispersion), and graphs to analyse and make meaningful comments on the context associated with the given data.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 32
+    },
+    {
+      "topic": "Trigonometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-TRIG-008",
+      "objective": "Problems in two dimensions.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 33
+    },
+    {
+      "topic": "Measurement",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-MEAS-001",
+      "objective": "Revise the volume and surface areas of right-prisms and cylinders.",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 33
+    },
+    {
+      "topic": "Measurement",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-MEAS-002",
+      "objective": "Study the effect on volume and surface area when multiplying any dimension by a constant factor k.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 33
+    },
+    {
+      "topic": "Measurement",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-MEAS-003",
+      "objective": "Calculate the volume and surface areas of spheres, right pyramids and right cones.",
+      "term": 3,
+      "kind": "new",
+      "source_page": 33
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-PROB-001",
+      "objective": "The use of probability models to compare the relative frequency of events with the theoretical probability.",
+      "term": 4,
+      "kind": "new",
+      "source_page": 34
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-PROB-002",
+      "objective": "The use of Venn diagrams to solve probability problems, deriving and applying for any two events A and B in a sample space S: P(A or B) = P(A) + P(B) - P(A and B).",
+      "term": 4,
+      "kind": "new",
+      "source_page": 34
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G10-PROB-003",
+      "objective": "Derive and apply, for any two events A and B in a sample space S: A and B are mutually exclusive if P(A and B) = 0; A and B are complementary if they are mutually exclusive and P(A) + P(B) = 1. Then P(B) = P(not A).",
+      "term": 4,
+      "kind": "new",
+      "source_page": 34
+    }
+  ],
+  "unmapped_caps_topics": [],
+  "topics_without_objectives": [],
+  "uncertain": [
+    "ZA-MATH-G10-EXP-005",
+    "ZA-MATH-G10-FUNC-002",
+    "ZA-MATH-G10-TRIGFN-001",
+    "ZA-MATH-G10-TRIGFN-002",
+    "ZA-MATH-G10-FIN-001",
+    "ZA-MATH-G10-FUNC-003"
+  ],
+  "notes": [
+    "Only the Curriculum statement column of the Grade 10 term tables (PDF pp.26-34) was used; Clarification column (examples, comments, K/R/C/P tags) ignored.",
+    "source_page = the 'PDF PAGE N' marker (printed CAPS page numbers are 5 lower, e.g. PDF 26 = printed 21).",
+    "CAPS 'Numbers and patterns' -> app 'Number patterns'; CAPS 'Equations and Inequalities' -> 'Equations and inequalities'; 'Finance and growth', 'Analytical Geometry', 'Euclidean Geometry', 'Measurement', 'Statistics', 'Probability' match directly.",
+    "Real-number, surd and rounding statements (ALGEXP-001..003) sit under 'Algebraic expressions' in the CAPS term table and are kept there.",
+    "Term 2 'Functions' (4 + 1 weeks): statements 1-3 and 6 -> Functions; statements 4-5 (trig graphs, formulae lost as images in extraction) -> Trigonometric functions, matching the app's 1-week (4.5 h) Term 2 allocation and the overview listing trigonometric functions for Gr 10. Statement 6 (sketch/interpret) covers both per the CAPS note 'based on the observation of number 3 and 5' but is kept once under Functions.",
+    "TRIGFN-001/002: the function formulae and interval did not survive extraction; described in words. Standard CAPS reads y = sin θ, y = cos θ, y = tan θ for θ ∈ [0°; 360°]; verify against the PDF.",
+    "EXP-001..006: 'Revise laws of exponents' list split one LO per law/definition. EXP-005 negative-exponent definition formula lost in extraction; described in words.",
+    "FUNC-002: 'b ≠ 1' restored from a blank after 'b > 0 and'; verify against the PDF.",
+    "FIN-001: simple-growth formula A = P(1 + in) lost in extraction (only 'and A = P(1 + i)ⁿ]' survived); restored from the compound/simple pairing, verify against the PDF. The foreign-exchange sentence is a separate LO (FIN-002).",
+    "PROB-002/003: Venn-diagram statement exceeded 300 chars; split at the identity / mutually-exclusive-complementary boundary. P(A or B) identity restored from the s.3.1 overview; 'P(not A)' restored from a truncated line.",
+    "ALGEXP-005 kept as one LO (factorisation types are cases of one skill, per rule 2).",
+    "STATS-003 tagged 'revision' because CAPS says 'Revision of range', but it also introduces new content (percentiles, quartiles, IQR, semi-IQR).",
+    "TRIG-008 (Term 3 'Problems in two dimensions') overlaps TRIG-005 (Term 1); both kept as separate CAPS statements.",
+    "Revision (4 weeks, Term 4), Mid-year examinations and Examinations rows have no curriculum statements; not listed as topics.",
+    "Exponents Term 1 note: the graph y = x is assumed known from Grade 9 (Functions note, not an LO).",
+    "VERIFY: EXP-005 negative-exponent definition rewritten from words to notation x⁻ⁿ = 1/xⁿ, x ≠ 0 (formula image lost in extraction; 'x ≠ 0, and' survives at fet_gr10.txt l.49).",
+    "VERIFY: TRIGFN-001 'the trigonometric functions sine, cosine and tangent over the prescribed interval of θ' replaced by the CAPS formulae y = sin θ, y = cos θ and y = tan θ for θ ∈ [0°; 360°]; source keeps the skeleton 'defined by __, __ and __ for' (l.196-197); interval not legible in the text dump, still confirm against PDF p.29.",
+    "VERIFY: TRIGFN-002 paraphrase replaced by CAPS formulae y = a.sin θ + q; y = a.cos θ + q; y = a.tan θ + q, a, q ∈ Q, θ ∈ [0°; 360°]; source skeleton 'defined by: ; ; and ... where a, q ∈ Q for' (l.199-206) matches; interval still to confirm against PDF p.29.",
+    "VERIFY: FUNC-003 'b ≠ 1' restored after the trailing 'b > 0,' (l.193), consistent with FUNC-002 and the Gr 11 statement 'b>0, b≠1'; confirm against PDF p.29.",
+    "VERIFY: ALGEXP-006 spelling restored to source 'factorization' (l.27); no meaning change.",
+    "VERIFY: TRIG-005/TRIG-008 and EUCGEO-004 checked: Term 3 'Problems in two dimensions' (Trigonometry, 2 wks) and riders (Euclidean Geometry, 1 wk) are Grade 10 curriculum-statement text on PDF p.33; no other-grade or clarification text found in any sampled LO.",
+    "VERIFY: full scan of fet_gr10.txt curriculum-statement column (pp.26-34) found no Grade 10 statement missing from the file; all 55 objectives checked against source."
+  ]
+}

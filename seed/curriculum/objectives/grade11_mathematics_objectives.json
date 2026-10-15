@@ -1,0 +1,473 @@
+{
+  "grade": 11,
+  "source": "CAPS FET Mathematics Gr 10-12, s.3.2.3 Topic allocation per term",
+  "objectives": [
+    {
+      "topic": "Exponents and surds",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EXP-001",
+      "objective": "Simplify expressions and solve equations using the laws of exponents for rational exponents where x^(p/q) = q-th root of xᵖ; x > 0; q > 0",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Exponents and surds",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EXP-002",
+      "objective": "Add, subtract, multiply and divide simple surds",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Exponents and surds",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EXP-003",
+      "objective": "Solve simple equations involving surds",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EQ-001",
+      "objective": "Complete the square",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EQ-002",
+      "objective": "Quadratic equations (by factorisation and by using the quadratic formula)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EQ-003",
+      "objective": "Quadratic inequalities in one unknown (Interpret solutions graphically)",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EQ-004",
+      "objective": "Equations in two unknowns, one of which is linear and the other quadratic",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Equations and inequalities",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EQ-005",
+      "objective": "Nature of roots",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Number patterns",
+      "subtopic": "Patterns",
+      "code": "ZA-MATH-G11-NP-001",
+      "objective": "Investigate number patterns leading to those where there is a constant second difference between consecutive terms, and the general term is therefore quadratic",
+      "term": 1,
+      "kind": "new",
+      "source_page": 35
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-AG-001",
+      "objective": "Derive and apply the equation of a line through two given points",
+      "term": 1,
+      "kind": "new",
+      "source_page": 36
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-AG-002",
+      "objective": "Derive and apply the equation of a line through one point and parallel or perpendicular to a given line",
+      "term": 1,
+      "kind": "new",
+      "source_page": 36
+    },
+    {
+      "topic": "Analytical Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-AG-003",
+      "objective": "Derive and apply the inclination (θ) of a line, where m = tan θ is the gradient of the line",
+      "term": 1,
+      "kind": "new",
+      "source_page": 36
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-FN-001",
+      "objective": "Revise the effect of the parameters a and q on the graphs of the functions defined by: y = f(x) = a(x + p)² + q; y = f(x) = a/(x + p) + q; y = f(x) = a.b^(x + p) + q where b > 0, b ≠ 1",
+      "term": 2,
+      "kind": "revision",
+      "source_page": 37
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-FN-002",
+      "objective": "Investigate the effect of p on the graphs of the functions defined by: y = f(x) = a(x + p)² + q; y = f(x) = a/(x + p) + q; y = f(x) = a.b^(x + p) + q where b > 0, b ≠ 1",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Functions",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-FN-003",
+      "objective": "Investigate numerically the average gradient between two points on a curve and develop an intuitive understanding of the concept of the gradient of a curve at a point",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": "Trigonometric functions",
+      "code": "ZA-MATH-G11-TRIG-RG-001",
+      "objective": "Point by point plotting of basic graphs defined by y = sin θ, y = cos θ and y = tan θ for θ ∈ [−360°; 360°]",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": "Trigonometric functions",
+      "code": "ZA-MATH-G11-TRIG-RG-002",
+      "objective": "Investigate the effect of the parameter k on the graphs of the functions defined by y = sin(kx), y = cos(kx) and y = tan(kx)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": "Trigonometric functions",
+      "code": "ZA-MATH-G11-TRIG-RG-003",
+      "objective": "Investigate the effect of the parameter p on the graphs of the functions defined by y = sin(x + p), y = cos(x + p) and y = tan(x + p)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": "Trigonometric functions",
+      "code": "ZA-MATH-G11-TRIG-RG-004",
+      "objective": "Draw sketch graphs defined by: y = a sin k(x + p), y = a cos k(x + p) and y = a tan k(x + p) at most two parameters at a time",
+      "term": 2,
+      "kind": "new",
+      "source_page": 37
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-RG-005",
+      "objective": "Derive and use the identities tan θ = sin θ / cos θ (θ ≠ k.90°, k an odd integer) and sin²θ + cos²θ = 1",
+      "term": 2,
+      "kind": "new",
+      "source_page": 38
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-RG-006",
+      "objective": "Derive and use reduction formulae to simplify the following expressions: sin(90° ± θ), cos(90° ± θ); sin(180° ± θ), cos(180° ± θ), tan(180° ± θ); sin(360° ± θ), cos(360° ± θ), tan(360° ± θ); sin(−θ), cos(−θ), tan(−θ)",
+      "term": 2,
+      "kind": "new",
+      "source_page": 38
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-RG-007",
+      "objective": "Determine for which values of a variable an identity holds",
+      "term": 2,
+      "kind": "new",
+      "source_page": 38
+    },
+    {
+      "topic": "Trigonometry (reduction formulae, graphs, equations)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-RG-008",
+      "objective": "Determine the general solutions of trigonometric equations. Also, determine solutions in specific intervals",
+      "term": 2,
+      "kind": "new",
+      "source_page": 38
+    },
+    {
+      "topic": "Measurement",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-MEAS-001",
+      "objective": "Revise the Grade 10 work",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EG-001",
+      "objective": "Accept results established in earlier grades as axioms and also that a tangent to a circle is perpendicular to the radius, drawn to the point of contact",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-002",
+      "objective": "Investigate and prove the theorem of the geometry of circles: The line drawn from the centre of a circle perpendicular to a chord bisects the chord",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-003",
+      "objective": "Investigate and prove the theorem of the geometry of circles: The perpendicular bisector of a chord passes through the centre of the circle",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-004",
+      "objective": "Investigate and prove the theorem of the geometry of circles: The angle subtended by an arc at the centre of a circle is double the size of the angle subtended by the same arc at the circle (on the same side of the chord as the centre)",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-005",
+      "objective": "Investigate and prove the theorem of the geometry of circles: Angles subtended by a chord of the circle, on the same side of the chord, are equal",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-006",
+      "objective": "Investigate and prove the theorem of the geometry of circles: The opposite angles of a cyclic quadrilateral are supplementary",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-007",
+      "objective": "Investigate and prove the theorem of the geometry of circles: Two tangents drawn to a circle from the same point outside the circle are equal in length",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": "Theorems of the geometry of circles",
+      "code": "ZA-MATH-G11-EG-008",
+      "objective": "Investigate and prove the theorem of the geometry of circles: The angle between the tangent to a circle and the chord drawn from the point of contact is equal to the angle in the alternate segment",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Euclidean Geometry",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-EG-009",
+      "objective": "Use the above theorems and their converses, where they exist, to solve riders",
+      "term": 3,
+      "kind": "new",
+      "source_page": 39
+    },
+    {
+      "topic": "Trigonometry (sine, area, cosine rules)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-SAC-001",
+      "objective": "Prove and apply the sine, cosine and area rules",
+      "term": 3,
+      "kind": "new",
+      "source_page": 42
+    },
+    {
+      "topic": "Trigonometry (sine, area, cosine rules)",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-TRIG-SAC-002",
+      "objective": "Solve problems in two dimensions using the sine, cosine and area rules",
+      "term": 3,
+      "kind": "new",
+      "source_page": 42
+    },
+    {
+      "topic": "Finance, growth and decay",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-FIN-001",
+      "objective": "Use simple and compound decay formulae: A = P(1 − in) and A = P(1 − i)ⁿ to solve problems (including straight line depreciation and depreciation on a reducing balance)",
+      "term": 3,
+      "kind": "new",
+      "source_page": 42
+    },
+    {
+      "topic": "Finance, growth and decay",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-FIN-002",
+      "objective": "The effect of different periods of compound growth and decay, including nominal and effective interest rates",
+      "term": 3,
+      "kind": "new",
+      "source_page": 42
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-001",
+      "objective": "Revise the addition rule for mutually exclusive events: P(A or B) = P(A) + P(B)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 43
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-002",
+      "objective": "Revise the complementary rule: P(not A) = 1 − P(A)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 43
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-003",
+      "objective": "Revise the identity P(A or B) = P(A) + P(B) − P(A and B)",
+      "term": 3,
+      "kind": "revision",
+      "source_page": 43
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-004",
+      "objective": "Identify dependent and independent events and the product rule for independent events: P(A and B) = P(A) × P(B)",
+      "term": 3,
+      "kind": "new",
+      "source_page": 43
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-005",
+      "objective": "The use of Venn diagrams to solve probability problems, deriving and applying formulae for any three events A, B and C in a sample space S",
+      "term": 3,
+      "kind": "new",
+      "source_page": 43
+    },
+    {
+      "topic": "Probability",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-PROB-006",
+      "objective": "Use tree diagrams for the probability of consecutive or simultaneous events which are not necessarily independent",
+      "term": 3,
+      "kind": "new",
+      "source_page": 43
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-001",
+      "objective": "Histograms",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-002",
+      "objective": "Frequency polygons",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-003",
+      "objective": "Ogives (cumulative frequency curves)",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-004",
+      "objective": "Variance and standard deviation of ungrouped data",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-005",
+      "objective": "Symmetric and skewed data",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    },
+    {
+      "topic": "Statistics",
+      "subtopic": null,
+      "code": "ZA-MATH-G11-STAT-006",
+      "objective": "Identification of outliers",
+      "term": 4,
+      "kind": "new",
+      "source_page": 44
+    }
+  ],
+  "unmapped_caps_topics": [],
+  "topics_without_objectives": [],
+  "uncertain": [
+    "ZA-MATH-G11-EXP-001",
+    "ZA-MATH-G11-AG-003",
+    "ZA-MATH-G11-TRIG-RG-001",
+    "ZA-MATH-G11-TRIG-RG-002",
+    "ZA-MATH-G11-TRIG-RG-005",
+    "ZA-MATH-G11-TRIG-RG-006"
+  ],
+  "notes": [
+    "Grade 11 pages 35-44 only; Clarification column (examples, comments, K/R/C/P tags) and assessment blocks ignored.",
+    "CAPS 'Functions' (p37) spans two app topics: statements 1-2 (parabola, hyperbola, exponential; average gradient) -> Functions; statements 3-6 (trig graphs) -> Trigonometry (reduction formulae, graphs, equations), subtopic 'Trigonometric functions'.",
+    "FN-001/FN-002: statement 1 'Revise the effect of a and q and investigate the effect of p' split at the natural boundary into a revision LO and a new LO.",
+    "CAPS p42 'Trigonometry' (2 weeks, Term 3) mapped to Trigonometry (sine, area, cosine rules); CAPS p38 'Trigonometry' (Term 2) mapped to Trigonometry (reduction formulae, graphs, equations).",
+    "EXP-001: formula partly lost; restored as x^(p/q) = q-th root of x^p from visible fragments 'p q q p' and 'x > 0; q > 0'. Verify.",
+    "AG-003: 'm = tan θ' missing in extraction ('where ___ is the gradient'); restored from standard definition. Verify.",
+    "TRIG-RG-001: basic graphs y = sin θ, cos θ, tan θ not legible; only 'for θ ∈ [−360°; 360°]' visible. Restored from context of statements 4-6. Verify.",
+    "TRIG-RG-002: only y = sin(kx) visible; cos(kx) and tan(kx) restored by parallel with statement 5. Verify.",
+    "TRIG-RG-005: identity formulae not legible; only 'k an odd integer' visible. Restored as tan θ = sin θ/cos θ and sin²θ + cos²θ = 1 from the published CAPS. Verify against PDF.",
+    "TRIG-RG-006: sub-items 2.1-2.4 formulae not legible in extraction; restored as the standard CAPS Gr11 reduction formulae (90°±θ; 180°±θ; 360°±θ; −θ). Verify against PDF.",
+    "EQ: the NB under Equations (solving equations in two unknowns used with hyperbola-straight line graphs) is a teaching note, not a separate LO.",
+    "PROB-001..003: 'Revise' list of three distinct rules split into one revision LO each.",
+    "Euclidean Geometry: CAPS topic heading on p39 is 'Euclidean Geometry'; the 1-week 'Measurement' row on p39 maps to app topic Measurement.",
+    "VERIFY: all 49 objectives checked against fet_gr11.txt pp35-44; no wording, notation, topic or page fixes needed and no missing Grade 11 statements found (EQ 'NB' teaching note intentionally excluded). The 6 'uncertain' restorations match the visible fragments and the published CAPS wording but cannot be confirmed from the extracted text alone, so they remain in 'uncertain' pending a PDF check."
+  ]
+}
