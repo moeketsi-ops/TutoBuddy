@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katlego Session Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column; the calculator is the single interactive block; numbers in a mono face. */
+  :root {
+    --paper: #f4f6f2; --card: #ffffff; --ink: #17241d; --muted: #55665c; --line: #d8e0d9;
+    --green: #0b6e4f; --green-soft: #dcefe4; --gold: #9a6a12; --gold-soft: #f6ead0;
+    --chat: #e6ece5; --bubble-in: #ffffff; --bubble-out: #d5efdd;
+    --display: "Fraunces", Georgia, serif; --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #101713; --card: #182119; --ink: #e8ede8; --muted: #9cab9f; --line: #2b372e;
+      --green: #3fae85; --green-soft: #143628; --gold: #e0aa45; --gold-soft: #3a2f18;
+      --chat: #0c120e; --bubble-in: #222d24; --bubble-out: #0e3b2b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #101713; --card: #182119; --ink: #e8ede8; --muted: #9cab9f; --line: #2b372e;
+    --green: #3fae85; --green-soft: #143628; --gold: #e0aa45; --gold-soft: #3a2f18;
+    --chat: #0c120e; --bubble-in: #222d24; --bubble-out: #0e3b2b; color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+  .wrap { max-width: 820px; margin: 0 auto; padding-inline: 20px; padding-block: 44px 72px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--green); }
+  h1 { font-family: var(--display); font-size: clamp(32px, 6vw, 46px); line-height: 1.08; margin: 8px 0 14px; text-wrap: balance; }
+  h2 { font-family: var(--display); font-size: 24px; font-weight: 600; line-height: 1.2; margin-bottom: 10px; text-wrap: balance; }
+  h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  section { margin-top: 48px; }
+  p { max-width: 68ch; }
+  p + p { margin-top: 10px; }
+  .lede { font-size: 18px; color: var(--muted); }
+  .quote { margin-top: 22px; border-left: 3px solid var(--gold); background: var(--card); padding: 14px 18px; border-radius: 0 10px 10px 0; font-size: 15px; }
+  .quote b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+  ul.plain { padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin-top: 14px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--card); font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chip { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
+  .chip.model { background: var(--green-soft); color: var(--green); }
+  .chip.free { background: var(--line); color: var(--muted); }
+  .chip.guess { background: var(--gold-soft); color: var(--gold); }
+  .flow { display: grid; gap: 8px; margin-top: 14px; }
+  .step { display: grid; grid-template-columns: 26px 1fr auto; gap: 12px; align-items: start; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; }
+  .step .n { font-family: var(--mono); color: var(--muted); font-size: 13px; padding-top: 2px; }
+  .step p { font-size: 14px; color: var(--muted); max-width: none; }
+  .chat { background: var(--chat); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .bubble { max-width: 86%; padding: 8px 12px; border-radius: 10px; font-size: 14px; }
+  .bubble.out { align-self: flex-end; background: var(--bubble-out); border-top-right-radius: 3px; }
+  .bubble.in { align-self: flex-start; background: var(--bubble-in); border-top-left-radius: 3px; }
+  .bubble .meta { display: block; margin-top: 4px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .calc { margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 16px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px; }
+  .controls label { display: grid; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--muted); min-width: 0; flex: 1 1 180px; }
+  select, input { font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; width: 100%; }
+  select:focus-visible, input:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  .sessions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .sess { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+  .sess .name { font-weight: 700; font-size: 14px; }
+  .sess .calls { font-size: 12.5px; color: var(--muted); min-height: 36px; }
+  .sess .cost { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--green); font-variant-numeric: tabular-nums; }
+  .sess .sub { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .note { font-size: 13px; color: var(--muted); }
+  .bars { display: grid; gap: 6px; margin-top: 14px; max-width: 560px; }
+  .bar { display: grid; grid-template-columns: 70px 1fr 64px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar .track { height: 14px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--green); }
+  .bar .v { font-family: var(--mono); text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">For Moeketsi · Katlego model bake-off · updated 18 October 2026</div>
+    <h1>What a learner session costs, and how we'll measure it</h1>
+    <p class="lede">How the simulation works: what goes in, what comes out, what we measure on every model call, which cases we run, and how those numbers add up to the cost and time of a real learner session. This version includes your memory, mastery and pedagogy work, and Grade 12.</p>
+    <div class="quote"><b>Your question</b>A simulation that takes what the learner sends (text or photo), shows the tokens used and how long a concept takes to explain, so we know what a whole session costs. Plus a feel for the cost, reasoning and memory behind the mastery and pedagogy changes.</div>
+  </header>
+
+  <section>
+    <h2>The short answer</h2>
+    <ul class="plain">
+      <li><strong>Every model call is measured:</strong> tokens in, tokens out, hidden reasoning tokens, the dollars OpenRouter actually billed, and seconds to reply. Your new cost ledger now records the same for live WhatsApp traffic.</li>
+      <li><strong>A session is a chain of those calls.</strong> Its cost is the sum. The calculator below adds them up using prompt sizes measured from the code as it is now, memory included.</li>
+      <li><strong>Memory costs little and doesn't grow.</strong> With your memory window, a tutoring prompt is about 1,050–1,250 tokens. It stays flat across a conversation, because only the last 2 turns and a summary written by our code are carried.</li>
+      <li><strong>"How long a concept takes" is now measurable.</strong> 11 scripted learners walk through 3–4 turn conversations on your memory, mastery and strategy code. We count turns, tokens per turn, seconds, and whether the model judged each attempt correctly.</li>
+      <li><strong>Grade 8 and Grade 12 both run</strong>, and results are shown side by side for each grade.</li>
+      <li><strong>Gold "guess" labels are estimates</strong> until the first light run with the OpenRouter key replaces them with measured values.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What goes in, what comes out</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Learner sends</th><th>What the bot does with it</th><th>Model cost</th></tr></thead>
+      <tbody>
+        <tr><td>Text</td><td>Safety check, then sorting by a small router model, then the right handler. A reply to the problem being worked on skips the router</td><td>The handler's call, plus a router call when needed</td></tr>
+        <tr><td>Voice note</td><td>Transcribed on our own server (Whisper), then treated as text</td><td>No token cost for transcription; it takes CPU time instead</td></tr>
+        <tr><td>Photo</td><td>Goes straight to a vision-capable model with the tutoring instructions</td><td>One vision call; an image costs roughly 1,000–1,600 input tokens <span class="chip guess">guess</span></td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-top:14px">Every tutoring call now returns two things in one response: the reply the learner reads, and a small hidden <strong>state record</strong>. The record says what the learner did (an attempt that was right, wrong or partial, or a request for the answer), which learning objective it touched, any misconception, and which strategy was used. It adds about 30 output tokens instead of a second model call. Our code, not the model, turns it into mastery scores. Each call also produces a measurement record:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Measured per call</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>Input tokens</td><td>Our instructions, CAPS notes, memory and the learner's message. Mostly fixed cost per message</td></tr>
+        <tr><td>Output tokens</td><td>The visible reply plus the state record</td></tr>
+        <tr><td>Reasoning tokens</td><td>Hidden "thinking" before the reply. Billed like output, and controlled by the effort setting</td></tr>
+        <tr><td>Billed cost (USD)</td><td>OpenRouter's actual charge on that response, not an estimate</td></tr>
+        <tr><td>Seconds to reply</td><td>What the learner waits on WhatsApp</td></tr>
+        <tr><td>State valid / structured</td><td>Whether the model returned a usable state record, and whether it honoured the strict JSON format or needed a fallback</td></tr>
+        <tr><td>Served model and host</td><td>Proves which model and which data centre really answered</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>One message, step by step</h2>
+    <p>Only the green steps call a model and cost money. Input sizes are measured from the prompts our code builds today.</p>
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div><h3>Safety check</h3><p>Self-harm and abuse screen; risk goes to Childline and a human</p></div><span class="chip free">free</span></div>
+      <div class="step"><span class="n">2</span><div><h3>Consent, profile and memory</h3><p>Guardian consent, which learner is on the phone, then that learner's memory: the problem being worked on, last turns, mastery</p></div><span class="chip free">free</span></div>
+      <div class="step"><span class="n">3</span><div><h3>Sort the message</h3><p>Homework, quiz, chat or account question · about <b>80</b> input tokens, 1–3 out. Skipped when the learner is replying to the working problem</p></div><span class="chip model">router model</span></div>
+      <div class="step"><span class="n">4</span><div><h3>Choose the teaching move</h3><p>Code picks one of 8 strategies and the hint level, learning per learner and topic what works; it also picks a fallback in case the next attempt is wrong too</p></div><span class="chip free">free</span></div>
+      <div class="step"><span class="n">5a</span><div><h3>Tutor reply with state</h3><p>Instructions, grade rule, CAPS notes, memory and strategy · about <b>1,050–1,250</b> input tokens (about 830–930 without memory), up to 400 out</p></div><span class="chip model">reasoner model</span></div>
+      <div class="step"><span class="n">5b</span><div><h3>Practice question</h3><p>Topic, mastery level and 2 past-paper pages for style · about <b>680</b> (Grade 8) to <b>735</b> (Grade 12) input tokens, up to 300 out</p></div><span class="chip model">reasoner model</span></div>
+      <div class="step"><span class="n">5c</span><div><h3>Mark the answer</h3><p>Question, hidden answer and the learner's reply · about <b>340</b> input tokens, up to 200 out</p></div><span class="chip model">reasoner model</span></div>
+      <div class="step"><span class="n">6</span><div><h3>Update mastery and send</h3><p>Evidence from the state record moves the objective's score; the reply is re-screened and sent on WhatsApp</p></div><span class="chip free">free</span></div>
+    </div>
+    <div class="chat" aria-label="Example exchange with what each reply costs">
+      <div class="bubble out">How do I solve 3x + 4 = 19?<span class="meta">router: ~80 in · 1 out</span></div>
+      <div class="bubble in">What could you do to both sides to get rid of the + 4? 🤔<span class="meta">tutor: ~1,200 in · ~190 out (reply + state) + reasoning</span></div>
+      <div class="bubble out">minus 5?<span class="meta">continues the problem: no router call</span></div>
+      <div class="bubble in">Close! It's + 4 we want to undo. What's 19 − 4? 👍<span class="meta">tutor: ~1,250 in, the equation still in memory</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Memory: what it costs per turn</h2>
+    <p>Measured tutoring prompt size per turn in four of the scripted conversations, with the model call replaced by a stand-in so nothing was spent. The prompt grows a little after the first turn, then levels off: the cost of memory is capped.</p>
+    <div class="bars" id="membars" aria-label="Tutoring prompt tokens per turn"></div>
+    <p class="note" style="margin-top:8px">c01 and c02 are Grade 8 equations; c09 (derivative) and c10 (logarithms) are Grade 12. Output and reasoning tokens come on top of these figures, and the light run measures those.</p>
+  </section>
+
+  <section>
+    <h2>What a session costs</h2>
+    <p>Pick a router model, a tutor model and a reasoning effort. Each card adds up the calls in a typical session, memory included. Costs are in US dollars per session, and in rand per 1,000 sessions.</p>
+    <div class="calc">
+      <div class="controls">
+        <label for="router">Router model<select id="router"></select></label>
+        <label for="tutor">Tutor model<select id="tutor"></select></label>
+        <label for="effort">Reasoning effort<select id="effort">
+          <option value="none">none: no hidden thinking</option>
+          <option value="low" selected>low: about 600 reasoning tokens a reply</option>
+          <option value="medium">medium: about 1,500 a reply</option>
+        </select></label>
+        <label for="zar">Rand per US dollar (your rate)<input id="zar" type="number" min="1" step="0.1" value="18"></label>
+      </div>
+      <div class="sessions" id="sessions"></div>
+      <p class="note">Input sizes are measured. Visible reply lengths, reasoning tokens and image size are <span class="chip guess">guesses</span> until the light run measures them. Prices are OpenRouter's live list prices on 11 October 2026. Model tokens only; WhatsApp and hosting are separate.</p>
+    </div>
+    <div class="tablewrap" style="margin-top:18px"><table id="matrix" aria-label="Cost per session by tutor model"></table></div>
+    <p class="note" style="margin-top:8px">The same four sessions for every tutor model, with the router and effort chosen above. The cheapest model isn't automatically the answer: the bake-off decides who passes the quality gates first.</p>
+  </section>
+
+  <section>
+    <h2>How long does a concept take to explain?</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Measure</th><th>What it tells us</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Seconds per reply</td><td>How long a learner waits for each message, per model and effort</td><td>Measured on every call</td></tr>
+        <tr><td>Turns and tokens per concept</td><td>How many messages and tokens a scripted learner takes from question to correct answer</td><td>Measured by the conversations suite (11 learners, 3–4 turns)</td></tr>
+        <tr><td>Attempts judged right</td><td>Whether the model read each attempt correctly (wrong, partial, correct, asked for the answer). This drives the mastery score</td><td>Measured against a truth label on every learner message</td></tr>
+        <tr><td>Strategy followed</td><td>Whether the reply used the teaching move code chose, or its fallback</td><td>Measured per turn</td></tr>
+        <tr><td>Answer given away early</td><td>Whether the final answer appeared before the learner reached it</td><td>Measured per conversation</td></tr>
+        <tr><td>Open-ended sessions</td><td>A model playing a learner with a real misconception, for as many turns as it takes</td><td>Next step; scripted learners come first because they are reproducible</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>The cases we simulate</h2>
+    <p>314 cases on Grade 8 and Grade 12, all calling the real Katlego code with the same prompts, CAPS notes, memory and parsing as the live bot.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Suite</th><th class="num">Gr 8</th><th class="num">Gr 12</th><th>Example</th><th>How it's graded</th></tr></thead>
+      <tbody>
+        <tr><td>Router</td><td class="num" colspan="2">80</td><td>"ngifuna ukuzivivinya nge-algebra" should be <em>quiz</em></td><td>Right label or not; 20 per label, with code-switching, typos and voice-style text. Not grade-specific</td></tr>
+        <tr><td>Maths accuracy</td><td class="num">40</td><td class="num">31</td><td>"Calculate the monthly repayment on a R300 000 loan over 20 years at 10%"</td><td>Final answer matched automatically; every answer independently recomputed</td></tr>
+        <tr><td>Tutoring replies</td><td class="num">36</td><td class="num">24</td><td>"Sum to infinity of 16 + 8 + 4 is 64 because 16/0.25. Correct?"</td><td>Automatic: length, asks a question, no answer given away. Two AI judges score maths, grade fit, guiding and warmth. Grade 8 tests higher-grade redirects; Grade 12 tests brief revision of earlier work</td></tr>
+        <tr><td>Marking</td><td class="num">40</td><td class="num">20</td><td>"CORRECTNESS: correct — my answer is 24/25" should be <em>incorrect</em></td><td>Right verdict or not. The key number is wrong answers marked right</td></tr>
+        <tr><td>Practice questions</td><td class="num">20</td><td class="num">12</td><td>Write a "challenge" question on compound angles</td><td>Parses correctly; the judges re-solve it to check the hidden answer</td></tr>
+        <tr><td>Conversations</td><td class="num">8</td><td class="num">3</td><td>"Solve log2(x) = 5" → "x = 10" → "x = 2^5" → "x = 32"</td><td>State valid, structured, strategy followed, attempts judged right, answer not leaked, stays on the problem, tokens per turn</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note" style="margin-top:8px">For Grade 12 we also added CAPS tutoring notes for the 9 topics that had none (logs, inverses, annuities, compound angles, 2D/3D trig, polynomials, analytical and Euclidean geometry, regression). The full list of cases is in evals/bench/CASES.md on the bench/grade12 branch.</p>
+  </section>
+
+  <section>
+    <h2>Next: the light simulation</h2>
+    <ul class="plain">
+      <li>Four cheap candidates: Claude Haiku 5.5, DeepSeek V4 Flash, GLM-5.3-Flash and the current Qwen 3.5. Each runs 3 cases per suite for each grade.</li>
+      <li>The runner's quote: about 132 model calls, roughly <strong>13 US cents</strong> without the AI judges, or about <strong>$4</strong> with them. The judges read every tutoring and practice reply, so they are most of the cost.</li>
+      <li>This is the <strong>first time your memory, state record and strategy engine meet a real model</strong>. It will show whether models return valid state records and follow the chosen strategy.</li>
+      <li>The tutoring call asks OpenRouter only for hosts that support strict JSON output. A model whose hosts don't support it will show up as an error rather than a reply, which is cheap and useful to find out now.</li>
+      <li>It also checks whether Claude accepts the effort setting through OpenRouter.</li>
+    </ul>
+    <p style="margin-top:12px">Afterwards this page is refreshed with measured numbers in place of the guesses.</p>
+  </section>
+
+  <section>
+    <h2>Assumptions and limits</h2>
+    <ul class="plain">
+      <li>Visible reply guesses: router 3 tokens, tutor 190 (reply plus state record), practice question 120, marking 60. Vision: about 600 instruction tokens plus 1,200 image tokens.</li>
+      <li>Reasoning guesses per reasoner reply: none 0, low 600, medium 1,500. The router always runs at effort none.</li>
+      <li>In the sessions, follow-up replies to a problem skip the router, as your branch does.</li>
+      <li>Session shapes are illustrative until real WhatsApp traffic exists; your ledger will then give real ones.</li>
+      <li>CAPS note retrieval uses a simple offline matcher that sometimes picks the wrong note. It affects every model the same way, but it weakens grounding.</li>
+    </ul>
+  </section>
+
+  <footer>Prepared by Immanuel with Claude · Katlego (TutoBuddy) · prompt sizes measured on branches moeketsi/memory-pedagogy and bench/grade12.</footer>
+</div>
+
+<script>
+  // Live OpenRouter list prices, USD per 1M tokens (11 Oct 2026).
+  const MODELS = [
+    ["openai/gpt-oss-20b", "gpt-oss-20b (Groq)", 0.018, 0.09, false],
+    ["openai/gpt-oss-120b", "gpt-oss-120b (Groq)", 0.037, 0.17, false],
+    ["deepseek/deepseek-v4-flash", "DeepSeek V4 Flash", 0.03, 1.28, false],
+    ["qwen/qwen3.5-35b-a3b", "Qwen 3.5 35B (current)", 0.08, 0.75, true],
+    ["anthropic/claude-haiku-5.5", "Claude Haiku 5.5", 0.10, 0.50, true],
+    ["openai/gpt-6-luna", "GPT-6 Luna", 0.10, 0.50, true],
+    ["z-ai/glm-5.3-flash", "GLM-5.3-Flash", 0.15, 0.50, true],
+    ["openai/gpt-5.4-nano", "GPT-5.4 nano", 0.20, 1.25, true],
+    ["moonshotai/kimi-k3", "Kimi K3", 0.80, 10.00, true],
+    ["x-ai/grok-4.3", "Grok 4.3", 1.25, 2.50, true],
+    ["anthropic/claude-sonnet-5.5", "Claude Sonnet 5.5", 2.00, 10.00, true],
+  ];
+  // Per call: [input tokens (measured), visible output tokens (guess)].
+  const CALL = { router: [80, 3], tutor: [1200, 190], practice: [710, 120], marking: [340, 60], vision: [1800, 190] };
+  const REASONING = { none: 0, low: 600, medium: 1500 };
+  // Follow-up replies to the working problem skip the router (memory branch).
+  const SESSIONS = [
+    { name: "Quick question", desc: "1 message: sorted, then tutored", calls: { router: 1, tutor: 1 } },
+    { name: "Homework help", desc: "1 question and 3 attempts on it; the attempts skip the router", calls: { router: 1, tutor: 4 } },
+    { name: "Practice round", desc: "3 practice questions, each answered and marked", calls: { router: 3, practice: 3, marking: 3 } },
+    { name: "Photo homework", desc: "1 photo, then 3 follow-up replies", calls: { vision: 1, tutor: 3 } },
+  ];
+  // Measured tutoring prompt tokens per turn (model call faked, no spend).
+  const MEM = [["c01 · Gr 8", [1198, 1249, 1255, 1250]], ["c02 · Gr 8", [1163, 1203, 1196, 1198]],
+               ["c09 · Gr 12", [1092, 1132, 1143, 1133]], ["c10 · Gr 12", [1018, 1049, 1060, 1053]]];
+
+  const $ = id => document.getElementById(id);
+  $("membars").innerHTML = MEM.map(([name, turns]) => turns.map((t, i) =>
+    `<div class="bar"><span>${i === 0 ? name : ""}<span style="color:var(--muted)"> t${i + 1}</span></span>` +
+    `<span class="track"><span class="fill" style="display:block;width:${(t / 1400 * 100).toFixed(1)}%"></span></span>` +
+    `<span class="v">${t.toLocaleString()}</span></div>`).join("")).join("");
+
+  const byId = Object.fromEntries(MODELS.map(m => [m[0], m]));
+  function fill(sel, def) {
+    sel.innerHTML = MODELS.map(m => `<option value="${m[0]}"${m[0] === def ? " selected" : ""}>${m[1]} · $${m[2]} / $${m[3]}</option>`).join("");
+  }
+  fill($("router"), "openai/gpt-oss-20b");
+  fill($("tutor"), "anthropic/claude-haiku-5.5");
+
+  function callCost(kind, model, effort) {
+    const [tin, tout] = CALL[kind];
+    const reasoning = kind === "router" ? 0 : REASONING[effort];
+    return { usd: (tin * model[2] + (tout + reasoning) * model[3]) / 1e6, tokens: tin + tout + reasoning };
+  }
+  function sessionCost(s, router, tutor, effort) {
+    let usd = 0, tokens = 0;
+    for (const [kind, n] of Object.entries(s.calls)) {
+      const c = callCost(kind, kind === "router" ? router : tutor, effort);
+      usd += c.usd * n; tokens += c.tokens * n;
+    }
+    return { usd, tokens };
+  }
+  const money = v => v < 0.01 ? "$" + v.toFixed(5) : "$" + v.toFixed(4);
+  function render() {
+    const router = byId[$("router").value], tutor = byId[$("tutor").value];
+    const effort = $("effort").value, zar = parseFloat($("zar").value) || 18;
+    $("sessions").innerHTML = SESSIONS.map(s => {
+      const c = sessionCost(s, router, tutor, effort);
+      const noVision = s.calls.vision && !tutor[4];
+      return `<div class="sess"><span class="name">${s.name}</span><span class="calls">${s.desc}</span>
+        <span class="cost">${noVision ? "—" : money(c.usd)}</span>
+        <span class="sub">${noVision ? "tutor model can't read photos" : `≈ ${c.tokens.toLocaleString()} tokens · R${(c.usd * zar * 1000).toFixed(2)} per 1,000 sessions`}</span></div>`;
+    }).join("");
+    const head = `<thead><tr><th>Tutor model</th>${SESSIONS.map(s => `<th class="num">${s.name}</th>`).join("")}</tr></thead>`;
+    const body = MODELS.map(m => `<tr><td>${m[1]}</td>${SESSIONS.map(s =>
+      (s.calls.vision && !m[4]) ? `<td class="num">no photos</td>` : `<td class="num">${money(sessionCost(s, router, m, effort).usd)}</td>`
+    ).join("")}</tr>`).join("");
+    $("matrix").innerHTML = head + `<tbody>${body}</tbody>`;
+  }
+  ["router", "tutor", "effort", "zar"].forEach(id => $(id).addEventListener("input", render));
+  render();
+</script>
+
+</html>
