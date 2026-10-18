@@ -12,6 +12,7 @@ def normalize(text: str) -> str:
     superscripts, LaTeX, decimal commas, thousands spaces, spaces round operators."""
     t = text.lower()
     t = _SUP_RUN.sub(lambda m: "^" + m.group(0).translate(_SUPERSCRIPTS), t)
+    t = t.translate(str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789"))   # log₂ → log2
     t = t.replace("−", "-").replace("–", "-").replace("÷", "/")
     t = re.sub(r"\\d?frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", t)
     t = re.sub(r"\\(times|cdot)", "×", t)

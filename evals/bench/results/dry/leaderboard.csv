@@ -1,7 +1,7 @@
-suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,false_correct,parsed,answer_correct,judge_errors,state_valid,structured,strategy_follow,judged_right,leak_early,on_problem,tokens_per_turn,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
-conversations,stub,default,8,0.0,,,,,,,,,1.0,1.0,1.0,0.5625,0.0,1.0,0,0.16,0.18,0.0,0.0,0.0,0
-marking,stub,default,40,0.0,0.375,,,,0.038461538461538464,,,,,,,,,,,0.0,0.0,0.0,0.0,0.0,0
-maths,stub,default,40,0.0,0.0,,,,,,,,,,,,,,,0.004,0.048,0.0,0.0,0.0,0
-practice,stub,default,20,0.0,,,,,,0.0,,,,,,,,,,0.004,0.006,0.0,0.0,0.0,0
-router,stub,default,80,0.0,0.4375,,,,,,,,,,,,,,,0.0,0.0,0.0,0.0,0.0,0
-tutoring,stub,default,36,0.0,,,0.038461538461538464,,,,,,,,,,,,,0.005,0.008,0.0,0.0,0.0,0
+suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,revision_pass,false_correct,parsed,answer_correct,judge_errors,state_valid,structured,strategy_follow,judged_right,leak_early,on_problem,tokens_per_turn,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
+conversations,stub,default,11,0.0,,,,,,,,,,1.0,1.0,1.0,0.5606060606060606,0.0,1.0,0,0.036,0.047,0.0,0.0,0.0,0
+marking,stub,default,60,0.0,0.36666666666666664,,,,,0.02564102564102564,,,,,,,,,,,0.001,0.001,0.0,0.0,0.0,0
+maths,stub,default,71,0.0,0.0,,,,,,,,,,,,,,,,0.002,0.012,0.0,0.0,0.0,0
+practice,stub,default,32,0.0,,,,,,,0.0,,,,,,,,,,0.002,0.004,0.0,0.0,0.0,0
+router,stub,default,80,0.0,0.4375,,,,,,,,,,,,,,,,0.0,0.0,0.0,0.0,0.0,0
+tutoring,stub,default,60,0.0,,,0.022222222222222223,,,,,,,,,,,,,,0.003,0.004,0.0,0.0,0.0,0

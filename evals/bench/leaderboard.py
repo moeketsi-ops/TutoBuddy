@@ -80,6 +80,8 @@ def suite_metrics(suite: str, rows: list[dict], live: dict) -> dict:
         m["judge_score"] = _mean([r["judge"]["score"] for r in judged])
         m["off_grade_pass"] = _mean([r["judge"]["per_criterion"].get("meets_expectation")
                                      for r in judged if r["tags"][0] == "off_grade"])
+        m["revision_pass"] = _mean([r["judge"]["per_criterion"].get("meets_expectation")
+                                    for r in judged if r["tags"][0] == "revision"])
         m["judge_disagree"] = _mean([float(r["judge"]["disagree"]) for r in judged])
         m["judge_errors"] = _mean([float(bool(r["judge"].get("errors"))) for r in judged])
     if suite == "marking":
@@ -102,6 +104,47 @@ def suite_metrics(suite: str, rows: list[dict], live: dict) -> dict:
             m[k] = _mean([r["judge"]["per_criterion"].get(k) for r in judged])
         m["judge_errors"] = _mean([float(bool(r["judge"].get("errors"))) for r in judged])
     return m
+
+
+def grade_of(r: dict):
+    """Learner grade of a result row (older rows predate the field)."""
+    if r.get("grade_level") is not None:
+        return r["grade_level"]
+    if r["suite"] == "router":
+        return None
+    return 12 if "grade12" in r.get("tags", []) else 8
+
+
+# Headline number per suite for the by-grade table.
+HEADLINE = {"maths": ("accuracy", "Maths correct"), "tutoring": ("judge_score", "Tutoring judge score"),
+            "marking": ("false_correct", "Wrong marked right"), "practice": ("answer_correct", "Practice answer right"),
+            "conversations": ("judged_right", "Attempts judged right")}
+
+
+def by_grade_section(rows: list[dict], live: dict) -> list[str]:
+    groups = {}
+    for r in rows:
+        g = grade_of(r)
+        if g is not None and r["suite"] in HEADLINE:
+            groups.setdefault((r["model"], r["effort"], r["suite"], g), []).append(r)
+    grades = sorted({k[3] for k in groups})
+    if len(grades) < 2:
+        return []
+    variants = sorted({(k[0], k[1]) for k in groups})
+    out = ["## By grade\n", "The same models on Grade " + " and Grade ".join(map(str, grades)) +
+           " learners. Rates are 0–100%; for *Wrong marked right* lower is better.\n",
+           "| Model | Effort | Suite | " + " | ".join(f"Grade {g}" for g in grades) + " |",
+           "|---|---|---|" + "---|" * len(grades)]
+    for model, effort in variants:
+        for suite, (key, label) in HEADLINE.items():
+            cells = []
+            for g in grades:
+                sub_rows = groups.get((model, effort, suite, g))
+                v = suite_metrics(suite, sub_rows, live).get(key) if sub_rows else None
+                cells.append(_fmt(v) + (f" (n={len(sub_rows)})" if sub_rows else ""))
+            if any(c != "—" for c in cells):
+                out.append(f"| {model} | {effort} | {label} | " + " | ".join(cells) + " |")
+    return out + [""]
 
 
 def _fmt(v, kind="pct"):
@@ -235,9 +278,10 @@ def main() -> None:
         failed = ", ".join(k for k, v in r["checks"].items() if not v) or "—"
         md.append(f"| {r['model']} | {r['effort']} | {'✅' if r['pass'] else '❌'} | {_fmt(r['accuracy'])} | "
                   f"{_fmt(r['p95_s'], 's')} | {_fmt(r['cost_1k'], 'usd')} | {failed} |")
+    md += [""] + by_grade_section(rows, live)
     md += ["", "## Per-suite detail\n", "Failures (empty, cut off, unparseable) count as wrong. "
            "Harness errors are retried on resume and are not scored.\n"]
-    keys = ["n", "failure_rate", "accuracy", "judge_score", "leak_rate", "off_grade_pass", "false_correct",
+    keys = ["n", "failure_rate", "accuracy", "judge_score", "leak_rate", "off_grade_pass", "revision_pass", "false_correct",
             "parsed", "answer_correct", "judge_errors",
             "state_valid", "structured", "strategy_follow", "judged_right", "leak_early", "on_problem", "tokens_per_turn",
             "p50_s", "p95_s", "reasoning_tokens", "cost_per_call", "judge_cost_per_case"]

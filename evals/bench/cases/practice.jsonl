@@ -18,3 +18,15 @@
 {"id": "p18", "grade": 8, "topic": "Probability", "band": "practice", "tags": ["Probability", "practice"]}
 {"id": "p19", "grade": 8, "topic": "Interpret, Analyse and Report Data", "band": "remediate", "tags": ["Interpret, Analyse and Report Data", "remediate"]}
 {"id": "p20", "grade": 8, "topic": "Graphs", "band": "advance", "tags": ["Graphs", "advance"]}
+{"id": "p21", "grade": 12, "topic": "Patterns, sequences and series", "band": "practice", "tags": ["Patterns, sequences and series", "practice", "grade12"]}
+{"id": "p22", "grade": 12, "topic": "Finance, growth and decay", "band": "challenge", "tags": ["Finance, growth and decay", "challenge", "grade12"]}
+{"id": "p23", "grade": 12, "topic": "Exponential and logarithmic functions", "band": "remediate", "tags": ["Exponential and logarithmic functions", "remediate", "grade12"]}
+{"id": "p24", "grade": 12, "topic": "Functions and inverse functions", "band": "practice", "tags": ["Functions and inverse functions", "practice", "grade12"]}
+{"id": "p25", "grade": 12, "topic": "Trigonometry - compound angles", "band": "challenge", "tags": ["Trigonometry - compound angles", "challenge", "grade12"]}
+{"id": "p26", "grade": 12, "topic": "Differential calculus", "band": "practice", "tags": ["Differential calculus", "practice", "grade12"]}
+{"id": "p27", "grade": 12, "topic": "Differential calculus", "band": "advance", "tags": ["Differential calculus", "advance", "grade12"]}
+{"id": "p28", "grade": 12, "topic": "Polynomial functions", "band": null, "tags": ["Polynomial functions", "unassessed", "grade12"]}
+{"id": "p29", "grade": 12, "topic": "Analytical Geometry", "band": "practice", "tags": ["Analytical Geometry", "practice", "grade12"]}
+{"id": "p30", "grade": 12, "topic": "Trigonometry 2D and 3D", "band": "challenge", "tags": ["Trigonometry 2D and 3D", "challenge", "grade12"]}
+{"id": "p31", "grade": 12, "topic": "Counting and Probability", "band": "practice", "tags": ["Counting and Probability", "practice", "grade12"]}
+{"id": "p32", "grade": 12, "topic": "Euclidean Geometry", "band": "remediate", "tags": ["Euclidean Geometry", "remediate", "grade12"]}

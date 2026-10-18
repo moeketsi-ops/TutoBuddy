@@ -54,6 +54,23 @@ def load_cases(suite: str) -> list[dict]:
     return [json.loads(line) for line in lines if line.strip()]
 
 
+def select_cases(suite: str, limit: int | None, grades: set[int] | None) -> list[dict]:
+    """Cases for a run: only the chosen grades (router cases have no grade and
+    always stay), and `limit` applies per grade so a light run samples every
+    grade instead of just the first one in the file."""
+    cases = [c for c in load_cases(suite) if grades is None or c.get("grade") is None or c["grade"] in grades]
+    if not limit:
+        return cases
+    seen: dict = {}
+    out = []
+    for c in cases:
+        g = c.get("grade")
+        if seen.get(g, 0) < limit:
+            seen[g] = seen.get(g, 0) + 1
+            out.append(c)
+    return out
+
+
 def config() -> dict:
     return tomllib.loads((HERE / "candidates.toml").read_text())
 
@@ -271,7 +288,7 @@ async def run_case(suite, case, rep, model, effort, ctx, timeout_s):
     return {
         "case_id": case["id"], "rep": rep, "suite": suite, "variant": variant_name(model, effort),
         "model": model["slug"], "effort": effort or "default", "group": model.get("group", ""),
-        "status": status, "tags": case.get("tags", []), "output": out.get("output"),
+        "status": status, "grade_level": case.get("grade"), "tags": case.get("tags", []), "output": out.get("output"),
         "pred": out.get("pred"), "grade": out.get("grade", {}),
         "judge": {k: j.get(k) for k in ("score", "per_criterion", "disagree", "verdicts", "errors")} if j else None,
         "latency_s": round(time.perf_counter() - started, 3),
@@ -366,7 +383,7 @@ def _measured_cost() -> dict:
             {k: statistics.median(v) for k, v in judges.items()})
 
 
-def quote(rows, limit, reps, use_judges) -> tuple[float, int, str]:
+def quote(rows, limit, reps, use_judges, grades=None) -> tuple[float, int, str]:
     live = prices.cached() or prices.fetch()
     measured, judge_measured = _measured_cost()
     judges = config()["judges"]["models"]
@@ -374,7 +391,7 @@ def quote(rows, limit, reps, use_judges) -> tuple[float, int, str]:
     for suite, m, e in rows:
         if not is_paid(m):
             continue
-        n = min(limit or 10**9, len(load_cases(suite))) * reps
+        n = len(select_cases(suite, limit, grades)) * reps
         calls += n
         key = (suite, m["slug"], e or "default")
         if key in measured:
@@ -395,19 +412,25 @@ def quote(rows, limit, reps, use_judges) -> tuple[float, int, str]:
     return total, calls, basis
 
 
-async def preflight(suites) -> None:
+async def preflight(suites, grades=None) -> None:
+    """Refuse a paid run when a selected grade has no tutoring notes or topics:
+    every reply would be "couldn't find that topic" and every model would
+    score the same."""
     from app.db import get_pool
 
+    if not {"tutoring", "practice", "maths", "conversations"} & set(suites):
+        return
+    wanted = grades or {8, 12}
     pool = await get_pool()
     async with pool.acquire() as conn:
-        chunks = await conn.fetchval("SELECT count(*) FROM caps_chunks WHERE grade = 8")
-        topics = await conn.fetchval(
-            "SELECT count(*) FROM topics t JOIN grades g ON g.id = t.grade_id WHERE g.grade_number = 8")
-    if {"tutoring", "practice", "maths"} & set(suites) and (not chunks or not topics):
-        sys.exit("Grade 8 content is missing (caps_chunks=%s, topics=%s). Every reply would be "
-                 "\"couldn't find that topic\" and every model would score the same. Run:\n"
-                 "  docker compose run --rm seed\n"
-                 "  docker compose run --rm seed python -m seed.load_curriculum" % (chunks, topics))
+        for g in sorted(wanted):
+            chunks = await conn.fetchval("SELECT count(*) FROM caps_chunks WHERE grade = $1", g)
+            topics = await conn.fetchval(
+                "SELECT count(*) FROM topics t JOIN grades gr ON gr.id = t.grade_id WHERE gr.grade_number = $1", g)
+            if not chunks or not topics:
+                sys.exit(f"Grade {g} content is missing (caps_chunks={chunks}, topics={topics}). Run:\n"
+                         "  docker compose run --rm seed\n"
+                         "  docker compose run --rm seed python -m seed.load_curriculum")
 
 
 async def main() -> None:
@@ -417,7 +440,8 @@ async def main() -> None:
     ap.add_argument("--models", help="comma list of slugs from candidates.toml (default: all)")
     ap.add_argument("--efforts", help="comma list overriding the stage's effort levels")
     ap.add_argument("--reps", type=int)
-    ap.add_argument("--limit", type=int, help="cases per suite (pilot default 5)")
+    ap.add_argument("--limit", type=int, help="cases per suite and grade (pilot default 5)")
+    ap.add_argument("--grades", help="comma list, e.g. 8,12 (default: every grade in the cases)")
     ap.add_argument("--concurrency", type=int, default=6)
     ap.add_argument("--timeout-s", type=float, default=120)
     ap.add_argument("--no-judge", action="store_true")
@@ -427,6 +451,7 @@ async def main() -> None:
     cfg, preset = config(), STAGES[args.stage]
     reps = args.reps or preset["reps"]
     limit = args.limit if args.limit is not None else preset["limit"]
+    grades = {int(g) for g in args.grades.split(",")} if args.grades else None
     rows = plan(args, cfg)
     if not rows:
         sys.exit("Nothing to run: check --models / --suites.")
@@ -434,11 +459,12 @@ async def main() -> None:
     use_judges = paid and not args.no_judge
     variants = len({(m["slug"], e) for _, m, e in rows})
     print(f"Stage {args.stage}: {len(rows)} suite×variant runs over {variants} model×effort variants, "
-          f"{reps} repeat(s), {'first ' + str(limit) if limit else 'all'} cases per suite"
+          f"{reps} repeat(s), {'first ' + str(limit) if limit else 'all'} cases per suite and grade"
+          f"{' (grades ' + args.grades + ')' if args.grades else ''}"
           f"{', with judges' if use_judges else ''}.")
 
     if paid:
-        cost, calls, basis = quote(rows, limit, reps, use_judges)
+        cost, calls, basis = quote(rows, limit, reps, use_judges, grades)
         print(f"Quote: about {calls} model calls, ~${cost:.2f} (basis: {basis}).")
         if not settings.is_set(settings.openrouter_api_key):
             sys.exit("OPENROUTER_API_KEY is not set in .env, so no paid stage can run yet.")
@@ -447,11 +473,11 @@ async def main() -> None:
             return
 
     suites = sorted({s for s, _, _ in rows})
-    await preflight(suites)
+    await preflight(suites, grades)
     ctx = {"judges": cfg["judges"]["models"] if use_judges else []}
     t0 = time.perf_counter()
     for suite, m, e in rows:
-        cases = load_cases(suite)[:limit] if limit else load_cases(suite)
+        cases = select_cases(suite, limit, grades)
         await run_variant(args.stage, suite, m, e, cases, reps, ctx, args.concurrency, args.timeout_s)
     spent = sum(r["cost_usd"] + r["judge_cost_usd"]
                 for f in (RESULTS / args.stage).glob("*/*/results.jsonl")

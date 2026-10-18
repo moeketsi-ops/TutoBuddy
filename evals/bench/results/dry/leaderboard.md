@@ -9,7 +9,7 @@
 
 | Model | Effort | Pass | Judge | Maths | Wrong marked right | Tutor p95 | $ per 1k msgs | Failed gates |
 |---|---|---|---|---|---|---|---|---|
-| stub | default | ❌ | — | 0% | 4% | 0.0 s | $0.0000 | maths, off_grade |
+| stub | default | ❌ | — | 0% | 3% | 0.0 s | $0.0000 | maths, off_grade |
 
 ## Router scorecard
 
@@ -17,15 +17,28 @@
 |---|---|---|---|---|---|---|
 | stub | default | ❌ | 44% | 0.0 s | $0.0000 | accuracy |
 
+## By grade
+
+The same models on Grade 8 and Grade 12 learners. Rates are 0–100%; for *Wrong marked right* lower is better.
+
+| Model | Effort | Suite | Grade 8 | Grade 12 |
+|---|---|---|---|---|
+| stub | default | Maths correct | 0% (n=40) | 0% (n=31) |
+| stub | default | Tutoring judge score | — (n=36) | — (n=24) |
+| stub | default | Wrong marked right | 4% (n=40) | 0% (n=20) |
+| stub | default | Practice answer right | — (n=20) | — (n=12) |
+| stub | default | Attempts judged right | 56% (n=8) | 56% (n=3) |
+
+
 ## Per-suite detail
 
 Failures (empty, cut off, unparseable) count as wrong. Harness errors are retried on resume and are not scored.
 
-| Suite | Model | Effort | n | failure_rate | accuracy | judge_score | leak_rate | off_grade_pass | false_correct | parsed | answer_correct | judge_errors | state_valid | structured | strategy_follow | judged_right | leak_early | on_problem | tokens_per_turn | p50_s | p95_s | reasoning_tokens | cost_per_call | judge_cost_per_case | harness errors |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| conversations | stub | default | 8 | 0% | — | — | — | — | — | — | — | — | 100% | 100% | 100% | 56% | 0% | 100% | 0 | 0.2 s | 0.2 s | 0.0 | $0.0000 | $0.0000 | 0 |
-| marking | stub | default | 40 | 0% | 38% | — | — | — | 4% | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
-| maths | stub | default | 40 | 0% | 0% | — | — | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
-| practice | stub | default | 20 | 0% | — | — | — | — | — | 0% | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
-| router | stub | default | 80 | 0% | 44% | — | — | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
-| tutoring | stub | default | 36 | 0% | — | — | 4% | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| Suite | Model | Effort | n | failure_rate | accuracy | judge_score | leak_rate | off_grade_pass | revision_pass | false_correct | parsed | answer_correct | judge_errors | state_valid | structured | strategy_follow | judged_right | leak_early | on_problem | tokens_per_turn | p50_s | p95_s | reasoning_tokens | cost_per_call | judge_cost_per_case | harness errors |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| conversations | stub | default | 11 | 0% | — | — | — | — | — | — | — | — | — | 100% | 100% | 100% | 56% | 0% | 100% | 0 | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| marking | stub | default | 60 | 0% | 37% | — | — | — | — | 3% | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| maths | stub | default | 71 | 0% | 0% | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| practice | stub | default | 32 | 0% | — | — | — | — | — | — | 0% | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| router | stub | default | 80 | 0% | 44% | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |
+| tutoring | stub | default | 60 | 0% | — | — | 2% | — | — | — | — | — | — | — | — | — | — | — | — | — | 0.0 s | 0.0 s | 0.0 | $0.0000 | $0.0000 | 0 |

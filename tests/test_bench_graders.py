@@ -50,7 +50,7 @@ def test_maths_oracle_scores_100_and_null_scores_0():
     """Oracle/null check from the plan: every reference answer must pass its
     own grader, and an empty or constant reply must fail every case."""
     items = [json.loads(line) for line in (CASES / "maths.jsonl").read_text().splitlines() if line.strip()]
-    assert len(items) == 40
+    assert len(items) == 71  # 40 Grade 8 + 31 Grade 12
     for it in items:
         assert g.answer_matches(f"Final answer: {it['answer']}", it["answers"]), it["id"]
         assert not g.answer_matches("", it["answers"]), it["id"]
@@ -58,7 +58,7 @@ def test_maths_oracle_scores_100_and_null_scores_0():
 
 
 def test_case_files_are_well_formed():
-    expect = {"router": 80, "maths": 40, "tutoring": 36, "marking": 40, "practice": 20}
+    expect = {"router": 80, "maths": 71, "tutoring": 60, "marking": 60, "practice": 32, "conversations": 11}
     for suite, n in expect.items():
         rows = [json.loads(line) for line in (CASES / f"{suite}.jsonl").read_text().splitlines() if line.strip()]
         assert len(rows) == n, suite

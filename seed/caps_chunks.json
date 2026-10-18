@@ -238,5 +238,77 @@
     "topic": "Financial ratios and interpretation",
     "doc_type": "CAPS note",
     "content": "Key ratios: gross profit percentage on sales = gross profit / sales × 100; current ratio = current assets : current liabilities; acid-test ratio excludes inventory from current assets. The current ratio tests short-term liquidity — around 2:1 is generally healthy, while below 1:1 signals the business may struggle to pay short-term debts."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Exponential and logarithmic functions",
+    "doc_type": "CAPS note",
+    "content": "log_b x = y means b^y = x (b > 0, b ≠ 1, x > 0). Laws: log(ab) = log a + log b, log(a/b) = log a − log b, log(a^n) = n log a. The inverse of y = b^x is y = log_b x, its reflection in y = x. To solve b^x = a, take logs of both sides: x = log a / log b."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Functions and inverse functions",
+    "doc_type": "CAPS note",
+    "content": "To find the inverse of a function, swap x and y and make y the subject; write it as f⁻¹(x). The graph of f⁻¹ is the reflection of f in the line y = x, so domain and range swap. The inverse of y = ax² is only a function if the domain of the parabola is restricted (x ≥ 0 or x ≤ 0)."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Finance, growth and decay",
+    "doc_type": "CAPS note",
+    "content": "Annuities use i per period and n periods. Future value of regular payments x: F = x[(1 + i)^n − 1]/i (savings, sinking funds). Present value: P = x[1 − (1 + i)^−n]/i (loans and bonds; solve for x to get the repayment). Outstanding balance on a loan = present value of the remaining payments. A single lump sum still uses A = P(1 + i)^n."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 1,
+    "topic": "Trigonometry - compound angles",
+    "doc_type": "CAPS note",
+    "content": "Compound angle identities: sin(α ± β) = sin α cos β ± cos α sin β; cos(α ± β) = cos α cos β ∓ sin α sin β. Double angles: sin 2α = 2 sin α cos α; cos 2α = cos²α − sin²α = 1 − 2sin²α = 2cos²α − 1. Use a sketch in the correct quadrant to find other ratios from one given ratio."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Trigonometry 2D and 3D",
+    "doc_type": "CAPS note",
+    "content": "In 2D and 3D problems, first find a right-angled triangle that shares a side with the triangle you need. Sine rule: a/sin A = b/sin B; cosine rule: a² = b² + c² − 2bc cos A; area rule: ½ab sin C. Use the cosine rule when given two sides and the included angle, or all three sides."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Polynomial functions",
+    "doc_type": "CAPS note",
+    "content": "Factor theorem: if f(a) = 0 then (x − a) is a factor of f(x). Factorise a cubic by finding one root by trial, then dividing or inspecting. To sketch a cubic, find the y-intercept, the x-intercepts, the stationary points (f′(x) = 0) and the point of inflection (f″(x) = 0)."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 2,
+    "topic": "Analytical Geometry",
+    "doc_type": "CAPS note",
+    "content": "Circle with centre (a; b) and radius r: (x − a)² + (y − b)² = r². A tangent is perpendicular to the radius at the point of contact, so m_tangent × m_radius = −1. Distance: d = √[(x₂ − x₁)² + (y₂ − y₁)²]; gradient m = (y₂ − y₁)/(x₂ − x₁); perpendicular lines have gradients whose product is −1."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Euclidean Geometry",
+    "doc_type": "CAPS note",
+    "content": "Proportionality theorem: a line drawn parallel to one side of a triangle divides the other two sides in the same proportion. Equiangular (similar) triangles have corresponding sides in proportion. State reasons in every step, for example (line ∥ one side of Δ) or (||| Δs)."
+  },
+  {
+    "grade": 12,
+    "subject": "Mathematics",
+    "term": 3,
+    "topic": "Statistics (regression and correlation)",
+    "doc_type": "CAPS note",
+    "content": "The least squares regression line ŷ = a + bx is found with a calculator in statistics mode; use it to predict y values inside the data range. The correlation coefficient r lies between −1 and 1: near ±1 is a strong linear relationship, near 0 is weak. Standard deviation measures spread about the mean."
   }
 ]
