@@ -77,7 +77,7 @@
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">For Moeketsi · Katlego model bake-off · updated 18 October 2026</div>
+    <div class="eyebrow">For Moeketsi · Katlego model bake-off · updated 19 October 2026 with the first real run</div>
     <h1>What a learner session costs, and how we'll measure it</h1>
     <p class="lede">How the simulation works: what goes in, what comes out, what we measure on every model call, which cases we run, and how those numbers add up to the cost and time of a real learner session. This version includes your memory, mastery and pedagogy work, and Grade 12.</p>
     <div class="quote"><b>Your question</b>A simulation that takes what the learner sends (text or photo), shows the tokens used and how long a concept takes to explain, so we know what a whole session costs. Plus a feel for the cost, reasoning and memory behind the mastery and pedagogy changes.</div>
@@ -91,7 +91,64 @@
       <li><strong>Memory costs little and doesn't grow.</strong> With your memory window, a tutoring prompt is about 1,050–1,250 tokens. It stays flat across a conversation, because only the last 2 turns and a summary written by our code are carried.</li>
       <li><strong>"How long a concept takes" is now measurable.</strong> 11 scripted learners walk through 3–4 turn conversations on your memory, mastery and strategy code. We count turns, tokens per turn, seconds, and whether the model judged each attempt correctly.</li>
       <li><strong>Grade 8 and Grade 12 both run</strong>, and results are shown side by side for each grade.</li>
-      <li><strong>Gold "guess" labels are estimates</strong> until the first light run with the OpenRouter key replaces them with measured values.</li>
+      <li><strong>The first real run is done</strong> (19 October, on your Groq key): Qwen 3.8 27B, gpt-oss-120b and gpt-oss-20b ran through the real code, memory conversations included. Results are in the next section. Gold "guess" labels elsewhere are still estimates.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>First real run: what we learned</h2>
+    <p>Your key turned out to be a <strong>Groq</strong> key, not OpenRouter, so it now sits in <code>GROQ_API_KEY</code>. It reaches Qwen 3.8 27B, gpt-oss-20b and gpt-oss-120b, Whisper large-v3 and its turbo version, and two safety classifiers (Llama Prompt Guard and gpt-oss-safeguard). We ran 3 cases per suite for each grade, without the AI judges, because the judges need an OpenRouter key. This is a smoke test, not a verdict.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Measured</th><th class="num">gpt-oss-120b</th><th class="num">Qwen 3.8 27B</th></tr></thead>
+      <tbody>
+        <tr><td>Maths answers right, Grade 8 + 12</td><td class="num">6 / 6</td><td class="num">6 / 6</td></tr>
+        <tr><td>Marking verdicts right</td><td class="num">6 / 6</td><td class="num">5 / 6</td></tr>
+        <tr><td>Practice questions usable</td><td class="num">6 / 6</td><td class="num">5 / 6</td></tr>
+        <tr><td>Tutoring replies that gave the answer away</td><td class="num">0 / 6</td><td class="num">0 / 6</td></tr>
+        <tr><td>Reply time on its own</td><td class="num">≈ 0.8 s</td><td class="num">≈ 1.1 s</td></tr>
+        <tr><td>Hidden reasoning tokens per tutoring reply (low effort)</td><td class="num">≈ 29</td><td class="num">≈ 150</td></tr>
+        <tr><td colspan="3"><strong>Memory conversations</strong> (6 scripted learners; Qwen at effort none, see below)</td></tr>
+        <tr><td>Attempts the model judged correctly</td><td class="num">78%</td><td class="num">56%</td></tr>
+        <tr><td>Strict JSON state record honoured</td><td class="num">88%</td><td class="num">92%</td></tr>
+        <tr><td>Followed the strategy code chose</td><td class="num">100%</td><td class="num">96%</td></tr>
+        <tr><td>Stayed on the working problem</td><td class="num">83%</td><td class="num">100%</td></tr>
+        <tr><td>Answer given away early</td><td class="num">0%</td><td class="num">0%</td></tr>
+        <tr><td>Tokens per conversation turn (in + out)</td><td class="num">≈ 1,790</td><td class="num">≈ 1,420</td></tr>
+        <tr><td>Estimated cost per 1,000 messages <span class="chip guess">estimate</span></td><td class="num">≈ $0.04</td><td class="num">≈ $0.57</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note" style="margin-top:8px">Groq doesn't report what it bills, so cost uses the same model's OpenRouter list price. Qwen costs more mainly because its output tokens are priced at $2.30 per million, against $0.17 for gpt-oss-120b. Routing: all three models routed 3 of 3 messages correctly in under a second; gpt-oss-20b is the cheapest router at about $0.005 per 1,000 messages. Speech-to-text: Whisper large-v3 transcribed our test voice note word for word in 0.5 s, and turbo in 0.3 s.</p>
+
+    <h3 style="margin-top:22px">Two Grade 12 conversations, side by side</h3>
+    <p>The same scripted learner on "Solve log₂(x) = 5". The tag after each reply shows the strategy code chose and what the model judged the attempt to be.</p>
+    <div class="chat" aria-label="gpt-oss-120b logarithm conversation">
+      <div class="bubble out">Solve log2(x) = 5</div>
+      <div class="bubble in">Before we start, can you tell me what log₂(x) = 5 means in terms of powers of 2?<span class="meta">gpt-oss-120b · prior knowledge · ev=none</span></div>
+      <div class="bubble out">x = 10</div>
+      <div class="bubble in">Good try! log₂(x) = 5 means 2 raised to what power gives x, so 2⁵ = x. Can you calculate 2⁵?<span class="meta">scaffolded example · ev=attempt_wrong ✓</span></div>
+      <div class="bubble out">x = 2^5</div>
+      <div class="bubble in">Well done, you wrote x = 2⁵! 🎉 Now, what is 2 to the 5th power?<span class="meta">scaffolded example · ev=attempt_correct</span></div>
+      <div class="bubble out">x = 32</div>
+      <div class="bubble in">Before we dive in, what do you remember about the formula for sin(A ± B)?<span class="meta">⚠ lost the problem: the correct answer was treated as a new topic</span></div>
+    </div>
+    <div class="chat" aria-label="Qwen 3.8 logarithm conversation">
+      <div class="bubble out">Solve log2(x) = 5</div>
+      <div class="bubble in">Let's break this down. What does log2(x) = 5 mean in exponential form?<span class="meta">Qwen 3.8 · prior knowledge · ev=none</span></div>
+      <div class="bubble out">x = 10</div>
+      <div class="bubble in">I see you've typed x = 10, but our working problem is log2(x) = 5. 🤔 Have a go at converting it to exponential form.<span class="meta">⚠ read a wrong attempt as off-topic (ev=none)</span></div>
+      <div class="bubble out">x = 2^5</div>
+      <div class="bubble in">Nailed it! 🎯 Now calculate 2⁵. What is 2 × 2 × 2 × 2 × 2?<span class="meta">scaffolded example · ev=attempt_partial ✓</span></div>
+      <div class="bubble out">x = 32</div>
+      <div class="bubble in">Sharp! 🎉 Since 2⁵ = 32, x = 32 is spot on. Ready for log₂(x + 1) = 3?<span class="meta">ev=attempt_correct ✓ · stayed on the problem</span></div>
+    </div>
+
+    <h3 style="margin-top:22px">Findings</h3>
+    <ul class="plain">
+      <li><strong>Your Groq account's limits block Qwen with memory.</strong> The on-demand tier allows Qwen 1,000 output tokens per minute in total, which is about 3–5 tutoring replies a minute for the whole bot. The memory tutor call at low effort reserves about 1,400 tokens (400 for the reply plus room for reasoning), so Groq rejects it outright. We ran Qwen's conversations at effort "none" to fit. The same limits made Qwen look slow in the run (about 14 s per tutoring reply, mostly waiting on the limit), even though it answers in about 1 s on its own. Live use needs a higher Groq tier, or a smaller reasoning allowance.</li>
+      <li><strong>Fixed: gpt-oss as router silently failed.</strong> gpt-oss can't switch reasoning off, so its 10-token router reply came back empty and every message became "homework". It now gets room to reason. This would have hit the live bot, because gpt-oss-20b is the default Groq router.</li>
+      <li><strong>Fixed: Qwen's reasoning could reach learners.</strong> On Groq, Qwen puts its reasoning inside the reply as <code>&lt;think&gt;</code> text unless told not to. It is now always hidden.</li>
+      <li><strong>For your memory code:</strong> gpt-oss dropped the working problem on the final correct answer and jumped to a new topic. Qwen read a wrong attempt as off-topic, and one Qwen reply showed a literal "\n\n" instead of a line break, probably in the JSON fallback path.</li>
+      <li><strong>Strict JSON:</strong> Groq sometimes rejected generated JSON as not matching the schema. Your fallback (asking for JSON in the prompt instead) caught every one, so no learner saw a broken reply.</li>
     </ul>
   </section>
 
@@ -202,15 +259,13 @@
   </section>
 
   <section>
-    <h2>Next: the light simulation</h2>
+    <h2>Next steps</h2>
     <ul class="plain">
-      <li>Four cheap candidates: Claude Haiku 5.5, DeepSeek V4 Flash, GLM-5.3-Flash and the current Qwen 3.5. Each runs 3 cases per suite for each grade.</li>
-      <li>The runner's quote: about 132 model calls, roughly <strong>13 US cents</strong> without the AI judges, or about <strong>$4</strong> with them. The judges read every tutoring and practice reply, so they are most of the cost.</li>
-      <li>This is the <strong>first time your memory, state record and strategy engine meet a real model</strong>. It will show whether models return valid state records and follow the chosen strategy.</li>
-      <li>The tutoring call asks OpenRouter only for hosts that support strict JSON output. A model whose hosts don't support it will show up as an error rather than a reply, which is cheap and useful to find out now.</li>
-      <li>It also checks whether Claude accepts the effort setting through OpenRouter.</li>
+      <li><strong>Raise the Groq limit</strong> (a paid tier), then rerun the full Grade 8 and 12 sets on Qwen 3.8 and gpt-oss at several effort levels. Tight limits currently distort both speed and the memory results.</li>
+      <li><strong>Get an OpenRouter key</strong> for the two AI judges. Tutoring quality, grade fit and practice-question correctness can't be scored without them. The key also opens the Claude, ChatGPT, Grok and other open models for comparison.</li>
+      <li><strong>Fix the two memory behaviours above</strong>: holding the problem when the learner gets it right, and reading short wrong attempts as attempts. The conversation suite will show when they're fixed.</li>
+      <li><strong>Consider Whisper large-v3-turbo</strong> for voice notes. It was faster here with the same transcript; a few real South African voice notes would settle it.</li>
     </ul>
-    <p style="margin-top:12px">Afterwards this page is refreshed with measured numbers in place of the guesses.</p>
   </section>
 
   <section>
@@ -224,7 +279,7 @@
     </ul>
   </section>
 
-  <footer>Prepared by Immanuel with Claude · Katlego (TutoBuddy) · prompt sizes measured on branches moeketsi/memory-pedagogy and bench/grade12.</footer>
+  <footer>Prepared by Immanuel with Claude · Katlego (TutoBuddy) · prompt sizes and first-run results measured on branch bench/grade12 (results in evals/bench/results/pilot).</footer>
 </div>
 
 <script>
@@ -234,6 +289,7 @@
     ["openai/gpt-oss-120b", "gpt-oss-120b (Groq)", 0.037, 0.17, false],
     ["deepseek/deepseek-v4-flash", "DeepSeek V4 Flash", 0.03, 1.28, false],
     ["qwen/qwen3.5-35b-a3b", "Qwen 3.5 35B (current)", 0.08, 0.75, true],
+    ["qwen/qwen3.8-27b", "Qwen 3.8 27B (Groq, your pick)", 0.04, 2.30, true],
     ["anthropic/claude-haiku-5.5", "Claude Haiku 5.5", 0.10, 0.50, true],
     ["openai/gpt-6-luna", "GPT-6 Luna", 0.10, 0.50, true],
     ["z-ai/glm-5.3-flash", "GLM-5.3-Flash", 0.15, 0.50, true],
