@@ -79,7 +79,8 @@ class Settings(BaseSettings):
     jev_min_confidence: float = 0.6
 
     # Speech-to-text
-    stt_provider: str = "stub"  # stub | local | openai
+    stt_provider: str = "stub"  # stub | local | openai | groq
+    groq_stt_model: str = "whisper-large-v3"  # or whisper-large-v3-turbo (faster, cheaper)
     stt_base_url: str = "http://stt:9000"
     openai_api_key: str = PLACEHOLDER
 

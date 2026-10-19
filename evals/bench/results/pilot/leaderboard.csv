@@ -1,0 +1,14 @@
+suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,revision_pass,false_correct,parsed,answer_correct,judge_errors,state_valid,structured,strategy_follow,judged_right,leak_early,on_problem,tokens_per_turn,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
+conversations,groq:openai/gpt-oss-120b,low,6,0.0,,,,,,,,,,1.0,0.875,1.0,0.7777777777777777,0.0,0.8333333333333334,1788,54.405,77.01,376.1666666666667,0.0003831491666666667,0.0,5
+conversations,groq:qwen/qwen3.8-27b,none,6,0.0,,,,,,,,,,0.9166666666666666,0.9166666666666666,0.9583333333333334,0.5555555555555555,0.0,1.0,1421,46.919,53.113,0.0,0.0013147366666666667,0.0,0
+marking,groq:openai/gpt-oss-120b,low,6,0.0,1.0,,,,,,,,,,,,,,,,0.617,0.855,34.5,2.73095e-05,0.0,0
+marking,groq:qwen/qwen3.8-27b,low,6,0.0,0.8333333333333334,,,,,,,,,,,,,,,,5.826,16.319,110.66666666666667,0.00035807,0.0,2
+maths,groq:openai/gpt-oss-120b,low,6,0.0,1.0,,,,,,,,,,,,,,,,1.23,1.429,24.166666666666668,5.793699999999999e-05,0.0,0
+maths,groq:qwen/qwen3.8-27b,low,6,0.0,1.0,,,,,,,,,,,,,,,,0.79,0.948,139.5,0.0005753933333333333,0.0,0
+practice,groq:openai/gpt-oss-120b,low,6,0.0,,,,,,,1.0,,,,,,,,,,0.72,1.081,56.166666666666664,5.1643999999999995e-05,0.0,0
+practice,groq:qwen/qwen3.8-27b,low,6,0.16666666666666663,,,,,,,0.8333333333333334,,,,,,,,,,21.174,29.575,563.1666666666666,0.0014548900000000001,0.0,2
+router,groq:openai/gpt-oss-120b,none,3,0.0,1.0,,,,,,,,,,,,,,,,0.367,0.841,16.333333333333332,1.0122666666666665e-05,0.0,0
+router,groq:openai/gpt-oss-20b,none,3,0.0,1.0,,,,,,,,,,,,,,,,0.448,0.906,9.333333333333334,4.493999999999999e-06,0.0,0
+router,groq:qwen/qwen3.8-27b,none,3,0.0,1.0,,,,,,,,,,,,,,,,0.442,0.665,0.0,1.0513333333333333e-05,0.0,0
+tutoring,groq:openai/gpt-oss-120b,low,6,0.0,,,0.0,,,,,,,,,,,,,,0.783,0.995,28.833333333333332,5.046249999999999e-05,0.0,0
+tutoring,groq:qwen/qwen3.8-27b,low,6,0.0,,,0.0,,,,,,,,,,,,,,14.305,14.506,150.16666666666666,0.0005836733333333333,0.0,2

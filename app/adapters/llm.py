@@ -208,6 +208,24 @@ def _usage_dict(usage) -> dict:
     }
 
 
+def _groq_reasoning(model: str, effort: str) -> dict:
+    """Groq's reasoning parameters differ by model family (console.groq.com/docs/reasoning):
+    - Qwen 3.x returns its reasoning INSIDE the reply as <think>…</think> unless
+      reasoning_format is parsed/hidden, so it is always hidden here (a learner
+      must never see it; JSON mode also rejects "raw"). Effort: none|low|medium|high.
+    - gpt-oss takes no reasoning_format; include_reasoning=false keeps the
+      reasoning out of the response. Effort: low|medium|high (cannot be off)."""
+    if "qwen" in model.lower():
+        body = {"reasoning_format": "hidden"}
+        if effort:
+            body["reasoning_effort"] = {"minimal": "low"}.get(effort, effort)
+        return body
+    body = {"include_reasoning": False}
+    if effort:
+        body["reasoning_effort"] = effort if effort in ("low", "medium", "high") else "low"
+    return body
+
+
 def _anthropic_text(resp) -> str:
     """First text block. Claude 5.x models think by default, so content[0]
     can be a thinking block with no .text."""
@@ -289,10 +307,11 @@ async def _complete(
         extra = {"max_tokens": max(base, max_tokens + headroom) if effort else base, "extra_body": body}
     else:
         client = _groq_client()
-        extra = {"max_tokens": max_tokens + headroom}
-        if effort:
-            # gpt-oss on Groq takes low|medium|high.
-            extra["reasoning_effort"] = effort if effort in ("low", "medium", "high") else "low"
+        if "qwen" not in model.lower() and effort in ("", "none", "minimal"):
+            # gpt-oss always reasons (no "off" switch); without room for it a
+            # 10-token router call comes back empty and silently becomes "homework".
+            headroom = max(headroom, EFFORT_HEADROOM["minimal"])
+        extra = {"max_tokens": max_tokens + headroom, "extra_body": _groq_reasoning(model, effort)}
     if json_schema:
         extra["response_format"] = {"type": "json_schema", "json_schema": {
             "name": call, "strict": True, "schema": json_schema}}

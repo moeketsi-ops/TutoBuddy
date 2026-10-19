@@ -123,3 +123,26 @@ slug = "qwen/qwen3.5-35b-a3b"
 tiers = ["router", "reasoner"]
 group = "open"
 vision = true
+
+# ── Groq direct (GROQ_API_KEY): Moeketsi's pick + the gpt-oss pair ───────────
+# Costs are estimated from the same model's OpenRouter list price (Groq returns no billed cost).
+[[model]]
+slug = "groq:qwen/qwen3.8-27b"
+model_id = "qwen/qwen3.8-27b"
+route = "groq"
+tiers = ["router", "reasoner"]
+group = "open"
+
+[[model]]
+slug = "groq:openai/gpt-oss-120b"
+model_id = "openai/gpt-oss-120b"
+route = "groq"
+tiers = ["router", "reasoner"]
+group = "open"
+
+[[model]]
+slug = "groq:openai/gpt-oss-20b"
+model_id = "openai/gpt-oss-20b"
+route = "groq"
+tiers = ["router"]
+group = "open"

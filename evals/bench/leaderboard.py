@@ -48,7 +48,8 @@ def _cost(r: dict, live: dict) -> float:
     provider didn't report it."""
     if r.get("cost_usd"):
         return r["cost_usd"]
-    p = live.get(r["model"])
+    # Groq reports no billed cost; estimate from the same model's OpenRouter list price.
+    p = live.get(r["model"]) or live.get(r["model"].split(":", 1)[-1])
     if not p or not (r.get("input_tokens") or r.get("output_tokens")):
         return 0.0
     return (r["input_tokens"] * p["in"] + r["output_tokens"] * p["out"]) / 1e6

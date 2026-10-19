@@ -83,7 +83,7 @@ def is_paid(model: dict) -> bool:
     return model.get("route", "openrouter") != "stub"
 
 
-_FIELDS = ("llm_provider", "reasoner_provider", "router_provider", "openrouter_router_model",
+_FIELDS = ("groq_router_model", "groq_reasoner_model", "llm_provider", "reasoner_provider", "router_provider", "openrouter_router_model",
            "openrouter_reasoner_model", "openrouter_vision_model", "router_model", "reasoner_model",
            "router_effort", "reasoner_effort", "openrouter_provider")
 
@@ -102,6 +102,9 @@ def use_variant(model: dict, effort: str, tier: str):
             settings.llm_provider = "stub"
         elif route == "jev":
             settings.llm_provider, settings.router_provider = "stub", "jev"
+        elif route == "groq":
+            settings.llm_provider = "groq"
+            settings.groq_router_model = settings.groq_reasoner_model = model.get("model_id", model["slug"])
         elif route == "anthropic":
             settings.llm_provider = "anthropic"
             settings.router_model = settings.reasoner_model = model.get("model_id", model["slug"])
@@ -398,7 +401,7 @@ def quote(rows, limit, reps, use_judges, grades=None) -> tuple[float, int, str]:
             total += measured[key] * n
         else:
             guessed = True
-            p = live.get(m["slug"], {"in": 1.0, "out": 4.0})
+            p = live.get(m["slug"]) or live.get(m.get("model_id", "")) or {"in": 1.0, "out": 4.0}
             tin, tout = GUESS_TOKENS[suite]
             total += n * (tin * p["in"] + (tout + GUESS_REASONING.get(e, 0)) * p["out"]) / 1e6
         if use_judges and suite in JUDGED:
@@ -457,6 +460,9 @@ async def main() -> None:
         sys.exit("Nothing to run: check --models / --suites.")
     paid = any(is_paid(m) for _, m, _ in rows)
     use_judges = paid and not args.no_judge
+    if use_judges and not settings.is_set(settings.openrouter_api_key):
+        print("Judges need OPENROUTER_API_KEY, which isn't set: running without judges.")
+        use_judges = False
     variants = len({(m["slug"], e) for _, m, e in rows})
     print(f"Stage {args.stage}: {len(rows)} suite×variant runs over {variants} model×effort variants, "
           f"{reps} repeat(s), {'first ' + str(limit) if limit else 'all'} cases per suite and grade"
@@ -466,8 +472,12 @@ async def main() -> None:
     if paid:
         cost, calls, basis = quote(rows, limit, reps, use_judges, grades)
         print(f"Quote: about {calls} model calls, ~${cost:.2f} (basis: {basis}).")
-        if not settings.is_set(settings.openrouter_api_key):
-            sys.exit("OPENROUTER_API_KEY is not set in .env, so no paid stage can run yet.")
+        need = {"openrouter": settings.openrouter_api_key, "groq": settings.groq_api_key,
+                "anthropic": settings.anthropic_api_key, "jev": settings.typesafe_api_key}
+        missing = sorted({m.get("route", "openrouter") for _, m, _ in rows if is_paid(m)}
+                         - {r for r, k in need.items() if settings.is_set(k)})
+        if missing:
+            sys.exit(f"No API key in .env for: {', '.join(missing)}. Drop those models (--models) or add the key.")
         if not args.yes:
             print("Not run. Re-run with --yes once this spend is approved.")
             return

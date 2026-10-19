@@ -3,6 +3,7 @@
 stub   — fixed transcript, fully offline (CI-safe).
 local  — faster-whisper container (no API key; model downloaded once).
 openai — Whisper API (placeholder key).
+groq   — Groq-hosted Whisper (GROQ_STT_MODEL, default whisper-large-v3), GROQ_API_KEY.
 """
 
 import httpx
@@ -31,6 +32,19 @@ async def transcribe(audio: bytes, mime: str) -> str:
                 headers={"Authorization": f"Bearer {settings.openai_api_key}"},
                 files={"file": ("voice-note.ogg", audio, mime)},
                 data={"model": "whisper-1"},
+            )
+            resp.raise_for_status()
+            return resp.json()["text"].strip()
+
+    if settings.stt_provider == "groq":
+        if not settings.is_set(settings.groq_api_key):
+            raise RuntimeError("STT_PROVIDER=groq but GROQ_API_KEY is a placeholder")
+        async with httpx.AsyncClient(timeout=120) as client:
+            resp = await client.post(
+                "https://api.groq.com/openai/v1/audio/transcriptions",
+                headers={"Authorization": f"Bearer {settings.groq_api_key}"},
+                files={"file": ("voice-note.ogg", audio, mime)},
+                data={"model": settings.groq_stt_model, "language": "en"},
             )
             resp.raise_for_status()
             return resp.json()["text"].strip()
