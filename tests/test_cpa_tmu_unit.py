@@ -248,3 +248,13 @@ def test_both_roots_named_is_correct_one_is_a_step():
 
 def test_explanations_in_words_are_left_to_the_model():
     assert answer_check.check("Solve 6x = 42", "6 times 7 is 42 so x = 42 divided by 6") is None
+
+
+def test_another_way_and_confusion_stay_on_the_problem():
+    mem = memory._new(7)
+    memory.record_turn(mem, P8, "What first?", {"ev": "none"}, {"id": 1, "name": "Equations"},
+                       "SOCRATIC_QUESTIONING", new_problem=True)
+    assert memory.continues_problem(mem, "can you show me another way?")
+    assert memory.continues_problem(mem, "Can you explain it differently?")
+    assert memory.continues_problem(mem, "I still don't understand")
+    assert not memory.continues_problem(mem, "How do I add 1/3 and 1/6?")

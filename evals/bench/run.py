@@ -301,15 +301,15 @@ async def _homework_day(case, ctx):
                              and graders.leaks_answer(reply, prob.get("answers", [])))
                 switches += bool(info.get("switch"))
                 levels.append(info.get("level"))
-                solved = solved or (truth == "correct" and (info.get("problem") is None or d.get("bridge")))
+                solved = solved or bool(truth == "correct" and (info.get("problem") is None or d.get("bridge")))
                 transcript.append(f"L: {msg}\nK [{d.get('strategy')} / {info.get('level')}"
                                   f"{' / SWITCH ' + info['switch'] if info.get('switch') else ''}]: {reply}")
             problems.append({"turns": len(prob["turns"]), "switches": switches, "solved": solved,
                              "levels": levels})
         async with pool.acquire() as conn:
             profile = await conn.fetch(
-                "SELECT cpa_level, tries, successes FROM learner_level_stats WHERE learner_id = $1",
-                learner)
+                "SELECT cpa_level, sum(tries) AS tries, sum(successes) AS successes "
+                "FROM learner_level_stats WHERE learner_id = $1 GROUP BY cpa_level", learner)
             log_rows = await conn.fetch(
                 "SELECT switch, chosen_by, outcome FROM pedagogy_decisions WHERE learner_id = $1",
                 learner)
@@ -324,8 +324,8 @@ async def _homework_day(case, ctx):
     messages = 2 * turns  # each learner message gets one reply
     grade = {
         "problems": len(problems),
-        "turns_per_problem": turns / max(1, len(problems)),
-        "switches_per_problem": sum(p["switches"] for p in problems) / max(1, len(problems)),
+        "turns_per_problem": round(turns / max(1, len(problems)), 2),
+        "switches_per_problem": round(sum(p["switches"] for p in problems) / max(1, len(problems)), 2),
         "solved_share": sum(p["solved"] for p in problems) / max(1, len(problems)),
         "judged_right": (sum(judged) / len(judged)) if judged else None,
         "code_checked": (sum(checked) / len(checked)) if checked else None,

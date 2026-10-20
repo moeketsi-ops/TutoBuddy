@@ -61,14 +61,15 @@ def test_follow_up_attempt_stays_on_the_problem_and_moves_mastery(chat):
     assert mem["working"]["problem"].startswith("How do I solve"), mem["working"]
     assert mem["working"]["topic"], mem["working"]
 
-    chat.send_text("x = 6")  # a short attempt: routed straight back to the tutor
+    chat.send_text("2x = 12")  # a short attempt: routed straight back to the tutor
     second = chat.wait_for_reply()
     assert "<<STATE" not in second
 
     mem = _mem(learner_id)
     assert len(mem["turns"]) == 2
-    assert mem["turns"][1]["learner"] == "x = 6"
-    assert mem["working"]["wrong_on_problem"] == 1  # stub judges attempts 'partial'
+    assert mem["turns"][1]["learner"] == "2x = 12"
+    # code checks it (CPA spec): a valid step, not the answer -> 'partial'
+    assert mem["working"]["wrong_on_problem"] == 1
 
     events = _q("SELECT source, evidence, weight, mastery_before, mastery_after "
                 "FROM learner_events WHERE learner_id = $1", learner_id)
@@ -108,7 +109,8 @@ def test_five_turns_write_a_digest_that_survives_the_session(chat):
     learner_id = _learners(chat.phone)[0]["id"]
     chat.send_text("How do I solve the equation 2x + 5 = 17?")
     chat.wait_for_reply()
-    for attempt in ("x = 6", "x = 11", "2x = 12", "x = 7"):
+    # wrong, wrong, a step, wrong: x = 6 would be checked correct and close the problem
+    for attempt in ("x = 11", "x = 4", "2x = 12", "x = 7"):
         chat.send_text(attempt)
         chat.wait_for_reply()
     mem = _mem(learner_id)

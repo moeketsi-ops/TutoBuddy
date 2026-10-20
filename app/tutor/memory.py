@@ -159,6 +159,8 @@ def continues_problem(mem: dict, text: str) -> bool:
     keeps the working topic instead of re-guessing it from retrieval."""
     if SWITCH_INTENT.search(text):
         return False  # "quiz me" mid-problem is a request, not an attempt
+    if has_open_problem(mem) and (asks_other_way(text) or is_confused(text)):
+        return True  # "can you show me another way?" is about THIS problem
     return has_open_problem(mem) and not is_new_question(text) and len(text.split()) <= 60
 
 
