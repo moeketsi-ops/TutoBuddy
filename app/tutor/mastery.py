@@ -60,15 +60,26 @@ def band(score: float) -> str:
     return "advance"
 
 
-def evidence_weight(source: str, evidence: str, hint_level: int = 0) -> tuple[float, float] | None:
+# CPA spec v0.1 section 5: success shown with objects or a picture counts
+# for less than success in symbols, until the learner bridges to symbols.
+# Starting values, to calibrate on pilot data. Wrong answers are not
+# discounted by level.
+LEVEL_WEIGHT = {"abstract": 1.0, "pictorial": 0.5, "concrete": 0.3}
+
+
+def evidence_weight(source: str, evidence: str, hint_level: int = 0,
+                    level: str | None = None) -> tuple[float, float] | None:
     """(target, weight) for one event, or None if it carries no evidence.
-    A correct chat step after hint level h earns w * (1 - 0.25h)."""
+    A correct chat step after hint level h earns w * (1 - 0.25h), times the
+    CPA level weight when the learner worked below the abstract level."""
     rule = EVIDENCE_RULES.get((source, evidence))
     if rule is None:
         return None
     target, w = rule
     if evidence == "attempt_correct" and source != "quiz":
         w = w * (1 - 0.25 * max(0, min(3, hint_level)))
+    if evidence in ("attempt_correct", "attempt_partial") and level in LEVEL_WEIGHT:
+        w = w * LEVEL_WEIGHT[level]
     return target, round(w, 3)
 
 
@@ -184,13 +195,15 @@ async def record_event(
     hint_level: int = 0,
     strategy: str | None = None,
     misconception: str | None = None,
+    cpa_level: str | None = None,
+    strand: str | None = None,
 ) -> dict | None:
     """Write one evidence event, move LO mastery, roll up topic mastery.
     Returns {"lo_id", "before", "after", "topic_score"} or None when the
     event carries no evidence. Must run inside the caller's transaction.
 
     Grade rule: refuses (ValueError) a topic outside the learner's grade."""
-    rule = evidence_weight(source, evidence, hint_level)
+    rule = evidence_weight(source, evidence, hint_level, cpa_level)
     if rule is None:
         return None
     target, weight = rule
@@ -238,11 +251,11 @@ async def record_event(
         """
         INSERT INTO learner_events
             (learner_id, topic_id, lo_id, source, evidence, hint_level, strategy,
-             misconception_code, weight, mastery_before, mastery_after)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+             misconception_code, weight, mastery_before, mastery_after, cpa_level, strand)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         """,
         learner_id, topic_id, lo_id, source, evidence, hint_level, strategy,
-        misconception, weight, before, after,
+        misconception, weight, before, after, cpa_level, strand,
     )
     topic_score = await conn.fetchval(
         """

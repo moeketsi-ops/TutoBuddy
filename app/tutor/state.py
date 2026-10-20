@@ -20,6 +20,9 @@ second ~600-token call per turn.
 import json
 import re
 
+LEVELS = ("concrete", "pictorial", "abstract")
+PROGRESS = ("none", "step_forward", "solved")
+
 EVIDENCE = (
     "none",
     "attempt_correct",
@@ -83,6 +86,8 @@ def parse_state(
     except ValueError:
         hint = 0
     step = raw.get("step") if raw.get("step") and _STEP.match(raw["step"]) else None
+    level = (raw.get("level") or "").lower()
+    progress = (raw.get("progress") or "").lower()
 
     state = {
         "lo": lo if lo in lo_codes else None,
@@ -91,6 +96,9 @@ def parse_state(
         "strategy": strat if strat in strategies else None,
         "hint": hint,
         "step": step,
+        # Optional (CPA spec): older prompts and the STATE fallback may omit them.
+        "level": level if level in LEVELS else None,
+        "progress": progress if progress in PROGRESS else None,
     }
     # Evidence about an attempt is only usable when we know which objective
     # it was about; without an LO it is recorded against the working topic
@@ -126,8 +134,10 @@ def turn_schema(lo_codes: list[str], misconception_codes: list[str],
             "strat": {"type": "string", "enum": sorted(set(strategies))},
             "hint": {"type": "string", "enum": ["0", "1", "2", "3"]},
             "step": {"type": "string"},
+            "level": {"type": "string", "enum": list(LEVELS)},
+            "progress": {"type": "string", "enum": list(PROGRESS)},
         },
-        "required": ["ev", "lo", "misc", "strat", "hint", "step"],
+        "required": ["ev", "lo", "misc", "strat", "hint", "step", "level", "progress"],
     }
     return {
         "type": "object",
@@ -169,7 +179,9 @@ def parse_turn(text: str) -> tuple[str, str | dict | None, str]:
             try:
                 reply = json.loads(f'"{m.group(1)}"')
             except ValueError:
-                reply = m.group(1)
+                # First run: a learner saw literal backslash-n text from this path.
+                reply = (m.group(1).replace("\\n", "\n").replace('\\"', '"')
+                         .replace("\\t", " "))
             return strip_state(reply)[0], None, "none"
         return "", None, "none"
     reply, body = strip_state(text or "")

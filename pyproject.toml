@@ -15,6 +15,7 @@ dependencies = [
     "openai>=1.50",  # OpenRouter client (OpenAI-compatible API)
     "pydantic-settings>=2.4",
     "python-multipart>=0.0.9",
+    "sympy>=1.12",  # code-side answer checking (app/tutor/answer_check.py)
 ]
 
 [project.optional-dependencies]

@@ -92,12 +92,19 @@ def suite_metrics(suite: str, rows: list[dict], live: dict) -> dict:
         m["false_correct"] = _mean([g(r, "false_correct") or 0 for r in wrong])
         m["false_incorrect"] = _mean([g(r, "false_incorrect") or 0 for r in right])
     if suite == "conversations":
-        for k in ("state_valid", "structured", "strategy_follow", "judged_right", "leak_early", "on_problem"):
+        for k in ("state_valid", "structured", "strategy_follow", "judged_right", "leak_early", "on_problem",
+                  "code_checked", "switched_ok", "switch_sequence_ok"):
             m[k] = _mean([g(r, k) for r in ok if g(r, k) is not None])
         turns = [len(str(r.get("output", "")).split("\n\nL: ")) for r in ok]
         tpt = _mean([(r.get("input_tokens", 0) + r.get("output_tokens", 0)) / t
                      for r, t in zip(ok, turns) if t])
         m["tokens_per_turn"] = round(tpt) if tpt is not None else None
+    if suite == "homework_day":
+        for k in ("solved_share", "turns_per_problem", "switches_per_problem", "judged_right",
+                  "code_checked", "leak_early", "seconds_per_reply", "wa_messages", "twilio_usd"):
+            m[k] = _mean([g(r, k) for r in ok if g(r, k) is not None])
+        m["day_cost_usd"] = _mean([r.get("cost_usd") for r in ok])
+        m["calls_per_day"] = _mean([r.get("calls") for r in ok])
     if suite == "practice":
         m["parsed"] = _mean([g(r, "parsed") or 0 for r in rows])
         judged = [r for r in ok if (r.get("judge") or {}).get("score") is not None]
@@ -285,6 +292,9 @@ def main() -> None:
     keys = ["n", "failure_rate", "accuracy", "judge_score", "leak_rate", "off_grade_pass", "revision_pass", "false_correct",
             "parsed", "answer_correct", "judge_errors",
             "state_valid", "structured", "strategy_follow", "judged_right", "leak_early", "on_problem", "tokens_per_turn",
+            "code_checked", "switched_ok", "switch_sequence_ok",
+            "solved_share", "turns_per_problem", "switches_per_problem", "seconds_per_reply",
+            "calls_per_day", "day_cost_usd", "wa_messages", "twilio_usd",
             "p50_s", "p95_s", "reasoning_tokens", "cost_per_call", "judge_cost_per_case"]
     md += ["| Suite | Model | Effort | " + " | ".join(keys) + " | harness errors |", "|" + "---|" * (len(keys) + 4)]
     with (RESULTS / args.stage / "leaderboard.csv").open("w", newline="") as f:
@@ -293,7 +303,8 @@ def main() -> None:
         for (suite, model, effort), m in sorted(by.items()):
             err = errors.get((suite, f"{model.replace('/', '__')}@{effort}"), 0)
             w.writerow([suite, model, effort, *[m.get(k) for k in keys], err])
-            cells = [_fmt(m.get(k), "s" if k.endswith("_s") else "usd" if "cost" in k else "raw" if k in ("n", "reasoning_tokens", "tokens_per_turn") else "pct")
+            cells = [_fmt(m.get(k), "s" if k.endswith("_s") or k == "seconds_per_reply" else "usd" if "cost" in k or k.endswith("_usd") else "raw" if k in ("n", "reasoning_tokens", "tokens_per_turn", "turns_per_problem",
+                                     "switches_per_problem", "calls_per_day", "wa_messages") else "pct")
                      for k in keys]
             md.append(f"| {suite} | {model} | {effort} | " + " | ".join(cells) + f" | {err} |")
     (RESULTS / args.stage / "leaderboard.md").write_text("\n".join(md) + "\n")

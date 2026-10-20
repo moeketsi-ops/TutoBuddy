@@ -1,0 +1,147 @@
+{
+  "_source": "Paraphrased from the DBE 'Mathematics Teaching and Learning Framework for South Africa: Teaching Mathematics for Understanding' (draft 6, print date 27 Sep 2018), with page numbers as printed. Entries marked 'Katlego team' are our own and need teacher review. Short paraphrases only; nothing is quoted to learners.",
+  "entries": [
+    {
+      "id": "linear-equations",
+      "grades": [8, 9],
+      "keywords": ["solve", "equation", "3x", "2x", "4x", "5x"],
+      "strand": "strategic_competence",
+      "source": "Katlego team (to review)",
+      "methods": [
+        "Balance: do the same to both sides until x is alone",
+        "Undo in reverse order: last thing done to x is undone first",
+        "Bar model: draw the parts and take away the known part",
+        "Guess, check and improve: try a number, see if it works, adjust"
+      ],
+      "misconceptions": ["Doing an operation to one side only", "Dividing before undoing the + or -"]
+    },
+    {
+      "id": "linear-graph-equation",
+      "grades": [9, 10],
+      "keywords": ["gradient", "straight line", "y = mx", "y=mx", "linear function", "intercept"],
+      "strand": "strategic_competence",
+      "source": "DBE TMU framework, Senior Phase, pp. 54-57",
+      "methods": [
+        "Eliminate by inspection: the sign of m against the slope, equal intercepts only when m = 1",
+        "Read c as the y-intercept, then substitute another point to find m",
+        "Gradient formula with any two points on the line",
+        "Rise over run on the grid, from any point to any point on the line"
+      ],
+      "misconceptions": ["Reading the x- and y-intercepts straight into m and c"]
+    },
+    {
+      "id": "triangle-area",
+      "grades": [7, 8, 9],
+      "keywords": ["area of a triangle", "triangle", "base", "height", "perpendicular"],
+      "strand": "conceptual_understanding",
+      "source": "DBE TMU framework, Senior Phase, pp. 50-53",
+      "methods": [
+        "Draw the rectangle around the triangle: the triangle is half the rectangle",
+        "Check with numbers on a grid: two smaller rectangles, half of each"
+      ],
+      "misconceptions": ["Area always means length x breadth", "Using a slanted side as the height"]
+    },
+    {
+      "id": "exponent-laws",
+      "grades": [8, 9, 10],
+      "keywords": ["exponent", "power", "indices", "m^", "x^", "laws of exponents"],
+      "strand": "procedural_fluency",
+      "source": "DBE TMU framework, Senior Phase, pp. 53-54",
+      "methods": [
+        "Check both conditions first: multiplying AND the same base, then add exponents",
+        "Write the powers out as repeated multiplication to see why the law works",
+        "Sort cases where the law applies, where like terms add instead, and where nothing simplifies"
+      ],
+      "misconceptions": ["m^3 + n^3 = (m + n)^3", "Adding exponents when the powers are added, not multiplied"]
+    },
+    {
+      "id": "shape-puzzles",
+      "grades": [7, 8, 9],
+      "keywords": ["each shape", "same shapes", "missing number", "simultaneous"],
+      "strand": "strategic_competence",
+      "source": "DBE TMU framework, Senior Phase, pp. 57-58",
+      "methods": [
+        "Start from the two rows that differ by one shape and compare them",
+        "Assume a value, then test it against another row or column; drop it if it fails"
+      ],
+      "misconceptions": ["Two different shapes given the same number"]
+    },
+    {
+      "id": "supplementary-angles",
+      "grades": [7, 8, 9],
+      "keywords": ["supplementary", "co-interior", "angles on a straight line"],
+      "strand": "reasoning",
+      "source": "DBE TMU framework, Senior Phase, pp. 58-61",
+      "methods": [
+        "Check every part of the definition: exactly two angles AND they add up to 180 degrees",
+        "Find a counterexample: two angles that add to 180 but are not next to each other"
+      ],
+      "misconceptions": ["Supplementary angles must be adjacent", "Three angles on a line can be supplementary"]
+    },
+    {
+      "id": "completing-the-square",
+      "grades": [10, 11, 12],
+      "keywords": ["complete the square", "completing the square", "perfect square", "(x -", "(x +"],
+      "strand": "conceptual_understanding",
+      "source": "DBE TMU framework, FET, pp. 62-67",
+      "methods": [
+        "Area model: an x by x square plus two strips of (b/2)x; the missing corner is (b/2)^2",
+        "Procedure: halve the x-coefficient, square it, add it (and subtract it in an expression)"
+      ],
+      "misconceptions": ["(-4)^2 = -16", "Adding (b/2)^2 to one side of an equation only"]
+    },
+    {
+      "id": "factorising-trinomials",
+      "grades": [10, 11],
+      "keywords": ["factorise", "factorize", "trinomial", "x^2 +"],
+      "strand": "procedural_fluency",
+      "source": "DBE TMU framework, FET, pp. 67-68",
+      "methods": [
+        "Find two factors of the constant that add to the x-coefficient, split the middle term, take out common factors",
+        "Multiply back with the distributive law to check"
+      ],
+      "misconceptions": ["Choosing factors that multiply correctly but add to the wrong sign"]
+    },
+    {
+      "id": "max-area-optimisation",
+      "grades": [10, 11, 12],
+      "keywords": ["maximum", "minimum", "fencing", "turning point", "optimi", "greatest area"],
+      "strand": "strategic_competence",
+      "source": "DBE TMU framework, FET, pp. 68-73",
+      "methods": [
+        "Trial and error: draw a few rectangles with the same perimeter",
+        "Table of values for length, width and area",
+        "Graph area against length and read the turning point",
+        "Complete the square: A(x) = a(x - p)^2 + q, the maximum is q",
+        "Axis of symmetry: x = -b/2a, then substitute",
+        "Calculus (Grade 12): set A'(x) = 0"
+      ],
+      "misconceptions": ["A square is not a rectangle", "Only checking whole-number lengths"]
+    },
+    {
+      "id": "logarithms",
+      "grades": [11, 12],
+      "keywords": ["log", "logarithm"],
+      "strand": "conceptual_understanding",
+      "source": "Katlego team (to review)",
+      "methods": [
+        "Rewrite in exponential form: log_b(x) = y means b^y = x",
+        "Table of powers of the base: 2, 4, 8, 16, 32...",
+        "Real context: how many times must you double (or fold paper) to reach the number?"
+      ],
+      "misconceptions": ["log_2(x) = 5 means x = 2 x 5 = 10"]
+    },
+    {
+      "id": "circle-geometry-proof",
+      "grades": [11, 12],
+      "keywords": ["prove", "circle", "subtended", "chord", "cyclic"],
+      "strand": "reasoning",
+      "source": "DBE TMU framework, FET, pp. 65-66 and 74-75",
+      "methods": [
+        "Reasoning chain: each step A => B => C names the theorem that justifies it",
+        "Measure a few cases first (or drag points in GeoGebra), then prove the conjecture"
+      ],
+      "misconceptions": ["Using what the diagram looks like instead of a theorem"]
+    }
+  ]
+}

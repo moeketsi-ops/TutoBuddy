@@ -44,6 +44,19 @@ STRATEGIES: dict[str, str] = {
     "RETRIEVAL_PRACTICE": (
         "Start with one quick recall question on the objective due for review, then "
         "continue with what they asked."),
+    # Teaching Mathematics for Understanding (DBE framework) strategies:
+    "MULTIPLE_METHODS": (
+        "Offer a DIFFERENT method for the same problem (use METHODS if listed), do only its "
+        "first step, and ask the learner to carry on. Any valid method counts."),
+    "WHEN_TO_USE": (
+        "Give 2-3 quick cases where the rule or procedure does and does not apply, and ask the "
+        "learner which ones it works for and why."),
+    "CONNECT_REPRESENTATIONS": (
+        "Put two forms of the same idea side by side (picture, table, graph, equation) and ask "
+        "the learner what in one matches what in the other."),
+    "JUSTIFY_AND_CHECK": (
+        "Ask the learner to show their answer must be right: substitute it back, or give the "
+        "reason for each step. Confirm only after they have checked."),
 }
 
 LADDER = ("SOCRATIC_QUESTIONING", "SCAFFOLDED_EXAMPLE", "WORKED_EXAMPLE",
@@ -141,6 +154,105 @@ def choose(
     return {**decision, "strategy": start, "why": f"{_band(score)} band start"}
 
 
+# ── CPA + switching (spec "Katlego CPA + mastery switching v0.1", section 4) ──
+# Code switches after 3 learner turns with no progress, at most twice per
+# problem. First switch: one CPA level toward concrete, same strategy.
+# Second: a new strategy at the new level (learner's best fit first). After
+# that: a worked example on a SIMILAR problem, then the learner retries the
+# original. A small share of first switches pick a random alternative so
+# the evidence log can show the engine's pick beats chance.
+
+SWITCH_AFTER = 3
+MAX_SWITCHES = 2
+EXPLORE_RATE = 0.10
+SWITCH_POOL = LADDER + ("MULTIPLE_METHODS",)
+
+
+def next_strategy(current: str | None, tried: list[str], stats: dict[str, tuple[int, int]],
+                  rng: random.Random, *, explore: bool = False) -> tuple[str, str]:
+    """(strategy, why) for a strategy switch: toward more support along the
+    ladder, then anything not yet tried; this learner's best fit first."""
+    pool = list(SWITCH_POOL)
+    if current in pool:
+        i = pool.index(current)
+        order = pool[i + 1:] + pool[:i]
+    else:
+        order = pool
+    remaining = [s for s in order if s not in tried and s != current] or [s for s in order if s != current]
+    remaining = [s for s in remaining
+                 if not (stats.get(s, (0, 0))[0] >= MIN_TRIES_TO_SKIP
+                         and stats[s][1] / stats[s][0] < SKIP_BELOW_RATE)] or remaining
+    if explore:
+        return rng.choice(remaining), "random alternative (evidence check)"
+    return _thompson(remaining, stats, rng)
+
+
+def plan_switch(decision: dict, *, current_strategy: str | None, level: str,
+                no_progress: int, switches_used: int, asked_other_way: bool,
+                tried: list[str], stats: dict[str, tuple[int, int]] | None,
+                rng: random.Random | None = None, code_verdict: str | None = None) -> dict:
+    """Adds the CPA level and any switch to a choose() decision. Pure.
+
+    `no_progress` counts learner turns on this problem with no step
+    forward. When code has already checked the learner's current message
+    (`code_verdict`), a wrong one counts now, so the switch lands on this
+    reply instead of the next. Otherwise, one turn before the threshold the
+    decision carries a fallback ("if this attempt is no progress too, use
+    level/strategy Y"), as with_fallback does, so there is no lag."""
+    stats = stats or {}
+    rng = rng or random.Random(0)
+    d = {**decision, "level": level, "switch": None, "trigger": None, "chosen_by": "engine",
+         "switches_used": switches_used}
+    if code_verdict == "correct":
+        d.update(close=True)
+        return d
+    effective = no_progress + (1 if code_verdict == "wrong" else 0)
+    trigger = ("asked_other_way" if asked_other_way
+               else "no_progress" if effective >= SWITCH_AFTER else None)
+    if decision.get("why") == "same mistake twice":
+        return d  # choose() already changed approach for a repeated misconception
+
+    def switch(dd: dict) -> dict:
+        used = dd["switches_used"]
+        explore = used == 0 and rng.random() < EXPLORE_RATE
+        if used >= MAX_SWITCHES:
+            dd.update(strategy="WORKED_EXAMPLE", switch="worked_example", restart=True,
+                      reveal=False, require_attempt=True,
+                      why=f"{used} switches tried: worked example on a similar problem")
+            return dd
+        cur = current_strategy if current_strategy in STRATEGIES else dd["strategy"]
+        if used == 0 and dd["level"] != "concrete":
+            from app.tutor.representation import LEVELS, step_down
+            if explore:
+                new = rng.choice([lv for lv in LEVELS if lv != dd["level"]])
+                dd["chosen_by"] = "random"
+            else:
+                new = step_down(dd["level"])
+            dd.update(level=new, strategy=cur, switch="level",
+                      why=f"no progress at {dd['level']} level: try {new}")
+        else:
+            pick, why = next_strategy(cur, tried, stats, rng, explore=explore)
+            if explore:
+                dd["chosen_by"] = "random"
+            dd.update(strategy=pick, switch="strategy",
+                      why=f"{(cur or 'approach').lower().replace('_', ' ')} not working; {why}")
+        dd["switches_used"] = used + 1
+        return dd
+
+    if trigger:
+        d["trigger"] = trigger
+        return switch(d)
+    if code_verdict is None and no_progress == SWITCH_AFTER - 1:
+        preview = switch(dict(d))
+        if preview.get("switch") == "level":
+            d["fallback_level"] = preview["level"]
+        elif preview.get("switch") == "strategy":
+            d["fallback"] = preview["strategy"]
+        elif preview.get("switch") == "worked_example":
+            d["fallback"] = "WORKED_EXAMPLE"
+    return d
+
+
 def with_fallback(decide_kwargs: dict) -> dict:
     """choose(), plus what to do if the learner's CURRENT message turns out
     to be another miss. Code can't judge the message before the call, so
@@ -160,14 +272,34 @@ def with_fallback(decide_kwargs: dict) -> dict:
     return d
 
 
-def decision_line(d: dict) -> str:
-    line = (f"PEDAGOGY strat={d['strategy']} why=\"{d['why']}\" hint={d['hint']} "
+def decision_line(d: dict, grade: int | None = None) -> str:
+    level = d.get("level")
+    line = (f"PEDAGOGY strat={d['strategy']}{' level=' + level if level else ''} "
+            f"why=\"{d['why']}\" hint={d['hint']} "
             f"reveal={'yes' if d['reveal'] else 'no'} "
             f"require_attempt={'yes' if d['require_attempt'] else 'no'}\n"
             f"How: {STRATEGIES[d['strategy']]}")
+    if level and grade:
+        from app.tutor.representation import instruction
+        line += "\n" + instruction(level, grade)
+    if d.get("switch") == "worked_example":
+        line += ("\nUse a SIMILAR problem with different numbers for the worked example; "
+                 "do not solve the learner's own problem for them.")
     if d.get("fallback"):
-        line += (f"\nIf their latest message is ANOTHER wrong attempt, use "
+        line += (f"\nIf their latest message is ANOTHER attempt with no progress, use "
                  f"strat={d['fallback']} instead: {STRATEGIES[d['fallback']]}")
+    if d.get("fallback_level") and grade:
+        from app.tutor.representation import instruction
+        line += (f"\nIf their latest message is ANOTHER attempt with no progress, switch to "
+                 f"level={d['fallback_level']} (same strategy) instead: "
+                 + instruction(d["fallback_level"], grade).split("\n")[0])
+    if d.get("bridge"):
+        from app.tutor.representation import BRIDGE
+        line += "\n" + BRIDGE
+    if d.get("code_check"):
+        line += "\n" + d["code_check"]
+    if d.get("methods"):
+        line += "\n" + d["methods"]
     return line
 
 

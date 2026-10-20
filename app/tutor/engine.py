@@ -8,7 +8,7 @@ import random
 
 from app.adapters import ledger, llm
 from app.db import get_pool
-from app.tutor import mastery, memory, pedagogy, prompts
+from app.tutor import answer_check, mastery, memory, pedagogy, prompts, representation, tmu
 from app.tutor.state import parse_state, parse_turn, strip_state
 from app.tutor.rag import (
     get_past_paper_excerpts,
@@ -60,7 +60,11 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     pool = await get_pool()
     async with pool.acquire() as conn:
         mem = await memory.load(learner_id, await memory.load_history(conn, learner_id))
+    memory.ensure_working(mem)
     continuing = memory.continues_problem(mem, question)
+    # Code judges what it can before the call (CPA spec section 5), so the
+    # model is told, not asked, whether "x = 10" is right.
+    check = answer_check.check(mem["working"]["problem"], question) if continuing else None
 
     # A reply like "x = 6" retrieves nothing useful on its own; search with
     # the working problem attached so the notes stay on topic.
@@ -82,6 +86,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
             conn, topic["id"], query=query, keep_code=mem["working"]["lo_code"]) if topic else []
         miscs = await mastery.misconception_codes(conn, topic["id"] if topic else None)
         stats = await pedagogy.load_stats(conn, learner_id, topic["id"]) if topic else {}
+        level_stats = await representation.load_stats(conn, learner_id, topic["id"]) if topic else {}
         # The objective in play: the working one when continuing, else the
         # best match for this question.
         focus = (next((lo for lo in los if lo["code"] == mem["working"]["lo_code"]), None)
@@ -106,10 +111,14 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # A new question starts a new problem: its decision must not inherit the
     # previous problem's failures, tried strategies or answer requests.
     new_problem = not continuing
-    decision = pedagogy.with_fallback(dict(
-        score=lo_score if lo_score is not None else mastery.MASTERY_START,
+    score = lo_score if lo_score is not None else mastery.MASTERY_START
+    rng = random.Random(f"{learner_id}:{mem['session_turns']}")
+    # choose() keeps its guard-rail rules (review, new objective, repeated
+    # misconception, hint and reveal); the 3-turn switch is plan_switch's.
+    base = pedagogy.choose(**dict(
+        score=score,
         current=w["strategy"],
-        fails_in_row=0 if new_problem else w["fails_in_row"],
+        fails_in_row=0,
         tried_on_problem=[] if new_problem else w["tried"],
         new_lo_this_session=bool(lo_code) and lo_code not in mem["los_seen"] and lo_score is None,
         misconception_repeated=len(w["misc_recent"]) != len(set(w["misc_recent"])),
@@ -119,8 +128,35 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                            + int(memory.asks_for_answer(question)),
         wrong_on_problem=0 if new_problem else w["wrong_on_problem"],
         stats=stats,
-        rng=random.Random(f"{learner_id}:{mem['session_turns']}"),
+        rng=rng,
     ))
+    if continuing and w.get("level"):
+        level, level_why = w["level"], "same level"
+    else:
+        level, level_why = representation.start_level(score, level_stats)
+    verdict = check["verdict"] if check else None
+    decision = pedagogy.plan_switch(
+        base, current_strategy=w["strategy"] if continuing else None, level=level,
+        no_progress=0 if new_problem else w["no_progress"],
+        switches_used=0 if new_problem else w["switches"],
+        asked_other_way=continuing and memory.asks_other_way(question),
+        tried=[] if new_problem else w["tried"], stats=stats, rng=rng, code_verdict=verdict)
+    if new_problem:
+        decision["level_why"] = level_why
+    if decision.get("close") and decision["level"] != "abstract" and not w.get("bridge"):
+        # Solved with objects or a picture: ask for the symbols before closing.
+        decision.pop("close")
+        decision["bridge"] = True
+        decision["code_check"] = ("CODE CHECK: the learner's latest message is a CORRECT answer to "
+                                  "the working problem. Praise what they did, specifically.")
+    else:
+        decision["code_check"] = answer_check.prompt_line(check)
+    if (decision["strategy"] == "MULTIPLE_METHODS" or decision.get("fallback") == "MULTIPLE_METHODS"
+            or decision.get("switch") in ("strategy", "worked_example") or new_problem):
+        entry = tmu.find_methods(w["problem"] if continuing else question, grade,
+                                 (topic or {}).get("name"))
+        decision["methods"] = tmu.methods_line(entry)
+        decision["methods_id"] = entry["id"] if entry else None
     ledger.current_strategy.set(decision["strategy"])
 
     raw = await llm.socratic_reply(
@@ -150,8 +186,36 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     if state is None:
         log.info("tutor_reply: no usable STATE line (learner %s)", learner_id)
 
+    if check:
+        ev_code, progress_code = answer_check.EVIDENCE[check["verdict"]]
+        if state is None:
+            state = {"lo": None, "misc": None, "strategy": decision["strategy"],
+                     "hint": decision["hint"], "step": None, "level": None, "valid": False}
+        state = {**state, "ev": ev_code, "progress": progress_code, "code_checked": True}
+    # A pending fallback the model was told to apply if this message made no
+    # progress: code can now see whether it did.
+    no_progress_now = bool(state) and state.get("ev") in ("attempt_wrong", "attempt_partial",
+                                                          "asked_for_answer") \
+        and state.get("progress") not in ("step_forward", "solved")
+    if not decision.get("switch") and no_progress_now and (decision.get("fallback")
+                                                            or decision.get("fallback_level")):
+        decision["switch"] = "level" if decision.get("fallback_level") else (
+            "worked_example" if decision["fallback"] == "WORKED_EXAMPLE" else "strategy")
+        decision["trigger"] = "no_progress"
+        decision["switches_used"] = decision.get("switches_used", 0) + 1
+        if decision.get("fallback_level"):
+            decision["level"] = decision["fallback_level"]
+        else:
+            decision["strategy"] = decision["fallback"]
+        decision["applied_fallback"] = True
+
     used = (state or {}).get("strategy") or decision["strategy"]
+    if decision.get("applied_fallback") and decision.get("fallback"):
+        used = decision["strategy"]
     ev = (state or {}).get("ev", "none")
+    progress = (state or {}).get("progress")
+    prev_level = w.get("level")
+    level_shown = (state or {}).get("level") or prev_level
     # `ev` judges the learner's message, which answered the PREVIOUS reply:
     # credit that reply's strategy, hint level and topic, not this one's.
     prev_strategy, prev_hint, prev_topic = w["strategy"], w.get("last_hint", 0), w["topic_id"]
@@ -166,28 +230,74 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                     await mastery.record_event(
                         conn, learner_id, ev_topic_id, source="chat", evidence=ev,
                         lo_id=lo_id, hint_level=prev_hint, strategy=prev_strategy or used,
-                        misconception=state.get("misc"))
+                        misconception=state.get("misc"), cpa_level=level_shown,
+                        strand=tmu.strand_for(prev_strategy or used, ev, level_shown))
                 ok = pedagogy.outcome(ev)
                 if prev_topic and prev_strategy and ok is not None:
                     await pedagogy.record_outcome(conn, learner_id, prev_topic, prev_strategy, ok)
+                moved = progress in ("step_forward", "solved") or ok is True
+                if prev_topic and prev_level and (ok is not None or progress):
+                    await representation.record_outcome(conn, learner_id, prev_topic, prev_level, moved)
+                # Evidence log: close the last switch's outcome, then log a new one.
+                if w.get("last_switch_id"):
+                    w["since_switch"] = w.get("since_switch", 0) + 1
+                    if moved or w["since_switch"] >= 2:
+                        await conn.execute(
+                            "UPDATE pedagogy_decisions SET outcome = $2, turns_to_outcome = $3 "
+                            "WHERE id = $1", w["last_switch_id"],
+                            "progress" if moved else "no_progress", w["since_switch"])
+                        w["last_switch_id"] = None
+                if decision.get("switch"):
+                    w["last_switch_id"] = await conn.fetchval(
+                        """
+                        INSERT INTO pedagogy_decisions
+                            (learner_id, topic_id, problem, session_turn, trigger, switch, strategy,
+                             cpa_level, chosen_by, mastery_at, no_progress)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
+                        """, learner_id, (topic or {}).get("id") or prev_topic, w.get("problem"),
+                        mem["session_turns"], decision.get("trigger") or "no_progress",
+                        decision["switch"], decision["strategy"], decision.get("level"),
+                        decision.get("chosen_by", "engine"), score, w.get("no_progress", 0))
+                    w["since_switch"] = 0
         except ValueError:
             log.warning("grade rule: evidence on topic %s refused", ev_topic_id)
         except Exception:  # noqa: BLE001 -- bookkeeping never costs the learner their reply
             log.exception("tutor_reply: evidence write failed (learner %s)", learner_id)
 
-        consolidate_now = memory.record_turn(mem, question, reply, state, topic, used,
+        mem_state = state
+        if decision.get("bridge") and state:
+            mem_state = {**state, "progress": "step_forward", "step": None}  # stay open for the bridge
+        elif w.get("bridge") and continuing and state:
+            mem_state = {**state, "progress": "solved"}  # bridge answered: close the problem
+        switch_id, since = w.get("last_switch_id"), w.get("since_switch", 0)
+        consolidate_now = memory.record_turn(mem, question, reply, mem_state, topic, used,
                                              new_problem=new_problem)
+        w = mem["working"]
+        if w["problem"]:
+            w["level"] = decision.get("level")
+            if continuing:  # a new problem doesn't inherit the old problem's open switch
+                w["last_switch_id"], w["since_switch"] = switch_id, since
+            if decision.get("switch"):
+                w["no_progress"] = 0  # the new approach gets its own 3 turns
+                w["switches"] = decision.get("switches_used", w.get("switches", 0))
+            if decision.get("bridge"):
+                w["bridge"] = True
         if consolidate_now:
             memory.consolidate(mem)
             mem["_persist"] = True
         if mem.pop("_persist", False):
             await memory.persist_digest(conn, mem)
     if decision.get("restart"):
-        mem["working"].update(tried=[], fails_in_row=0, wrong_on_problem=0)
+        mem["working"].update(tried=[], fails_in_row=0, wrong_on_problem=0, no_progress=0)
     await memory.save(mem)
     last_turn.set({"decision": decision, "state": state, "topic": topic, "output_mode": mode,
                    "continuing": continuing, "problem": mem["working"]["problem"],
-                   "lo_score": lo_score})
+                   "lo_score": lo_score, "level": decision.get("level"),
+                   "switch": decision.get("switch"), "chosen_by": decision.get("chosen_by"),
+                   "code_check": check["verdict"] if check else None,
+                   "no_progress": mem["working"].get("no_progress"),
+                   "switches": mem["working"].get("switches"),
+                   "methods": decision.get("methods_id")})
     return reply
 
 

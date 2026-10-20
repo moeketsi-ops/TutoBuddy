@@ -58,7 +58,7 @@ def test_maths_oracle_scores_100_and_null_scores_0():
 
 
 def test_case_files_are_well_formed():
-    expect = {"router": 80, "maths": 71, "tutoring": 60, "marking": 60, "practice": 32, "conversations": 11}
+    expect = {"router": 80, "maths": 71, "tutoring": 60, "marking": 60, "practice": 32, "conversations": 16, "homework_day": 2}
     for suite, n in expect.items():
         rows = [json.loads(line) for line in (CASES / f"{suite}.jsonl").read_text().splitlines() if line.strip()]
         assert len(rows) == n, suite
@@ -69,3 +69,10 @@ def test_wilson_interval():
     lo, hi = g.wilson(9, 10)
     assert 0.55 < lo < 0.6 and 0.97 < hi <= 1.0
     assert g.wilson(0, 0) == (0.0, 0.0)
+
+
+def test_conversation_and_day_cases_line_up():
+    for suite in ("conversations", "homework_day"):
+        for r in (json.loads(x) for x in (CASES / f"{suite}.jsonl").read_text().splitlines() if x.strip()):
+            for p in r.get("problems", [r]):
+                assert len(p["turns"]) == len(p["truth"]), (suite, r["id"])

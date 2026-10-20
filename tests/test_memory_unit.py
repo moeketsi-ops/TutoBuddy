@@ -28,7 +28,8 @@ def test_state_is_stripped_and_parsed():
     assert "STATE" not in clean and clean.endswith("both sides?")
     st = _parse(body)
     assert st == {"lo": "ZA-MATH-G08-ALG-EQ-001", "ev": "attempt_partial", "misc": "SIGN_ERR",
-                  "strategy": "SOCRATIC_QUESTIONING", "hint": 1, "step": "2/3", "valid": True}
+                  "strategy": "SOCRATIC_QUESTIONING", "hint": 1, "step": "2/3", "valid": True,
+                  "level": None, "progress": None}
 
 
 def test_unknown_values_are_dropped_never_stored():
@@ -127,7 +128,7 @@ def test_fallback_removes_the_one_turn_lag():
     d = pedagogy.with_fallback(_kw(current="SOCRATIC_QUESTIONING", fails_in_row=1,
                                    tried_on_problem=["SOCRATIC_QUESTIONING"], wrong_on_problem=1))
     assert d["strategy"] == "SOCRATIC_QUESTIONING" and d["fallback"] == "SCAFFOLDED_EXAMPLE"
-    assert "ANOTHER wrong attempt" in pedagogy.decision_line(d)
+    assert "ANOTHER attempt with no progress" in pedagogy.decision_line(d)
 
 
 # ── Memory window ────────────────────────────────────────────────────────────

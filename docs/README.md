@@ -14,6 +14,7 @@ not the current state of `main`.
 | `tutobuddy-pedagogy-mastery-pace-step.md` | Term progress, practice questions, closing the mastery loop | `app/tutor/*` |
 | `tutobuddy-dynamic-pedagogy-engine-design.md` | Target pedagogy design (strategy library, learner model, decision object) and what is built so far | `app/tutor/*` |
 | `memory-pedagogy.md` | Per-learner memory window, STATE line, evidence-weighted mastery, pedagogy engine v1, bench `conversations` suite | `app/tutor/memory.py`, `state.py`, `mastery.py`, `pedagogy.py`, `app/adapters/ledger.py` |
+| `cpa-tmu-switching.md` | CPA levels, TMU strands and methods, the 3-turn switching rule, code-side answer checking, evidence log, bench CPA cases and homework day | `app/tutor/answer_check.py`, `representation.py`, `tmu.py`, `pedagogy.py`, `engine.py`, `evals/bench/run.py` |
 | `technical-blueprint-reconciliation.md` | CTO blueprint vs MVP roadmap: scope, router tiers, infra, safety layers | `app/db.py`, `app/tutor/rag.py` |
 
 Some notes mention other project notes that are not in this folder

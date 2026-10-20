@@ -68,18 +68,20 @@ def _off_grade_block(
 
 
 STATE_RULES = """After your reply, on its own final line, add this hidden line (the learner never sees it):
-<<STATE lo=CODE ev=EVIDENCE misc=CODE strat=STRATEGY hint=N step=N/M>>
-Example: <<STATE lo=ZA-MATH-G08-ALG-EQ-001 ev=attempt_wrong misc=SIGN_ERR strat=SCAFFOLDED_EXAMPLE hint=1 step=2/3>>
+<<STATE lo=CODE ev=EVIDENCE misc=CODE strat=STRATEGY hint=N step=N/M level=LEVEL progress=PROGRESS>>
+Example: <<STATE lo=ZA-MATH-G08-ALG-EQ-001 ev=attempt_wrong misc=SIGN_ERR strat=SCAFFOLDED_EXAMPLE hint=1 step=2/3 level=pictorial progress=none>>
 - lo: the objective code from OBJECTIVES this turn is about, or none.
 - ev: judge the learner's LATEST message only: attempt_correct, attempt_partial, attempt_wrong (an attempt at a step), asked_for_answer (wants the answer without trying), explained_back (explained the method in their own words), or none (a new question, chit-chat, no attempt).
 - misc: a code from MISCONCEPTIONS if their attempt shows one, else none.
 - strat: the strategy your reply used (normally the one in PEDAGOGY).
 - hint: the hint level your reply gave (0 none, 3 = gave the answer).
-- step: which step of the working problem the learner is on, e.g. 2/3, or done when it is solved."""
+- step: which step of the working problem the learner is on, e.g. 2/3, or done when it is solved.
+- level: the form the LEARNER worked in: concrete (objects, real context), pictorial (a picture, table, diagram) or abstract (symbols).
+- progress: none, step_forward (a correct step but not finished) or solved."""
 
 
 JSON_RULES = """Respond with ONE JSON object and nothing else (no text before or after it):
-{"state": {"ev": ..., "lo": ..., "misc": ..., "strat": ..., "hint": ..., "step": ...}, "reply": "..."}
+{"state": {"ev": ..., "lo": ..., "misc": ..., "strat": ..., "hint": ..., "step": ..., "level": ..., "progress": ...}, "reply": "..."}
 Fill "state" FIRST, then write "reply":
 - ev: judge the learner's LATEST message only: attempt_correct, attempt_partial, attempt_wrong (an attempt at a step), asked_for_answer (wants the answer without trying), explained_back (explained the method in their own words), or none (a new question, chit-chat, no attempt).
 - lo: the objective code from OBJECTIVES this turn is about, or "none".
@@ -87,6 +89,8 @@ Fill "state" FIRST, then write "reply":
 - strat: the strategy your reply uses (normally the one in PEDAGOGY).
 - hint: the hint level your reply gives, "0" (none) to "3" (gives the answer).
 - step: which step of the working problem the learner is on, e.g. "2/3", or "done" when it is solved.
+- level: the form the LEARNER worked in: "concrete" (objects, real context), "pictorial" (a picture, table, diagram) or "abstract" (symbols).
+- progress: "none", "step_forward" (a correct step but not finished) or "solved".
 - reply: the WhatsApp message the learner will see, following every rule above (use \\n for line breaks)."""
 
 
@@ -128,7 +132,7 @@ Rules (prompt policy {PROMPT_VERSION}):
     if pedagogy:
         parts.append(JSON_RULES if output == "json" else STATE_RULES)
         from app.tutor.pedagogy import decision_line
-        parts.append(decision_line(pedagogy))
+        parts.append(decision_line(pedagogy, grade))
     if memory_block:
         parts.append(memory_block)
     if above or grade_topics:

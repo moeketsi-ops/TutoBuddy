@@ -422,7 +422,7 @@ def _stub_state(question: str, pedagogy: dict, lo_candidates: list[dict] | None,
         ev = "none"
     return {"ev": ev, "lo": lo_candidates[0]["code"] if lo_candidates else "none",
             "misc": "none", "strat": pedagogy["strategy"], "hint": str(pedagogy["hint"]),
-            "step": "1/3"}
+            "step": "1/3", "level": pedagogy.get("level") or "abstract", "progress": "none"}
 
 
 def _is_refusal(exc: Exception) -> bool:

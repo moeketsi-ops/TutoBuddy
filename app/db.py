@@ -524,6 +524,43 @@ CREATE TABLE IF NOT EXISTS learner_strategy_stats (
     PRIMARY KEY (learner_id, topic_id, strategy)
 );
 
+-- CPA + TMU (spec "Katlego CPA + mastery switching v0.1"): the level the
+-- learner worked at and the TMU strand each piece of evidence speaks to.
+ALTER TABLE learner_events ADD COLUMN IF NOT EXISTS cpa_level varchar(10);
+ALTER TABLE learner_events ADD COLUMN IF NOT EXISTS strand varchar(30);
+
+-- What works for whom, per CPA level (app/tutor/representation.py).
+CREATE TABLE IF NOT EXISTS learner_level_stats (
+    learner_id int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    topic_id   int NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    cpa_level  varchar(10) NOT NULL,
+    tries      int NOT NULL DEFAULT 0,
+    successes  int NOT NULL DEFAULT 0,
+    PRIMARY KEY (learner_id, topic_id, cpa_level)
+);
+
+-- The evidence log: every switch the engine makes, why, and what happened
+-- over the next 2 turns. chosen_by = 'random' marks the 10% exploration
+-- share, so we can show the engine's pick beats chance.
+CREATE TABLE IF NOT EXISTS pedagogy_decisions (
+    id              bigserial PRIMARY KEY,
+    learner_id      int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    topic_id        int REFERENCES topics(id) ON DELETE SET NULL,
+    problem         text,
+    session_turn    int,
+    trigger         varchar(20) NOT NULL,
+    switch          varchar(20) NOT NULL,
+    strategy        varchar(40) NOT NULL,
+    cpa_level       varchar(10),
+    chosen_by       varchar(10) NOT NULL DEFAULT 'engine',
+    mastery_at      numeric(5,2),
+    no_progress     int,
+    outcome         varchar(20),
+    turns_to_outcome int,
+    created_at      timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_pedagogy_decisions_learner ON pedagogy_decisions(learner_id, created_at);
+
 -- Misconception taxonomy (seeded, small). topic_id NULL = applies to any
 -- topic (e.g. sign errors).
 CREATE TABLE IF NOT EXISTS misconceptions (

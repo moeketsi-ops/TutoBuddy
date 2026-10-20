@@ -66,7 +66,17 @@ def _fresh_working() -> dict:
         "problem": None, "strategy": None, "fails_in_row": 0,
         "tried": [], "wrong_on_problem": 0, "asked_answer": 0,
         "misc_recent": [], "last_hint": 0,
+        # CPA + switching (spec v0.1 section 4)
+        "level": None, "no_progress": 0, "switches": 0, "bridge": False,
+        "last_switch_id": None, "since_switch": 0,
     }
+
+
+def ensure_working(mem: dict) -> dict:
+    """Memory saved before the CPA fields existed gets their defaults."""
+    for k, v in _fresh_working().items():
+        mem["working"].setdefault(k, v)
+    return mem["working"]
 
 
 async def load(learner_id: int, history: list[str] | None = None) -> dict:
@@ -106,6 +116,22 @@ ASKS_ANSWER = re.compile(
     r"\b(give|tell|send|show) me the (final )?answer\b|\bjust (the|give me the) answer\b|"
     r"\bwhat('?s| is) the (final )?answer\b",
     re.IGNORECASE)
+
+
+ANOTHER_WAY = re.compile(
+    r"\b(another|different|other) (way|method)\b|\bexplain (it |that )?(differently|again)\b|"
+    r"\bshow me (a |another )?(different|other) way\b", re.IGNORECASE)
+CONFUSED = re.compile(
+    r"\bi (still )?(don'?t|do not|dont) (get|understand)\b|\bi'?m (lost|confused)\b|"
+    r"\bmakes no sense\b|\bno idea\b", re.IGNORECASE)
+
+
+def asks_other_way(text: str) -> bool:
+    return bool(ANOTHER_WAY.search(text))
+
+
+def is_confused(text: str) -> bool:
+    return bool(CONFUSED.search(text))
 
 
 SWITCH_INTENT = re.compile(r"\b(quiz|test me|practi[cs]e|another question)\b", re.IGNORECASE)
@@ -149,8 +175,9 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
                 topic: dict | None, strategy: str, *, new_problem: bool = False) -> bool:
     """Append a turn and update working state. Returns True when the window
     should be consolidated now (5 turns, or the topic changed)."""
-    w = mem["working"]
+    w = ensure_working(mem)
     ev = (state or {}).get("ev", "none")
+    progress = (state or {}).get("progress")
     topic_changed = bool(topic and w["topic_id"] and topic["id"] != w["topic_id"])
 
     if topic_changed:
@@ -170,7 +197,17 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
     # opens it; a STATE step of "done" closes it after this turn.
     if new_problem and ev == "none" and learner_text.strip():
         w["problem"] = learner_text[:200]
-        w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[])
+        w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[],
+                 level=None, no_progress=0, switches=0, bridge=False, last_switch_id=None,
+                 since_switch=0)
+
+    # No-progress count for the 3-turn switch rule: a turn with a step
+    # forward (or a correct answer) resets it; a wrong / partial-without-
+    # progress attempt, an answer request or "I don't get it" adds one.
+    if progress in ("step_forward", "solved") or ev in ("attempt_correct", "explained_back"):
+        w["no_progress"] = 0
+    elif ev in ("attempt_wrong", "attempt_partial", "asked_for_answer") or is_confused(learner_text):
+        w["no_progress"] += 1
 
     # `ev` judges the learner's message, i.e. the strategy of the PREVIOUS
     # reply; `strategy` is what THIS reply used.
@@ -201,15 +238,17 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
         "misc": (state or {}).get("misc"),
         "strategy": strategy,
         "topic": w["topic"],
+        "level": (state or {}).get("level") or w.get("level"),
     })
     mem["turns"] = mem["turns"][-WINDOW:]
     mem["turn_count"] += 1
     mem["session_turns"] += 1
     mem["last_turn_at"] = time.time()
 
-    if state and state.get("step") == "done":
+    if state and (state.get("step") == "done" or progress == "solved"):
         w.update(problem=None, fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0,
-                 misc_recent=[])
+                 misc_recent=[], level=None, no_progress=0, switches=0, bridge=False,
+                 last_switch_id=None, since_switch=0)
         if w["strategy"] == "RETRIEVAL_PRACTICE":
             w["strategy"] = None
 
@@ -281,7 +320,8 @@ def prompt_block(mem: dict, *, name: str | None, grade: int, lo_score: float | N
             now += f" · mastery {lo_score:.0f}% ({band(lo_score)})"
         lines.append(now)
     if w["problem"]:
-        lines.append(f"WORKING PROBLEM \"{w['problem']}\" · not-yet attempts {w['wrong_on_problem']}")
+        lines.append(f"WORKING PROBLEM \"{w['problem']}\" · not-yet attempts {w['wrong_on_problem']}"
+                     + (f" · level {w['level']}" if w.get("level") else ""))
     if review:
         lines.append(f"REVIEW DUE {review['code']} ({review['score']:.0f}%): {review['objective'][:60]}")
     if mem["digest"]:

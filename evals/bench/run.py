@@ -27,7 +27,7 @@ from evals.bench import graders, judge, prices
 
 HERE = Path(__file__).parent
 RESULTS = HERE / "results"
-SUITES = ("router", "maths", "tutoring", "marking", "practice", "conversations")
+SUITES = ("router", "maths", "tutoring", "marking", "practice", "conversations", "homework_day")
 JUDGED = ("tutoring", "practice")
 
 # Stage presets; every value can be overridden on the command line.
@@ -44,7 +44,13 @@ STAGES = {
 GUESS_TOKENS = {"router": (350, 5), "maths": (1400, 500), "tutoring": (1800, 250),
                 "marking": (700, 80), "practice": (2200, 150),
                 # a whole scripted conversation: ~4 turns x (1,300 in, 230 out)
-                "conversations": (5200, 920)}
+                "conversations": (5200, 920),
+                # a learner's day: ~7 problems x ~5 turns x (1,300 in, 230 out)
+                "homework_day": (45500, 8050)}
+# Twilio's WhatsApp fee per message, in or out, on top of Meta's
+# (twilio.com/en-us/whatsapp/pricing, Sept 2026). Meta's own service-message
+# fee for South Africa is not confirmed, so it is left out.
+TWILIO_USD_PER_MESSAGE = 0.005
 GUESS_REASONING = {"": 0, "none": 0, "minimal": 300, "low": 800, "medium": 2000, "high": 4000}
 GUESS_JUDGE = (1200, 2500)  # per judge call; medium effort reasoning counts as output
 
@@ -213,8 +219,15 @@ async def _conversations(case, ctx):
                 "problem": info.get("problem"),
                 "structured": info.get("output_mode") == "json",
                 "strategy": d.get("strategy"), "ev": st.get("ev"),
+                "level": info.get("level"), "switch": info.get("switch"),
+                "code_check": info.get("code_check"),
             })
-            transcript.append(f"L: {msg}\nK [{d.get('strategy')} / ev={st.get('ev')}]: {reply}")
+            tag = f"{d.get('strategy')} / {info.get('level')} / ev={st.get('ev')}"
+            if info.get("switch"):
+                tag += f" / SWITCH {info['switch']} ({info.get('chosen_by')})"
+            if info.get("code_check"):
+                tag += f" / code={info['code_check']}"
+            transcript.append(f"L: {msg}\nK [{tag}]: {reply}")
     finally:
         async with pool.acquire() as conn:
             await conn.execute("DELETE FROM llm_calls WHERE learner_id = $1", learner)
@@ -234,13 +247,101 @@ async def _conversations(case, ctx):
         "leak_early": float(any(t["leak"] for t in turns)),
         "on_problem": float(bool(first_problem) and all(
             t["problem"] in (first_problem, None) for t in turns[1:])),
+        "code_checked": sum(bool(t["code_check"]) for t in turns[1:]) / max(1, len(turns) - 1),
     }
+    # CPA cases say when the switch should land (1-based turn) or that none should.
+    switches = [i + 1 for i, t in enumerate(turns) if t["switch"]]
+    if case.get("expect_switches"):
+        kinds = [t["switch"] for t in turns if t["switch"]]
+        grade["switch_sequence_ok"] = float(kinds[:len(case["expect_switches"])] == case["expect_switches"])
+    if case.get("no_switch"):
+        grade["switched_ok"] = float(not switches)
+    elif case.get("switch_by"):
+        grade["switched_ok"] = float(bool(switches) and switches[0] <= case["switch_by"])
     return {"output": "\n\n".join(transcript), "grade": grade,
-            "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns]}
+            "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns],
+            "levels": [t["level"] for t in turns], "switches": switches}
+
+
+# ── A learner's homework day (CPA spec section 8) ────────────────────────────
+# One scripted learner works through ~7 maths problems in one sitting, so
+# the profile built on early problems (strategy and level stats) is used on
+# later ones, as live. run_case already totals calls, tokens, reasoning,
+# cost and seconds for the whole day; this adds per-problem turns, switches
+# and whether each problem was solved, plus the WhatsApp message count and
+# Twilio's fee for the same day.
+
+async def _homework_day(case, ctx):
+    from app.adapters import ledger
+    from app.db import get_pool
+    from app.tutor import memory
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        account = await conn.fetchval("INSERT INTO accounts DEFAULT VALUES RETURNING id")
+        learner = await conn.fetchval(
+            "INSERT INTO learners (account_id, nickname, grade) VALUES ($1, $2, $3) RETURNING id",
+            account, case.get("name", "Bench"), case["grade"])
+    problems, transcript, judged, leaks, checked, seconds = [], [], [], [], [], []
+    try:
+        for n, prob in enumerate(case["problems"], 1):
+            transcript.append(f"### Problem {n}: {prob['turns'][0]}")
+            reached, switches, levels, solved = False, 0, [], False
+            for i, (msg, truth) in enumerate(zip(prob["turns"], prob["truth"])):
+                t0 = time.perf_counter()
+                reply = await engine.tutor_reply(msg, case["grade"], learner, case.get("name"))
+                seconds.append(time.perf_counter() - t0)
+                info = engine.last_turn.get() or {}
+                st, d = info.get("state") or {}, info.get("decision") or {}
+                reached = reached or truth in ("correct", "explain")
+                if i and truth != "any":
+                    judged.append(st.get("ev") in _TRUTH.get(truth, set()))
+                    checked.append(bool(info.get("code_check")))
+                leaks.append(not reached and not d.get("reveal")
+                             and graders.leaks_answer(reply, prob.get("answers", [])))
+                switches += bool(info.get("switch"))
+                levels.append(info.get("level"))
+                solved = solved or (truth == "correct" and (info.get("problem") is None or d.get("bridge")))
+                transcript.append(f"L: {msg}\nK [{d.get('strategy')} / {info.get('level')}"
+                                  f"{' / SWITCH ' + info['switch'] if info.get('switch') else ''}]: {reply}")
+            problems.append({"turns": len(prob["turns"]), "switches": switches, "solved": solved,
+                             "levels": levels})
+        async with pool.acquire() as conn:
+            profile = await conn.fetch(
+                "SELECT cpa_level, tries, successes FROM learner_level_stats WHERE learner_id = $1",
+                learner)
+            log_rows = await conn.fetch(
+                "SELECT switch, chosen_by, outcome FROM pedagogy_decisions WHERE learner_id = $1",
+                learner)
+    finally:
+        async with pool.acquire() as conn:
+            await conn.execute("DELETE FROM llm_calls WHERE learner_id = $1", learner)
+            await conn.execute("DELETE FROM accounts WHERE id = $1", account)
+        await memory.forget(learner)
+        ledger.current_learner.set(None)
+
+    turns = sum(p["turns"] for p in problems)
+    messages = 2 * turns  # each learner message gets one reply
+    grade = {
+        "problems": len(problems),
+        "turns_per_problem": turns / max(1, len(problems)),
+        "switches_per_problem": sum(p["switches"] for p in problems) / max(1, len(problems)),
+        "solved_share": sum(p["solved"] for p in problems) / max(1, len(problems)),
+        "judged_right": (sum(judged) / len(judged)) if judged else None,
+        "code_checked": (sum(checked) / len(checked)) if checked else None,
+        "leak_early": float(any(leaks)),
+        "seconds_per_reply": statistics.median(seconds) if seconds else None,
+        "wa_messages": messages,
+        "twilio_usd": round(messages * TWILIO_USD_PER_MESSAGE, 4),
+        "switches_logged": len(log_rows),
+        "switches_with_progress": sum(r["outcome"] == "progress" for r in log_rows),
+    }
+    return {"output": "\n\n".join(transcript), "grade": grade, "problems": problems,
+            "level_profile": {r["cpa_level"]: [r["tries"], r["successes"]] for r in profile}}
 
 
 RUNNERS = {"router": _router, "maths": _maths, "tutoring": _tutoring, "marking": _marking, "practice": _practice,
-           "conversations": _conversations}
+           "conversations": _conversations, "homework_day": _homework_day}
 
 
 # ── Checks that protect the comparison ───────────────────────────────────────
@@ -331,7 +432,9 @@ async def run_variant(stage, suite, model, effort, cases, reps, ctx, concurrency
             return
         async with sem:
             try:
-                row = await run_case(suite, case, rep, model, effort, ctx, timeout_s)
+                # a whole homework day is ~35 turns, not one call
+                limit_s = timeout_s * (12 if suite == "homework_day" else 1)
+                row = await run_case(suite, case, rep, model, effort, ctx, limit_s)
                 with results.open("a") as f:
                     f.write(json.dumps(row, ensure_ascii=False) + "\n")
                 counts["ok" if row["status"] == "ok" else "fail"] += 1
@@ -421,7 +524,7 @@ async def preflight(suites, grades=None) -> None:
     score the same."""
     from app.db import get_pool
 
-    if not {"tutoring", "practice", "maths", "conversations"} & set(suites):
+    if not {"tutoring", "practice", "maths", "conversations", "homework_day"} & set(suites):
         return
     wanted = grades or {8, 12}
     pool = await get_pool()
