@@ -20,6 +20,24 @@ def test_formatting_variants_match():
     assert g.answer_matches("Expanded: 2x² + 6x", ["2x^2+6x"])
 
 
+def test_real_model_formats_from_the_pilot():
+    """Each of these is a correct answer a real model gave in the 31 Oct pilot
+    that the first grader marked wrong."""
+    assert g.answer_matches("**The person with the largest share gets R160.**", ["160"])
+    assert g.answer_matches("Thus, the highest common factor (HCF) is 42.", ["42"])
+    assert g.answer_matches("The sum of the first 20 terms is **820**.", ["820"])
+    assert g.answer_matches("**Answer:** R1\u202f200", ["1200"])
+    assert g.answer_matches(r"$$\boxed{SI = R1\,200}$$", ["1200"])
+    assert g.answer_matches(r"\[\boxed{\text{Simple interest earned}= \text{R}1\,200}\]", ["1200"])
+    assert g.answer_matches(r"T_8=2(3^7)=\boxed{4\,374}", ["4374"])
+    assert g.answer_matches(r"$$I = 5\,000 \times 0{,}08 \times 3$$\n**The simple interest earned is R1 200.**", ["1200"])
+    assert g.answer_matches(r"Final answer: \(1\frac{5}{12}\)", ["1 5/12"])
+    assert g.answer_matches(r"**Answer: $1\tfrac{5}{12}$**", ["1 5/12"])
+    assert g.answer_matches(r"\[ \boxed{f^{-1}(x)=\frac{x+6}{3}} \]", ["(x+6)/3"])
+    assert g.answer_matches(r"Final answer: \(12x^{3}-4x+5\)", ["12x^3-4x+5"])
+    assert not g.answer_matches(r"Final answer: \(\frac{x}{3}+6\)", ["(x+6)/3"])
+
+
 def test_no_false_matches_on_neighbouring_numbers():
     assert not g.answer_matches("Final answer: 15", ["5"])
     assert not g.answer_matches("Final answer: -13", ["13"])

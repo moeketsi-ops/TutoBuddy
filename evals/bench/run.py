@@ -54,20 +54,31 @@ def load_cases(suite: str) -> list[dict]:
     return [json.loads(line) for line in lines if line.strip()]
 
 
-def select_cases(suite: str, limit: int | None, grades: set[int] | None) -> list[dict]:
+def select_cases(suite: str, limit: int | None, grades: set[int] | None, ids: set[str] | None = None) -> list[dict]:
     """Cases for a run: only the chosen grades (router cases have no grade and
     always stay), and `limit` applies per grade so a light run samples every
     grade instead of just the first one in the file."""
     cases = [c for c in load_cases(suite) if grades is None or c.get("grade") is None or c["grade"] in grades]
+    if ids:
+        return [c for c in cases if c["id"] in ids]
     if not limit:
         return cases
-    seen: dict = {}
+    # Round-robin over case kinds (tags[0]) within each grade, so a light run
+    # covers off-grade and give-me-the-answer cases instead of only the easy
+    # ones listed first. Marking's tags[0] is the verdict, so its manipulation
+    # cases need --cases.
     out = []
-    for c in cases:
-        g = c.get("grade")
-        if seen.get(g, 0) < limit:
-            seen[g] = seen.get(g, 0) + 1
-            out.append(c)
+    for g in dict.fromkeys(c.get("grade") for c in cases):
+        by_kind: dict = {}
+        for c in cases:
+            if c.get("grade") == g:
+                by_kind.setdefault((c.get("tags") or [""])[0], []).append(c)
+        queues, picked = list(by_kind.values()), []
+        while len(picked) < limit and any(queues):
+            for q in queues:
+                if q and len(picked) < limit:
+                    picked.append(q.pop(0))
+        out += picked
     return out
 
 
@@ -386,7 +397,7 @@ def _measured_cost() -> dict:
             {k: statistics.median(v) for k, v in judges.items()})
 
 
-def quote(rows, limit, reps, use_judges, grades=None) -> tuple[float, int, str]:
+def quote(rows, limit, reps, use_judges, grades=None, ids=None) -> tuple[float, int, str]:
     live = prices.cached() or prices.fetch()
     measured, judge_measured = _measured_cost()
     judges = config()["judges"]["models"]
@@ -394,7 +405,7 @@ def quote(rows, limit, reps, use_judges, grades=None) -> tuple[float, int, str]:
     for suite, m, e in rows:
         if not is_paid(m):
             continue
-        n = len(select_cases(suite, limit, grades)) * reps
+        n = len(select_cases(suite, limit, grades, ids)) * reps
         calls += n
         key = (suite, m["slug"], e or "default")
         if key in measured:
@@ -445,6 +456,7 @@ async def main() -> None:
     ap.add_argument("--reps", type=int)
     ap.add_argument("--limit", type=int, help="cases per suite and grade (pilot default 5)")
     ap.add_argument("--grades", help="comma list, e.g. 8,12 (default: every grade in the cases)")
+    ap.add_argument("--cases", help="comma list of case ids (overrides --limit)")
     ap.add_argument("--concurrency", type=int, default=6)
     ap.add_argument("--timeout-s", type=float, default=120)
     ap.add_argument("--no-judge", action="store_true")
@@ -455,6 +467,7 @@ async def main() -> None:
     reps = args.reps or preset["reps"]
     limit = args.limit if args.limit is not None else preset["limit"]
     grades = {int(g) for g in args.grades.split(",")} if args.grades else None
+    ids = set(args.cases.split(",")) if args.cases else None
     rows = plan(args, cfg)
     if not rows:
         sys.exit("Nothing to run: check --models / --suites.")
@@ -470,7 +483,7 @@ async def main() -> None:
           f"{', with judges' if use_judges else ''}.")
 
     if paid:
-        cost, calls, basis = quote(rows, limit, reps, use_judges, grades)
+        cost, calls, basis = quote(rows, limit, reps, use_judges, grades, ids)
         print(f"Quote: about {calls} model calls, ~${cost:.2f} (basis: {basis}).")
         need = {"openrouter": settings.openrouter_api_key, "groq": settings.groq_api_key,
                 "anthropic": settings.anthropic_api_key, "jev": settings.typesafe_api_key}
@@ -487,7 +500,7 @@ async def main() -> None:
     ctx = {"judges": cfg["judges"]["models"] if use_judges else []}
     t0 = time.perf_counter()
     for suite, m, e in rows:
-        cases = select_cases(suite, limit, grades)
+        cases = select_cases(suite, limit, grades, ids)
         await run_variant(args.stage, suite, m, e, cases, reps, ctx, args.concurrency, args.timeout_s)
     spent = sum(r["cost_usd"] + r["judge_cost_usd"]
                 for f in (RESULTS / args.stage).glob("*/*/results.jsonl")

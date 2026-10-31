@@ -14,7 +14,14 @@ def normalize(text: str) -> str:
     t = _SUP_RUN.sub(lambda m: "^" + m.group(0).translate(_SUPERSCRIPTS), t)
     t = t.translate(str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789"))   # log₂ → log2
     t = t.replace("−", "-").replace("–", "-").replace("÷", "/")
-    t = re.sub(r"\\d?frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", t)
+    t = re.sub(r"\^\{([^{}]*)\}", r"^\1", t)                  # x^{3} → x^3
+    # 1\frac{5}{12} → 1 5/12; \frac{x+6}{3} → (x+6)/3. Before \boxed{} so its braces are gone.
+    wrap = lambda s: f"({s})" if re.search(r"[-+]", s.strip("-")) else s
+    t = re.sub(r"\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}", lambda m: f" {wrap(m[1])}/{wrap(m[2])}", t)
+    t = re.sub(r"\\(text|mathrm|boxed|mathbf|textbf)\{([^{}]*)\}", r"\2", t)  # \text{R} → R
+    t = re.sub(r"\\[,;:! ]", " ", t)                       # LaTeX thin spaces: 1\,200
+    t = t.replace("{,}", ",").replace("{.}", ".")            # 0{,}08
+    t = re.sub(r"[\u202f\u2009\u2007\u00a0]", " ", t)     # narrow / thin / no-break spaces
     t = re.sub(r"\\(times|cdot)", "×", t)
     t = re.sub(r"\\left|\\right|\\[()\[\]]|[$*_`]", "", t)
     t = t.replace("·", "×").replace("°", "")
@@ -34,7 +41,8 @@ def _found(alt: str, haystack: str) -> bool:
         return False
     if _NUMERIC.fullmatch(a):
         behind = r"(?<![\d./])" if a.startswith("-") else r"(?<![\d./-])"
-        return re.search(behind + re.escape(a) + r"(?![\d./])", haystack) is not None
+        ahead = r"(?!\d|[./]\d)"   # "is 42." matches 42; "4.25" does not match 4
+        return re.search(behind + re.escape(a) + ahead, haystack) is not None
     return a in haystack
 
 
