@@ -1,0 +1,1 @@
+{"case_id": "c03", "rep": 0, "kind": "app_error", "detail": "RuntimeError('tutor_reply: model output had no usable reply')", "ts": "2026-10-31T20:21:05"}

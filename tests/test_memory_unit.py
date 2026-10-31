@@ -260,6 +260,19 @@ def test_a_done_problem_stays_open_for_the_learners_echo():
     assert not memory.has_open_problem(mem)
 
 
+def test_a_wrong_attempt_after_done_keeps_the_problem_open():
+    """Bench c09: a wrong "3x - 6" was marked done; the learner kept trying
+    and the next attempt retrieved trigonometry."""
+    mem = memory._new(7)
+    t = {"id": 9, "name": "Differential Calculus"}
+    memory.record_turn(mem, "derivative of x^3 - 6x?", "Power rule?", _state("none"), t,
+                       "SOCRATIC_QUESTIONING", new_problem=True)
+    memory.record_turn(mem, "3x - 6", "Well done!", _state("attempt_correct", step="done"), t,
+                       "SOCRATIC_QUESTIONING")
+    memory.record_turn(mem, "3x^2 - 6x", "And the -6x?", _state("attempt_wrong"), t, "SOCRATIC_QUESTIONING")
+    assert memory.continues_problem(mem, "3x^2 - 6")
+
+
 # ── Structured output (JSON state + reply) ───────────────────────────────────
 
 from app.tutor.state import parse_turn, turn_schema  # noqa: E402

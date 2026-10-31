@@ -210,8 +210,9 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
 
     # A "done" problem stays open for one more turn, so the learner's echo of
     # the answer ("x = 32") is still read against it instead of retrieving
-    # a random topic for "x = 32" alone.
-    if w.get("closing") and not new_problem:
+    # a random topic for "x = 32" alone. A wrong or partial attempt on that
+    # turn means the "done" was premature, so it stays open.
+    if w.get("closing") and not new_problem and ev not in ("attempt_wrong", "attempt_partial"):
         w["problem"] = None
     w["closing"] = bool(state and state.get("step") == "done")
     if w["closing"]:
