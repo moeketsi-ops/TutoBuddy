@@ -65,7 +65,7 @@ def _fresh_working() -> dict:
         "topic_id": None, "topic": None, "lo_code": None,
         "problem": None, "strategy": None, "fails_in_row": 0,
         "tried": [], "wrong_on_problem": 0, "asked_answer": 0,
-        "misc_recent": [], "last_hint": 0,
+        "misc_recent": [], "last_hint": 0, "closing": False,
     }
 
 
@@ -167,8 +167,9 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
             mem["los_seen"].append(state["lo"])
 
     # Working problem: a new question (or the first substantive message)
-    # opens it; a STATE step of "done" closes it after this turn.
-    if new_problem and ev == "none" and learner_text.strip():
+    # opens it, whatever the model labelled it ("What is -8 + 3?" often comes
+    # back as asked_for_answer). A STATE step of "done" closes it a turn later.
+    if new_problem and learner_text.strip():
         w["problem"] = learner_text[:200]
         w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[])
 
@@ -207,9 +208,14 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
     mem["session_turns"] += 1
     mem["last_turn_at"] = time.time()
 
-    if state and state.get("step") == "done":
-        w.update(problem=None, fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0,
-                 misc_recent=[])
+    # A "done" problem stays open for one more turn, so the learner's echo of
+    # the answer ("x = 32") is still read against it instead of retrieving
+    # a random topic for "x = 32" alone.
+    if w.get("closing") and not new_problem:
+        w["problem"] = None
+    w["closing"] = bool(state and state.get("step") == "done")
+    if w["closing"]:
+        w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[])
         if w["strategy"] == "RETRIEVAL_PRACTICE":
             w["strategy"] = None
 

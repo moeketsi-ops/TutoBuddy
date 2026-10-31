@@ -234,6 +234,32 @@ def test_remediation_clears_the_misconception_trigger():
     assert mem["working"]["misc_recent"] == []
 
 
+def test_the_problem_opens_whatever_the_first_label_is():
+    """Bench c04: "What is -8 + 3?" labelled asked_for_answer stored no
+    problem, so the learner's "-5" retrieved exponents."""
+    mem = memory._new(7)
+    t = {"id": 1, "name": "Integers"}
+    memory.record_turn(mem, "What is -8 + 3?", "Where do you start?", _state("asked_for_answer"), t,
+                       "SOCRATIC_QUESTIONING", new_problem=True)
+    assert mem["working"]["problem"] == "What is -8 + 3?"
+    assert memory.continues_problem(mem, "-5")
+
+
+def test_a_done_problem_stays_open_for_the_learners_echo():
+    """Bench c10: "x = 2^5" marked done closed the problem, so "x = 32"
+    retrieved compound angles."""
+    mem = memory._new(7)
+    t = {"id": 3, "name": "Logarithms"}
+    memory.record_turn(mem, "solve log2 x = 5", "What does log mean?", _state("none"), t,
+                       "SOCRATIC_QUESTIONING", new_problem=True)
+    memory.record_turn(mem, "x = 2^5", "Yes! So x is?", _state("attempt_correct", step="done"), t,
+                       "SOCRATIC_QUESTIONING")
+    assert memory.continues_problem(mem, "x = 32")
+    assert mem["working"]["wrong_on_problem"] == 0
+    memory.record_turn(mem, "x = 32", "Well done!", _state("attempt_correct"), t, "SOCRATIC_QUESTIONING")
+    assert not memory.has_open_problem(mem)
+
+
 # ── Structured output (JSON state + reply) ───────────────────────────────────
 
 from app.tutor.state import parse_turn, turn_schema  # noqa: E402

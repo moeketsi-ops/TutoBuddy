@@ -33,17 +33,17 @@ class Settings(BaseSettings):
     ollama_reasoner_model: str = "llama3.2"
 
     # openrouter: OpenAI-compatible API (https://openrouter.ai/api/v1), one
-    # key across many hosted models. Added for Qwen3.5-35B-A3B (open-weight
-    # MoE, ~3B active params, reasoning + genuinely multimodal) -- founder
-    # wants it for reasoning AND vision, so it's wired into the reasoner
-    # tier AND photo_reply, not just the router. Router stays on whichever
+    # key across many hosted models. The reasoner model also serves
+    # photo_reply, so it must take images. Defaults are the cleanest models
+    # from the 31 Oct bench pilot (0 failed calls), pending the judged screen;
+    # Qwen3.5-35B-A3B was dropped because half its calls came back empty. Router stays on whichever
     # provider LLM_PROVIDER already points to unless you also set
     # LLM_PROVIDER=openrouter, in which case openrouter handles intent
     # routing too. To mix providers per tier, see REASONER_PROVIDER below.
     openrouter_api_key: str = PLACEHOLDER
-    openrouter_router_model: str = "qwen/qwen3.5-35b-a3b"
-    openrouter_reasoner_model: str = "qwen/qwen3.5-35b-a3b"
-    openrouter_vision_model: str = "qwen/qwen3.5-35b-a3b"
+    openrouter_router_model: str = "z-ai/glm-5.3-flash"
+    openrouter_reasoner_model: str = "openai/gpt-6-luna"
+    openrouter_vision_model: str = "openai/gpt-6-luna"
 
     # Intent router tier (app/adapters/router.py). "" = follow LLM_PROVIDER;
     # "jev" = TypeSafe AI's typed-decision model, with confidence-threshold
