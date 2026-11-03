@@ -296,6 +296,9 @@ def decision_line(d: dict, grade: int | None = None) -> str:
     if d.get("bridge"):
         from app.tutor.representation import BRIDGE
         line += "\n" + BRIDGE
+    if d.get("mid_chat"):
+        line += ("\nThis is a reply inside an ongoing chat: no greeting, no name, no \"before we "
+                 "start\". Open with the substance.")
     if d.get("code_check"):
         line += "\n" + d["code_check"]
     if d.get("methods"):

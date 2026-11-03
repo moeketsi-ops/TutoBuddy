@@ -1,3 +1,5 @@
+import asyncio
+
 import asyncpg
 
 from app.config import settings
@@ -621,19 +623,41 @@ ON CONFLICT (code) DO NOTHING;
 """
 
 
+SCHEMA_LOCK = 72_317_001  # pg advisory lock id: one schema run at a time across processes
+
+
 async def ensure_schema() -> None:
     conn = await asyncpg.connect(settings.database_url)
     try:
-        await conn.execute(SCHEMA.format(dim=settings.embedding_dim))
+        # Gateway, worker and bench processes can boot at the same moment;
+        # concurrent CREATE/ALTER runs deadlocked (DeadlockDetectedError in
+        # the 31 Oct bake-off). The advisory lock serialises them.
+        async with conn.transaction():
+            await conn.execute("SELECT pg_advisory_xact_lock($1)", SCHEMA_LOCK)
+            await conn.execute(SCHEMA.format(dim=settings.embedding_dim))
     finally:
         await conn.close()
 
 
+_init_lock: asyncio.Lock | None = None
+_init_loop = None
+
+
 async def get_pool() -> asyncpg.Pool:
-    global _pool
-    if _pool is None:
-        await ensure_schema()
-        _pool = await asyncpg.create_pool(settings.database_url, min_size=1, max_size=5)
+    """The shared pool. The schema check runs once per process at start-up,
+    not once per concurrent first caller: before, several calls starting
+    together each ran ensure_schema() and the cost ledger lost rows to
+    deadlocks."""
+    global _pool, _init_lock, _init_loop
+    if _pool is not None:
+        return _pool
+    loop = asyncio.get_running_loop()
+    if _init_lock is None or _init_loop is not loop:  # tests run one loop per case
+        _init_lock, _init_loop = asyncio.Lock(), loop
+    async with _init_lock:
+        if _pool is None:
+            await ensure_schema()
+            _pool = await asyncpg.create_pool(settings.database_url, min_size=1, max_size=5)
     return _pool
 
 

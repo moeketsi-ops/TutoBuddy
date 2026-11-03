@@ -23,6 +23,7 @@ question, never to copy a number from them).
 """
 
 import datetime
+import re
 
 from app.adapters.embeddings import embed
 from app.db import get_pool, vector_literal
@@ -103,6 +104,73 @@ _FIRST_TAUGHT = (
     (11, "Equations and inequalities", ("quadratic formula", "completing the square")),
     (10, "Trigonometry", ("trigonometr", "sine of", "cosine of", "tangent ratio", "sin(", "cos(", "tan(")),
 )
+
+
+# Own-grade topic hints. Retrieval with the offline hash embedder often
+# lands on the wrong topic for short questions ("Solve log2(x) = 5" pulled
+# compound angles), and the topic decides where mastery evidence goes. A
+# keyword hit names the topic first; no hit leaves retrieval to decide.
+# Keys are searched in order; the first topic that exists in the learner's
+# grade wins.
+_TOPIC_HINTS = (
+    (("derivative", "differentiat", "d/dx", "first principles", "f'(x)"),
+     ("Differential calculus",)),
+    (("log", "logarithm"), ("Exponential and logarithmic functions", "Exponents")),
+    (("sum to infinity", "geometric series", "arithmetic series", "geometric sequence",
+      "arithmetic sequence", "sigma", "series"),
+     ("Patterns, sequences and series", "Numeric and Geometric Patterns")),
+    (("compound angle", "double angle"), ("Trigonometry - compound angles",)),
+    (("regression", "correlation"), ("Statistics (regression and correlation)",)),
+    (("area of", "perimeter"), ("Area and Perimeter", "Measurement")),
+    (("fraction", "numerator", "denominator"), ("Common Fractions",)),
+    (("squared", "cubed", "exponent", "power of", "square root", "cube root"),
+     ("Exponents", "Exponents and surds")),
+    (("like terms", "simplify", "expand", "factoris", "factoriz"),
+     ("Algebraic Expressions", "Algebraic expressions")),
+    (("solve",), ("Algebraic Equations", "Equations and inequalities")),
+)
+_FRACTION_SUM = re.compile(r"\d+\s*/\s*\d+\s*(?:[+\-×*]|and|to|plus|minus|times|of)\s*\d+\s*/\s*\d+")
+_INTEGER_SUM = re.compile(r"(?:^|[^\w)])[-\u2212]\s*\d+\s*[+\-\u2212]\s*\d+")
+
+
+def topic_hint(question: str, grade_topics: list[str]) -> str | None:
+    """The learner's own-grade topic a question names by keyword, or None."""
+    q = question.lower()
+    have = {t.lower(): t for t in grade_topics}
+    for keys, topics in _TOPIC_HINTS:
+        if any(re.search(r"(?<![a-z])" + re.escape(k), q) for k in keys):
+            for t in topics:
+                if t.lower() in have:
+                    return have[t.lower()]
+    if _FRACTION_SUM.search(q) and "common fractions" in have:
+        return have["common fractions"]
+    if _INTEGER_SUM.search(q) and "integers" in have:
+        return have["integers"]
+    return None
+
+
+def _topic_words(name: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z]+", name.lower()) if len(w) > 3}
+
+
+async def topic_chunks(grade: int, topic: str, limit: int = 2,
+                       subject: str = "Mathematics") -> list[dict]:
+    """Own-grade notes whose topic matches `topic` (exact, else most shared
+    words), for a keyword-hinted question."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT grade, subject, term, topic, doc_type, content, 0.0 AS distance "
+            "FROM caps_chunks WHERE grade = $1 AND subject = $2", grade, subject)
+    want = _topic_words(topic)
+
+    def score(r) -> float:
+        if r["topic"].lower() == topic.lower():
+            return 2.0
+        have = _topic_words(r["topic"])
+        return len(want & have) / len(want | have) if want and have else 0.0
+    ranked = sorted((r for r in rows if score(r) >= 0.34), key=score, reverse=True)
+    return [dict(r) for r in ranked[:limit]]
 
 
 def first_taught_above(question: str, grade: int) -> dict | None:

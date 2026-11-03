@@ -204,7 +204,10 @@ def scorecards(by: dict, cfg: dict) -> tuple[list[dict], list[dict]]:
 
 def recommend(routers, reasoners, cfg, groups) -> list[str]:
     lines, d, mix = [], cfg["decision"], cfg["mix"]
-    pr = sorted((r for r in routers if r["pass"]), key=lambda r: (r["cost_1k"], -(r["accuracy"] or 0)))
+    # The keyword stub is the free floor, never a recommendation (it scored
+    # 100% on the 5 easy pilot router cases and was being recommended).
+    pr = sorted((r for r in routers if r["pass"] and not str(r["model"]).startswith("stub")),
+                key=lambda r: (r["cost_1k"], -(r["accuracy"] or 0)))
     best_router = pr[0] if pr else None
     if best_router:
         lines.append(f"**Router:** `{best_router['model']}` at effort `{best_router['effort']}`: "

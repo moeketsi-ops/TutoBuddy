@@ -5,6 +5,7 @@ in learner_topic_mastery / topics (see app.tutor.rag)."""
 import datetime
 import logging
 import random
+import re
 
 from app.adapters import ledger, llm
 from app.db import get_pool
@@ -15,6 +16,8 @@ from app.tutor.rag import (
     get_term_progress,
     grade_scoped_context,
     term_focus_for,
+    topic_chunks,
+    topic_hint,
     pick_practice_topic,
     record_practice_attempt,
     retrieve,
@@ -69,7 +72,16 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # A reply like "x = 6" retrieves nothing useful on its own; search with
     # the working problem attached so the notes stay on topic.
     query = f"{mem['working']['problem']} {question}" if continuing else question
-    ctx = await grade_scoped_context(query, grade)
+    # Mid-problem the notes were already shown on the opening turn: two are
+    # enough to stay grounded (~120 fewer prompt tokens a turn).
+    ctx = await grade_scoped_context(query, grade, k=2 if continuing else 3)
+    hint = None
+    if not continuing and not ctx["above"]:
+        hint = topic_hint(question, ctx["grade_topics"])
+        if hint and hint not in [c["topic"] for c in ctx["chunks"]]:
+            first = await topic_chunks(grade, hint)
+            seen = {c["content"] for c in first}
+            ctx["chunks"] = (first + [c for c in ctx["chunks"] if c["content"] not in seen])[:3]
     term_focus = None
     if ctx["above"]:
         term_focus = await term_focus_for(learner_id, grade, current_term())
@@ -81,7 +93,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                 topic = {"id": mem["working"]["topic_id"], "name": mem["working"]["topic"]}
             else:
                 topic = await mastery.resolve_topic(
-                    conn, grade, [c["topic"] for c in ctx["chunks"]], mem["working"]["topic_id"])
+                    conn, grade, ([hint] if hint else []) + [c["topic"] for c in ctx["chunks"]],
+                    mem["working"]["topic_id"])
         los = await mastery.lo_candidates(
             conn, topic["id"], query=query, keep_code=mem["working"]["lo_code"]) if topic else []
         miscs = await mastery.misconception_codes(conn, topic["id"] if topic else None)
@@ -151,6 +164,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                                   "the working problem. Praise what they did, specifically.")
     else:
         decision["code_check"] = answer_check.prompt_line(check)
+    decision["mid_chat"] = mem["session_turns"] > 0
     if (decision["strategy"] == "MULTIPLE_METHODS" or decision.get("fallback") == "MULTIPLE_METHODS"
             or decision.get("switch") in ("strategy", "worked_example") or new_problem):
         entry = tmu.find_methods(w["problem"] if continuing else question, grade,
@@ -159,20 +173,25 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         decision["methods_id"] = entry["id"] if entry else None
     ledger.current_strategy.set(decision["strategy"])
 
-    raw = await llm.socratic_reply(
-        question, ctx["chunks"], grade, above=ctx["above"],
+    # Mid-problem, the objective in play is known: list only that one.
+    prompt_los = [focus] if (continuing and focus and focus["code"] == w["lo_code"]) else los
+    call = dict(
+        question=question, chunks=ctx["chunks"], grade=grade, above=ctx["above"],
         # Topic list only when it's needed to judge an off-grade question
         # (saves ~200 prompt tokens on most turns).
         grade_topics=ctx["grade_topics"] if (ctx["above"] or not ctx["chunks"]) else None,
         term_focus=term_focus,
         memory_block=memory.prompt_block(mem, name=name, grade=grade, lo_score=lo_score,
                                          review=review),
-        pedagogy=decision, lo_candidates=los, misconceptions=miscs, continuing=continuing,
+        pedagogy=decision, lo_candidates=prompt_los, misconceptions=miscs, continuing=continuing,
     )
-    reply, body, parsed_as = parse_turn(raw)
-    if not reply.strip():
-        # Unparseable JSON with no recoverable reply: never send raw output.
-        raise RuntimeError("tutor_reply: model output had no usable reply")
+    # Leak guard: code knows the answer to many problems. Unless the engine
+    # allowed a reveal, or the learner has already reached the answer, a
+    # reply that states it is written again once, then masked.
+    forms = [] if (decision.get("reveal") or (check or {}).get("verdict") == "correct"
+                   or (continuing and w.get("answered"))) \
+        else answer_check.answer_forms(w["problem"] if continuing else question)
+    reply, body, parsed_as, guard = await _reply_with_guard(call, forms, mid_chat=decision["mid_chat"])
     mode = llm.last_output_mode.get()
     if mode == "json" and parsed_as != "json":
         mode = f"json_failed:{parsed_as}"
@@ -273,6 +292,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         consolidate_now = memory.record_turn(mem, question, reply, mem_state, topic, used,
                                              new_problem=new_problem)
         w = mem["working"]
+        if w["problem"] and ev in ("attempt_correct", "explained_back"):
+            w["answered"] = True  # the learner has reached it: restating it is fine now
         if w["problem"]:
             w["level"] = decision.get("level")
             if continuing:  # a new problem doesn't inherit the old problem's open switch
@@ -291,6 +312,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         mem["working"].update(tried=[], fails_in_row=0, wrong_on_problem=0, no_progress=0)
     await memory.save(mem)
     last_turn.set({"decision": decision, "state": state, "topic": topic, "output_mode": mode,
+                   "leak_guard": guard,
                    "continuing": continuing, "problem": mem["working"]["problem"],
                    "lo_score": lo_score, "level": decision.get("level"),
                    "switch": decision.get("switch"), "chosen_by": decision.get("chosen_by"),
@@ -299,6 +321,55 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                    "switches": mem["working"].get("switches"),
                    "methods": decision.get("methods_id")})
     return reply
+
+
+LEAK_REDO = ("REWRITE: your draft stated the final answer ({answer}) before the learner reached "
+             "it. Write the reply again without stating it, and without a calculation or count "
+             "that ends at it. Stop one step short and ask the learner for that step.")
+
+
+async def _reply_with_guard(call: dict, forms: list[str], *, mid_chat: bool):
+    """(reply, state body, parsed_as, guard) for one tutoring turn. `guard`
+    is None, "rewritten" (a second call fixed a leak) or "masked" (the
+    second call leaked too, so code hid the answer)."""
+    raw = await llm.socratic_reply(**call)
+    reply, body, parsed_as = parse_turn(raw)
+    if not reply.strip():
+        # Unparseable JSON with no recoverable reply: never send raw output.
+        raise RuntimeError("tutor_reply: model output had no usable reply")
+    guard = None
+    if forms and answer_check.gives_away(reply, forms):
+        redo = {**call["pedagogy"],
+                "code_check": "\n".join(filter(None, [call["pedagogy"].get("code_check"),
+                                                      LEAK_REDO.format(answer=forms[0])]))}
+        try:
+            raw2 = await llm.socratic_reply(**{**call, "pedagogy": redo})
+            reply2, body2, parsed2 = parse_turn(raw2)
+        except Exception:  # noqa: BLE001 -- the first reply is still there to mask
+            reply2 = ""
+        if reply2.strip() and not answer_check.gives_away(reply2, forms):
+            reply, body, parsed_as, guard = reply2, body2, parsed2, "rewritten"
+        else:
+            reply, guard = answer_check.mask(reply, forms), "masked"
+        log.info("leak guard: %s", guard)
+    if mid_chat:
+        reply = strip_greeting(reply)
+    return reply, body, parsed_as, guard
+
+
+_GREETING = re.compile(
+    r"^\s*(?i:hey|hi|hiya|hello|howzit|sawubona|dumela|molo)(?: there)?(?: [A-Z][\w'-]*)?"
+    r"\s*[!,.]*\s*(?:[\U0001F300-\U0001FAFF\u2600-\u27BF]\ufe0f?\s*)*")
+
+
+def strip_greeting(reply: str) -> str:
+    """Mid-chat replies don't open with "Hey Bench! 👋" every turn. Only a
+    greeting followed by more text is removed."""
+    rest = _GREETING.sub("", reply, count=1)
+    if rest is reply or len(rest.strip()) < 15:
+        return reply
+    rest = rest.lstrip()
+    return rest[:1].upper() + rest[1:]
 
 
 async def eval_answer(question: str, grade: int) -> str:
