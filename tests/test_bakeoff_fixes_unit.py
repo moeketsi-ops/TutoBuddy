@@ -118,3 +118,62 @@ G12 = ["Differential calculus", "Exponential and logarithmic functions",
 ])
 def test_topic_hint(question, topics, expected):
     assert topic_hint(question, topics) == expected
+
+
+# ── Working memory keeps the problem (Immanuel's 870fc2b/ecc2d32 on the bench cases) ──
+
+from app.tutor import memory  # noqa: E402
+
+TOPIC = {"id": 1, "name": "Integers"}
+
+
+def _t(mem, text, ev, progress=None, step=None, new=False):
+    st = {"ev": ev, "lo": None, "misc": None, "hint": 0, "step": step, "progress": progress,
+          "level": None}
+    memory.record_turn(mem, text, "ok?", st, TOPIC, "SOCRATIC_QUESTIONING", new_problem=new)
+
+
+def test_first_message_opens_the_problem_whatever_its_label():
+    mem = memory._new(1)
+    _t(mem, INT, "asked_for_answer", new=True)          # GPT-6 Luna's label on c04
+    assert mem["working"]["problem"] == INT
+
+
+def test_echo_after_done_is_read_against_the_problem():
+    mem = memory._new(1)
+    _t(mem, LOG, "none", new=True)
+    _t(mem, "x = 2^5", "attempt_correct", "solved")
+    assert mem["working"]["problem"] == LOG              # c10: "x = 32" still has its problem
+    _t(mem, "x = 32", "attempt_correct")
+    assert mem["working"]["problem"] is None
+
+
+def test_wrong_attempt_after_a_premature_done_keeps_it_open():
+    mem = memory._new(1)
+    _t(mem, DERIV, "none", new=True)
+    _t(mem, "3x - 6", "attempt_correct", "solved")      # c09: the model's false "correct"
+    _t(mem, "3x^2 - 6x", "attempt_wrong")
+    assert mem["working"]["problem"] == DERIV and not mem["working"]["closing"]
+    _t(mem, "3x^2 - 6", "attempt_correct", "solved")
+    assert mem["working"]["problem"] == DERIV            # open for one echo turn
+
+
+@pytest.mark.parametrize("reply,leaks", [
+    ("Great question, this is Grade 8 Mathematics. What do you do first?", False),
+    ("Take 8 steps back and look again.", False),
+    ("Divide 16 by 2 to get 8.", True),
+    ("So x = 8 🎉", True),
+])
+def test_bare_numbers_need_a_landing_cue(reply, leaks):
+    assert answer_check.gives_away(reply, answer_check.answer_forms("How do I solve 2x - 7 = 9?")) is leaks
+
+
+def test_answered_resets_for_the_next_problem():
+    mem = memory._new(1)
+    _t(mem, INT, "none", new=True)
+    mem["working"]["answered"] = True                    # engine sets it on a correct attempt
+    _t(mem, "-5", "attempt_correct", "solved")
+    _t(mem, "-5 yes", "attempt_correct")                 # closes
+    assert mem["working"]["problem"] is None and not mem["working"]["answered"]
+    _t(mem, SQ, "none", new=True)
+    assert mem["working"]["problem"] == SQ and not mem["working"]["answered"]

@@ -37,6 +37,8 @@ STAGES = {
     "screen":  {"limit": None, "reps": 1, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
     "sweep":   {"limit": None, "reps": 3, "router_efforts": ["none", "minimal", "low"],   "reasoner_efforts": ["none", "low", "medium", "high"]},
     "confirm": {"limit": None, "reps": 3, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
+    # 3 Nov: the bake-off fixes re-checked on the 31 Oct shortlist (all cases, effort low)
+    "recheck": {"limit": None, "reps": 1, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
 }
 
 # Rough tokens per call, used ONLY to quote the pilot before any measurement
@@ -232,12 +234,16 @@ async def _conversations(case, ctx):
                 "strategy": d.get("strategy"), "ev": st.get("ev"),
                 "level": info.get("level"), "switch": info.get("switch"),
                 "code_check": info.get("code_check"),
+                "guard": info.get("leak_guard"),
+                "topic": (info.get("topic") or {}).get("name"),
             })
             tag = f"{d.get('strategy')} / {info.get('level')} / ev={st.get('ev')}"
             if info.get("switch"):
                 tag += f" / SWITCH {info['switch']} ({info.get('chosen_by')})"
             if info.get("code_check"):
                 tag += f" / code={info['code_check']}"
+            if info.get("leak_guard"):
+                tag += f" / LEAK GUARD {info['leak_guard']}"
             transcript.append(f"L: {msg}\nK [{tag}]: {reply}")
     finally:
         async with pool.acquire() as conn:
@@ -259,6 +265,9 @@ async def _conversations(case, ctx):
         "on_problem": float(bool(first_problem) and all(
             t["problem"] in (first_problem, None) for t in turns[1:])),
         "code_checked": sum(bool(t["code_check"]) for t in turns[1:]) / max(1, len(turns) - 1),
+        # leak guard: share of turns where the reply had to be rewritten or masked
+        "guard_rewrote": sum(t["guard"] == "rewritten" for t in turns) / len(turns),
+        "guard_masked": sum(t["guard"] == "masked" for t in turns) / len(turns),
     }
     # CPA cases say when the switch should land (1-based turn) or that none should.
     switches = [i + 1 for i, t in enumerate(turns) if t["switch"]]
@@ -269,7 +278,7 @@ async def _conversations(case, ctx):
         grade["switched_ok"] = float(not switches)
     elif case.get("switch_by"):
         grade["switched_ok"] = float(bool(switches) and switches[0] <= case["switch_by"])
-    return {"output": "\n\n".join(transcript), "grade": grade,
+    return {"output": "\n\n".join(transcript), "grade": grade, "topic": turns[0]["topic"],
             "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns],
             "levels": [t["level"] for t in turns], "switches": switches}
 
@@ -404,7 +413,7 @@ async def run_case(suite, case, rep, model, effort, ctx, timeout_s):
         "case_id": case["id"], "rep": rep, "suite": suite, "variant": variant_name(model, effort),
         "model": model["slug"], "effort": effort or "default", "group": model.get("group", ""),
         "status": status, "grade_level": case.get("grade"), "tags": case.get("tags", []), "output": out.get("output"),
-        "pred": out.get("pred"), "grade": out.get("grade", {}),
+        "pred": out.get("pred"), "grade": out.get("grade", {}), "topic": out.get("topic"),
         "judge": {k: j.get(k) for k in ("score", "per_criterion", "disagree", "verdicts", "errors")} if j else None,
         "latency_s": round(time.perf_counter() - started, 3),
         "calls": len(app_calls),

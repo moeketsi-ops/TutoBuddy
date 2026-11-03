@@ -477,9 +477,23 @@ def _contains(flat: str, form: str) -> bool:
     return re.search(lead + re.escape(form) + r"(?!\d|[./]\d|\^)", flat) is not None
 
 
+# A bare number only counts as the answer where a reply lands on it
+# ("= -5", "→ -5", "land at -5", "the sum is 32"), not in "Grade 8" or "8 steps".
+_CUE = r"(?:=|→|->|⇒|\b(?:is|are|at|on|to|get|gets|got|gives|equals|makes|answer:?))\s*"
+
+
 def gives_away(reply: str, forms: list[str]) -> bool:
     flat = _flat(reply)
-    return any(_contains(flat, f) for f in forms)
+    for f in forms:
+        if "=" in f:
+            if f in flat or re.search(re.escape(f.split("=")[0]) + r"\s+is\s+" +
+                                      re.escape(f.split("=")[1]) + r"(?!\d|[./]\d)", flat):
+                return True
+            continue
+        lead = r"(?<![\d./^])" if f.startswith("-") else r"(?<![\d./^-])"
+        if re.search(_CUE + lead + re.escape(f) + r"(?!\d|[./]\d|\^)", flat):
+            return True
+    return False
 
 
 EVIDENCE = {"correct": ("attempt_correct", "solved"),

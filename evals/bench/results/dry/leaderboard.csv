@@ -1,6 +1,6 @@
 suite,model,effort,n,failure_rate,accuracy,judge_score,leak_rate,off_grade_pass,revision_pass,false_correct,parsed,answer_correct,judge_errors,state_valid,structured,strategy_follow,judged_right,leak_early,on_problem,tokens_per_turn,code_checked,switched_ok,switch_sequence_ok,solved_share,turns_per_problem,switches_per_problem,seconds_per_reply,calls_per_day,day_cost_usd,wa_messages,twilio_usd,p50_s,p95_s,reasoning_tokens,cost_per_call,judge_cost_per_case,harness_errors
-conversations,stub,default,16,0.0,,,,,,,,,,1.0,1.0,1.0,0.7604166666666666,0.0,0.9375,0,0.4791666666666667,1.0,1.0,,,,,,,,,0.284,0.55,0.0,0.0,0.0,0
-homework_day,stub,default,2,0.0,,,,,,,,,,,,,0.8564593301435407,0.0,,,0.6638755980861244,,,0.6428571428571428,3.925,0.36,0.01598593774991741,0.0,0.0,55.0,0.275,0.517,0.517,0.0,0.0,0.0,0
+conversations,stub,default,16,0.0,,,,,,,,,,1.0,1.0,1.0,0.9479166666666666,0.0,1.0,0,0.8645833333333334,1.0,1.0,,,,,,,,,0.222,0.939,0.0,0.0,0.0,0
+homework_day,stub,default,2,0.0,,,,,,,,,,,,,0.950956937799043,0.0,,,0.9019138755980861,,,0.2857142857142857,3.925,0.215,0.013579660750011158,0.0,0.0,55.0,0.275,0.416,0.416,0.0,0.0,0.0,0
 marking,stub,default,60,0.0,0.36666666666666664,,,,,0.02564102564102564,,,,,,,,,,,,,,,,,,,,,,0.001,0.001,0.0,0.0,0.0,0
 maths,stub,default,71,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,0.002,0.012,0.0,0.0,0.0,0
 practice,stub,default,32,0.0,,,,,,,0.0,,,,,,,,,,,,,,,,,,,,,0.002,0.004,0.0,0.0,0.0,0

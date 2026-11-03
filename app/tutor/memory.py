@@ -69,8 +69,9 @@ def _fresh_working() -> dict:
         # CPA + switching (spec v0.1 section 4)
         "level": None, "no_progress": 0, "switches": 0, "bridge": False,
         "last_switch_id": None, "since_switch": 0,
-        # a "done" problem stays open one more turn (Immanuel, 870fc2b)
-        "closing": False,
+        # a "done" problem stays open one more turn (Immanuel, 870fc2b);
+        # answered: the learner has reached the answer (leak guard off)
+        "closing": False, "answered": False,
     }
 
 
@@ -204,7 +205,7 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
         w["problem"] = learner_text[:200]
         w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[],
                  level=None, no_progress=0, switches=0, bridge=False, last_switch_id=None,
-                 since_switch=0)
+                 since_switch=0, closing=False, answered=False)
 
     # No-progress count for the 3-turn switch rule: a turn with a step
     # forward (or a correct answer) resets it; a wrong / partial-without-
@@ -256,7 +257,7 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
     # turn means the "done" was premature, so it stays open. Code-checked
     # "solved" (CPA branch) counts as done.
     if w.get("closing") and not new_problem and ev not in ("attempt_wrong", "attempt_partial"):
-        w["problem"] = None
+        w["problem"], w["answered"] = None, False
     w["closing"] = bool(state and (state.get("step") == "done" or progress == "solved"))
     if w["closing"]:
         w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[],
