@@ -28,7 +28,7 @@ from evals.bench import graders, judge, prices
 HERE = Path(__file__).parent
 RESULTS = HERE / "results"
 SUITES = ("router", "maths", "tutoring", "marking", "practice", "conversations", "homework_day")
-JUDGED = ("tutoring", "practice")
+JUDGED = ("tutoring", "practice", "conversations")
 
 # Stage presets; every value can be overridden on the command line.
 STAGES = {
@@ -41,6 +41,8 @@ STAGES = {
     "recheck": {"limit": None, "reps": 1, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
     # 5 Nov: again, after the opener-label and c08 grader fixes
     "recheck2": {"limit": None, "reps": 1, "router_efforts": ["none"],                    "reasoner_efforts": ["low"]},
+    # 5 Nov: the two AI judges on the finalists (6 cases per grade; conversations run with --limit 0)
+    "judged":   {"limit": 6,    "reps": 1, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
 }
 
 # Rough tokens per call, used ONLY to quote the pilot before any measurement
@@ -57,6 +59,7 @@ GUESS_TOKENS = {"router": (350, 5), "maths": (1400, 500), "tutoring": (1800, 250
 TWILIO_USD_PER_MESSAGE = 0.005
 GUESS_REASONING = {"": 0, "none": 0, "minimal": 300, "low": 800, "medium": 2000, "high": 4000}
 GUESS_JUDGE = (1200, 2500)  # per judge call; medium effort reasoning counts as output
+GUESS_JUDGE_CONV = (3000, 3500)  # a whole conversation per judge call
 
 
 def load_cases(suite: str) -> list[dict]:
@@ -218,7 +221,7 @@ async def _conversations(case, ctx):
         learner = await conn.fetchval(
             "INSERT INTO learners (account_id, nickname, grade) VALUES ($1, $2, $3) RETURNING id",
             account, case.get("name", "Bench"), case["grade"])
-    turns, transcript = [], []
+    turns, transcript, pairs = [], [], []
     try:
         reached = False
         for msg, truth in zip(case["turns"], case["truth"]):
@@ -251,6 +254,7 @@ async def _conversations(case, ctx):
             if info.get("leak_guard"):
                 tag += f" / LEAK GUARD {info['leak_guard']}"
             transcript.append(f"L: {msg}\nK [{tag}]: {reply}")
+            pairs.append((msg, reply))
     finally:
         async with pool.acquire() as conn:
             await conn.execute("DELETE FROM llm_calls WHERE learner_id = $1", learner)
@@ -284,9 +288,12 @@ async def _conversations(case, ctx):
         grade["switched_ok"] = float(not switches)
     elif case.get("switch_by"):
         grade["switched_ok"] = float(bool(switches) and switches[0] <= case["switch_by"])
-    return {"output": "\n\n".join(transcript), "grade": grade, "topic": turns[0]["topic"],
-            "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns],
-            "levels": [t["level"] for t in turns], "switches": switches}
+    out = {"output": "\n\n".join(transcript), "grade": grade, "topic": turns[0]["topic"],
+           "strategies": [t["strategy"] for t in turns], "evs": [t["ev"] for t in turns],
+           "levels": [t["level"] for t in turns], "switches": switches}
+    if ctx["judges"]:
+        out["judge"] = await judge.judge_conversation(ctx["judges"], case, pairs)
+    return out
 
 
 # ── A learner's homework day (CPA spec section 8) ────────────────────────────
@@ -539,8 +546,9 @@ def quote(rows, limit, reps, use_judges, grades=None, ids=None) -> tuple[float, 
                 total += judge_measured[suite] * n
             else:
                 guessed = True
-                total += n * sum(GUESS_JUDGE[0] * live.get(j, {"in": 3})["in"] +
-                                 GUESS_JUDGE[1] * live.get(j, {"out": 15})["out"] for j in judges) / 1e6
+                gin, gout = GUESS_JUDGE_CONV if suite == "conversations" else GUESS_JUDGE
+                total += n * sum(gin * live.get(j, {"in": 3})["in"] +
+                                 gout * live.get(j, {"out": 15})["out"] for j in judges) / 1e6
     basis = "partly a token GUESS (no measured rows yet for some variants)" if guessed else "measured pilot usage"
     return total, calls, basis
 

@@ -21,4 +21,5 @@ split_saving_min = 0.30  # only recommend different models per task if it saves 
 tutoring = 600
 practice = 120
 marking = 120
+paper_marking = 60        # past-paper answers marked against the memo (assumption, 5 Nov 2026)
 messages_per_learner_month = 120   # about 30 a week

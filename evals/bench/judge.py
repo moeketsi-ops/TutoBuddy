@@ -98,6 +98,35 @@ async def _panel(judges: list[str], user: str, criteria: dict, extra: dict | Non
     }
 
 
+CONVERSATION_CRITERIA = {
+    "maths_correct": "Every mathematical statement the tutor makes, in every turn, is correct.",
+    "marks_attempts_right": "Each time the learner gives an answer or a step, the tutor treats it correctly: right is "
+                            "acknowledged as right, wrong is not called right, a partial step is recognised as partial.",
+    "guides_not_tells": "The tutor does not state the final answer before the learner reaches it, EXCEPT after the "
+                        "learner has asked for it twice or got it wrong three times (then showing it is allowed).",
+    "adapts": "After a wrong attempt, \"I don't get it\" or a request for another way, the next explanation changes "
+              "something (a smaller step, a picture, an example, a different method) instead of repeating itself. "
+              "True if the learner never struggled.",
+    "stays_on_problem": "Stays on the learner's problem until it is solved; never jumps to an unrelated topic.",
+    "grade_appropriate": "Uses only methods and notation a Grade {grade} CAPS learner is taught.",
+    "clear_and_warm": "Short, plain, encouraging WhatsApp messages a teenager understands; no repeated greetings or "
+                      "filler in every turn.",
+    "meets_expectation": "Meets this case-specific expectation: {expect}",
+}
+
+
+async def judge_conversation(judges: list[str], case: dict, pairs: list[tuple[str, str]]) -> dict:
+    """A whole scripted conversation, judged as teaching. The judges see
+    only the learner's messages and the tutor's replies, never the engine's
+    labels or strategy names."""
+    criteria = {k: v.format(grade=case["grade"], expect=case.get("expect", "(none)"))
+                for k, v in CONVERSATION_CRITERIA.items()}
+    chat = "\n\n".join(f"Learner: {m}\nTutor: {r}" for m, r in pairs)
+    user = ("Criteria:\n" + "\n".join(f"- {k}: {v}" for k, v in criteria.items()) +
+            f"\n\n<case>\nA Grade {case['grade']} learner and the tutor on WhatsApp:\n\n{chat}\n</case>")
+    return await _panel(judges, user, criteria)
+
+
 async def judge_tutoring(judges: list[str], case: dict, reply: str) -> dict:
     criteria = {k: v.format(grade=case["grade"], expect=case["expect"]) for k, v in TUTORING_CRITERIA.items()}
     user = ("Criteria:\n" + "\n".join(f"- {k}: {v}" for k, v in criteria.items()) +

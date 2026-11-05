@@ -53,7 +53,15 @@ def summarise(stage: str, cases: set[str] | None) -> list[dict]:
         turns = sum(r.get("calls") or 0 for r in ok) or 1
         g = lambda k: _mean([r["grade"].get(k) for r in ok])  # noqa: E731
         topics = [r.get("topic") == EXPECTED_TOPIC.get(r["case_id"]) for r in ok if "topic" in r]
+        judged = [r["judge"] for r in ok if r.get("judge") and r["judge"].get("score") is not None]
+        crit: dict[str, list[float]] = {}
+        for j in judged:
+            for k, v in (j.get("per_criterion") or {}).items():
+                crit.setdefault(k, []).append(v)
         rows.append({
+            "judge": _mean([j["score"] for j in judged]) if judged else None,
+            "judged": len(judged), "disagree": sum(bool(j.get("disagree")) for j in judged),
+            "criteria": {k: _mean(v) for k, v in crit.items()},
             "variant": f.parent.name, "convs": len(recs), "failed": len(recs) - len(ok),
             "on_problem": g("on_problem"), "label_right": g("judged_right"),
             "leak_early": g("leak_early"), "code_checked": g("code_checked"),
@@ -81,6 +89,16 @@ def main() -> None:
     ap.add_argument("--cases", help="e.g. c01-c11 or c04,c09")
     args = ap.parse_args()
     rows = summarise(args.stage, _ids(args.cases))
+    if any(r["judged"] for r in rows):
+        keys = sorted({k for r in rows for k in r["criteria"]})
+        print("Teaching quality (two AI judges, share of criteria met)\n")
+        print("| Model | Judged | Judge score | Judges disagreed | " + " | ".join(keys) + " |")
+        print("|" + "---|" * (len(keys) + 4))
+        for r in rows:
+            if r["judged"]:
+                print(f"| {r['variant']} | {r['judged']} | {_pct(r['judge'])} | {r['disagree']} | "
+                      + " | ".join(_pct(r["criteria"].get(k)) for k in keys) + " |")
+        print("\nAutomatic checks\n")
     print("| Model | Convs | Failed | Stayed on problem | Label right | Answer too early | "
           "Code checked | Guard rewrote / masked | Mastery topic right | $ per turn | Input tokens per call | s per turn |")
     print("|" + "---|" * 12)

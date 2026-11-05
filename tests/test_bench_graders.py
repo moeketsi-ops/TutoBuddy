@@ -94,3 +94,26 @@ def test_conversation_and_day_cases_line_up():
         for r in (json.loads(x) for x in (CASES / f"{suite}.jsonl").read_text().splitlines() if x.strip()):
             for p in r.get("problems", [r]):
                 assert len(p["turns"]) == len(p["truth"]), (suite, r["id"])
+
+
+def test_conversation_judge_sees_no_engine_labels(monkeypatch):
+    """judge_conversation sends the learner/tutor text only, with every
+    criterion, and averages the panel."""
+    import asyncio
+
+    from evals.bench import judge
+
+    seen = {}
+
+    async def fake_ask(model, user, schema):
+        seen["user"] = user
+        crit = [k for k in schema["properties"] if k != "note"]
+        return {"model": model, "verdict": {**{k: True for k in crit}, "adapts": model == "a", "note": ""},
+                "cost_usd": 0.01, "input_tokens": 10, "output_tokens": 5}
+
+    monkeypatch.setattr(judge, "_ask", fake_ask)
+    case = {"grade": 8, "expect": "Uses a number line."}
+    res = asyncio.run(judge.judge_conversation(["a", "b"], case, [("What is -8 + 3?", "Start at -8 ...")]))
+    assert "Learner: What is -8 + 3?" in seen["user"] and "ev=" not in seen["user"]
+    assert res["per_criterion"]["adapts"] == 0.5 and res["disagree"] and res["cost_usd"] == 0.02
+    assert set(res["per_criterion"]) == set(judge.CONVERSATION_CRITERIA)
