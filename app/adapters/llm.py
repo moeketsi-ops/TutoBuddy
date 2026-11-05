@@ -232,6 +232,24 @@ def _anthropic_text(resp) -> str:
     return next((b.text for b in resp.content if getattr(b, "type", "") == "text"), "")
 
 
+# OpenRouter models seen to reject reasoning effort "none" in this process.
+_REASONING_REQUIRED: set[str] = set()
+
+
+def _reasoning_mandatory(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "reasoning" in text and ("mandatory" in text or "required" in text or "cannot be disabled" in text)
+
+
+def _openrouter_extra(effort: str, default_effort: str, max_tokens: int,
+                      openrouter_max_tokens: int | None, headroom: int) -> dict:
+    body = {"reasoning": {"effort": effort or default_effort}, "usage": {"include": True}}
+    if settings.openrouter_provider.strip():
+        body["provider"] = {"order": [settings.openrouter_provider.strip()], "allow_fallbacks": False}
+    base = openrouter_max_tokens or max_tokens
+    return {"max_tokens": max(base, max_tokens + headroom) if effort else base, "extra_body": body}
+
+
 async def _complete(
     provider: str,
     tier: str,
@@ -300,11 +318,10 @@ async def _complete(
     # groq + openrouter: OpenAI-style chat completions.
     if provider == "openrouter":
         client = _openrouter_client()
-        body = {"reasoning": {"effort": effort or openrouter_reasoning}, "usage": {"include": True}}
-        if settings.openrouter_provider.strip():
-            body["provider"] = {"order": [settings.openrouter_provider.strip()], "allow_fallbacks": False}
-        base = openrouter_max_tokens or max_tokens
-        extra = {"max_tokens": max(base, max_tokens + headroom) if effort else base, "extra_body": body}
+        if model in _REASONING_REQUIRED and (effort or openrouter_reasoning) in ("none", ""):
+            # This model refused "none" earlier in this process: go straight to low.
+            effort, headroom = "low", EFFORT_HEADROOM["low"]
+        extra = _openrouter_extra(effort, openrouter_reasoning, max_tokens, openrouter_max_tokens, headroom)
     else:
         client = _groq_client()
         if "qwen" not in model.lower() and effort in ("", "none", "minimal"):
@@ -321,7 +338,24 @@ async def _complete(
             extra["extra_body"] = {**extra["extra_body"],
                                    "provider": {**extra["extra_body"].get("provider", {}),
                                                 "require_parameters": True}}
-    resp = await client.chat.completions.create(model=model, messages=messages, **extra)
+    try:
+        resp = await client.chat.completions.create(model=model, messages=messages, **extra)
+    except Exception as exc:
+        # Some OpenRouter models (GLM-5.x, gpt-oss) cannot switch reasoning off and
+        # reject effort "none" with "Reasoning is mandatory". Retry once at low,
+        # with room for the reasoning, and remember the model for later calls.
+        if provider != "openrouter" or not _reasoning_mandatory(exc) or model in _REASONING_REQUIRED:
+            raise
+        _REASONING_REQUIRED.add(model)
+        log.warning("%s rejected reasoning effort none; retrying %s at low", model, call)
+        effort = "low"
+        retry = _openrouter_extra(effort, openrouter_reasoning, max_tokens, openrouter_max_tokens,
+                                  EFFORT_HEADROOM["low"])
+        if json_schema:
+            retry["response_format"] = extra["response_format"]
+            retry["extra_body"]["provider"] = {**retry["extra_body"].get("provider", {}),
+                                               "require_parameters": True}
+        resp = await client.chat.completions.create(model=model, messages=messages, **retry)
     choice = resp.choices[0]
     await _emit(call=call, tier=tier, provider=provider, requested_model=model,
             served_model=getattr(resp, "model", model), finish_reason=choice.finish_reason,
@@ -346,12 +380,17 @@ async def classify_intent(text: str) -> str:
 
     provider = _provider("router")
     if provider:
-        raw = await _complete(provider, "router", "classify_intent",
-                              prompts.INTENT_SYSTEM, text, max_tokens=10)
-        label = raw.strip().lower()
-        return label if label in INTENTS else "homework"
+        try:
+            raw = await _complete(provider, "router", "classify_intent",
+                                  prompts.INTENT_SYSTEM, text, max_tokens=10)
+            label = raw.strip().lower()
+            return label if label in INTENTS else "homework"
+        except Exception:
+            # A router failure must not cost the learner their reply: fall back
+            # to the keyword heuristic and let the tutor call go ahead.
+            log.warning("classify_intent failed on %s; using keyword fallback", provider, exc_info=True)
 
-    # stub: keyword heuristic, no model call
+    # stub (or router failure): keyword heuristic, no model call
     if any(w in lowered for w in ("quiz", "practice", "test me")):
         return "quiz"
     if any(h in lowered for h in _HOMEWORK_HINTS):

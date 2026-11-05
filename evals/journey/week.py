@@ -38,7 +38,7 @@ import json
 from pathlib import Path
 
 from evals.bench import graders
-from evals.journey.driver import Phone, learner_id, snapshot, time_travel
+from evals.journey.driver import Phone, is_error, learner_id, preflight, snapshot, time_travel
 from evals.journey.full import answer_checkin
 
 HERE = Path(__file__).parent
@@ -55,11 +55,13 @@ async def run_problem_scripted(phone: Phone, prob: dict) -> dict:
     for msg, truth in zip(prob["turns"], prob["truth"]):
         r = phone.say(msg)
         replies.append(r)
-        reached = reached or truth == "correct"
+        reached = reached or (truth == "correct" and not is_error(r))
         if not reached and graders.leaks_answer(r, prob["answers"]):
             early = True
     return {"type": prob["type"], "problem": prob["turns"][0], "learner_turns": len(prob["turns"]) - 1,
-            "solved": "correct" in prob["truth"], "first_try": _first_correct(prob["truth"]),
+            # the script says the learner got there; it only counts if Katlego actually replied
+            "solved": reached, "first_try": _first_correct(prob["truth"]) and not any(map(is_error, replies)),
+            "error_replies": sum(map(is_error, replies)),
             "attempts": sum(t in ("wrong", "partial", "correct") for t in prob["truth"]),
             "asked": prob["truth"].count("asked"), "early_answer": early}
 
@@ -69,6 +71,7 @@ async def run_problem_ai(phone: Phone, prob: dict, sim) -> dict:
 
     problem = prob["turns"][0]
     chat = [("learner", problem)]
+    errors_before = phone.errors
     r = phone.say(problem)
     chat.append(("katlego", r))
     solved, first_try, attempts, asked, early = False, None, 0, 0, False
@@ -92,7 +95,7 @@ async def run_problem_ai(phone: Phone, prob: dict, sim) -> dict:
             early = True
     return {"type": prob["type"], "problem": problem, "learner_turns": sum(1 for w, _ in chat if w == "learner") - 1,
             "solved": solved, "first_try": bool(first_try), "attempts": attempts, "asked": asked,
-            "early_answer": early}
+            "early_answer": early, "error_replies": phone.errors - errors_before}
 
 
 async def run(mode: str, learner_model: str) -> Path:
@@ -107,6 +110,8 @@ async def run(mode: str, learner_model: str) -> Path:
         from evals.journey.sim_learner import SimLearner
         sim = SimLearner(spec["misconceptions"], name=spec["name"], grade=spec["grade"], model=learner_model)
     print(f"Homework week ({mode}), phone {phone.number}")
+    if not await preflight():
+        raise SystemExit(1)
 
     # Day 0: sign-up + baseline check-in
     for m in ("hi", "AGREE", spec["name"]):
@@ -134,7 +139,8 @@ async def run(mode: str, learner_model: str) -> Path:
         days.append({"day": d["day"], "theme": d["theme"], "topic": d["topic"], "problems": probs, "snap": snap})
         a = snap["topics"].get("Area and Perimeter")
         print(f"  day {d['day']}: {d['theme']}: {sum(p['solved'] for p in probs)}/{len(probs)} solved, "
-              f"Area and Perimeter mastery {a if a is None else round(a)}, cost ${snap['calls']['cost']:.4f}")
+              f"Area and Perimeter mastery {a if a is None else round(a)}, cost ${snap['calls']['cost']:.4f}"
+              + (f", {sum(p['error_replies'] for p in probs)} ERROR replies" if any(p['error_replies'] for p in probs) else ""))
         results += probs
 
     # Day 8: end-line check-in
@@ -196,6 +202,7 @@ def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, leve
             "cost_usd": round(s["calls"]["cost"], 5),
             "median_s": round((s["calls"]["lat"] or 0) / 1000, 1),
             "errors": s["calls"]["errors"] or 0,
+            "error_replies": sum(p.get("error_replies", 0) for p in ps),
         })
     with open(out / "days.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
@@ -212,6 +219,9 @@ def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, leve
              f"{spec['atp']}. Learner: {spec['persona']}", "",
              "Simulated learner: this shows whether the engine behaves well over a week, not whether real "
              "children learn. The pilot measures that.", "",
+             *([f"**{phone.errors} replies were \"something went wrong\"**: those turns got no tutoring and the "
+                "problems they hit are not counted as solved. Check `docker compose logs worker --tail 80`.", ""]
+               if phone.errors else []),
              "## Day by day", "",
              "| Day | Theme | Solved | First try | Learner msgs | Answer given early | Area & Perimeter mastery | "
              "Surface Area & Volume mastery | Objectives with evidence | Evidence right/partial/wrong | Reviews | "

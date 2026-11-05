@@ -23,6 +23,42 @@ import httpx
 GATEWAY = os.environ.get("GATEWAY_URL", "http://gateway:8000").rstrip("/")
 MOCKWA = os.environ.get("MOCKWA_URL", "http://mockwa:8001").rstrip("/")
 REPLY_TIMEOUT = float(os.environ.get("JOURNEY_REPLY_TIMEOUT") or 120)
+# The worker's ERROR_REPLY: a model call (or anything else) failed for this message.
+ERROR_TEXT = "something went wrong on my side"
+
+
+def is_error(reply: str) -> bool:
+    return ERROR_TEXT in reply.lower()
+
+
+async def preflight() -> bool:
+    """Print which provider and models the run will use, then make one router
+    and one reasoner call. A failure here is the same failure the worker would
+    hit on every tutoring message, so it is reported before the run starts."""
+    from app.adapters import llm
+    from app.config import settings
+    from app.tutor import prompts
+
+    tiers = {t: llm._provider(t) for t in ("router", "reasoner")}
+    print("Models: " + "  ".join(f"{t}={p + ':' + llm._model(p, t) if p else 'stub'}" for t, p in tiers.items())
+          + f"  (LLM_PROVIDER={settings.llm_provider})")
+    if not any(tiers.values()):
+        print("  stub: no model calls; tutoring replies are canned. Set LLM_PROVIDER in .env for a real run.")
+        return True
+    ok = True
+    for tier, system, user in (("router", prompts.INTENT_SYSTEM, "how do i find the area of a square"),
+                               ("reasoner", "Reply with one short sentence.", "Say hello to a Grade 8 learner.")):
+        if not tiers[tier]:
+            continue
+        try:
+            text = await llm._complete(tiers[tier], tier, f"preflight_{tier}", system, user, max_tokens=40)
+            print(f"  {tier}: ok ({(text or '(empty)').strip()[:40]!r})")
+        except Exception as exc:  # noqa: BLE001
+            ok = False
+            print(f"  {tier}: FAILED: {str(exc)[:300]}")
+    if not ok:
+        print("  The worker will hit the same error. Fix .env, then: docker compose up -d --force-recreate gateway worker")
+    return ok
 
 
 class Phone:
@@ -34,6 +70,7 @@ class Phone:
         self.cursor = 0
         self.http = httpx.Client(timeout=30)
         self.log: list[tuple[str, str]] = []   # (who, text)
+        self.errors = 0                         # Katlego replies that were ERROR_REPLY
 
     def send(self, text: str) -> None:
         msg = {"from": self.number, "id": f"wamid.journey.{uuid.uuid4().hex}",
@@ -55,6 +92,9 @@ class Phone:
             if data["messages"]:
                 body = data["messages"][0]["body"]
                 self.log.append(("katlego", body))
+                if is_error(body):
+                    self.errors += 1
+                    print(f"    ! error reply after: {self.log[-2][1][:60]!r}")
                 return body
             time.sleep(0.4)
         raise TimeoutError(f"no reply within {timeout or REPLY_TIMEOUT}s")

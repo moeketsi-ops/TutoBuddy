@@ -33,7 +33,7 @@ import json
 import re
 from pathlib import Path
 
-from evals.journey.driver import Phone, learner_id, snapshot, time_travel, working_memory
+from evals.journey.driver import Phone, learner_id, preflight, snapshot, time_travel, working_memory
 
 # under evals/bench/results: that folder is mounted from your machine, so reports survive the container
 OUT = Path(__file__).resolve().parents[1] / "bench" / "results" / "journey"
@@ -82,6 +82,8 @@ async def run() -> Path:
     from app.db import get_pool
 
     steps = Steps()
+    if not await preflight():
+        raise SystemExit(1)
     pool = await get_pool()
     a = Phone()
     print(f"Learner phone {a.number}")
@@ -225,6 +227,9 @@ async def run() -> Path:
         calls = len(data["calls"])
     steps.check("model calls recorded against each learner", calls >= 1, f"{calls} calls")
     use = usage.report(data, usage.per_learner(data), 3, None)
+    errs = a.errors
+    steps.check("no 'something went wrong' replies", errs == 0,
+                f"{errs} error replies; see `docker compose logs worker --tail 80`")
 
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"journey-{datetime.datetime.now():%Y%m%d-%H%M}.md"

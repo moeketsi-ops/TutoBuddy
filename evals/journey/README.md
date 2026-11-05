@@ -18,6 +18,20 @@ OPENROUTER_VISION_MODEL=openai/gpt-6-luna
 Then `docker compose up -d --force-recreate gateway worker`. Check with
 `Get-Content .env | Select-String LLM_PROVIDER`. Put it back to `stub` after.
 
+After a `git pull`, rebuild first: the app code is baked into the images, so
+`docker compose build gateway worker evals` then `docker compose up -d`.
+
+Each run starts with a preflight: it prints the router and reasoner models and
+makes one call to each. If either fails, the run stops there with the error;
+the worker would hit the same one on every message. Any "something went wrong"
+reply during a run is counted, flagged in the console and the report, and the
+problem it hit is not counted as solved. `docker compose logs worker --tail 80`
+shows why.
+
+GLM-5.x and gpt-oss on OpenRouter cannot turn reasoning off. Katlego retries
+those at effort `low` automatically; if the router still fails, it falls back
+to keyword routing so the learner gets a reply.
+
 All commands below share this prefix (PowerShell, from `Documents\TutoBuddy-cto`):
 
 ```
