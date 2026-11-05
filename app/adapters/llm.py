@@ -35,6 +35,7 @@ import contextlib
 import contextvars
 import json
 import logging
+import os
 import re
 import time
 
@@ -175,14 +176,18 @@ async def _emit(**fields) -> None:
     await ledger.persist(fields)
 
 
-async def _log_stub(call: str, system: str, user: str, reply: str) -> None:
+async def _log_stub(call: str, system: str, user: str, reply: str,
+                    messages: list[dict] | None = None) -> None:
     """Stub calls go to the ledger as estimates (chars / 4) so prompt sizes
     can be compared offline. Not added to capture_calls(): the bench's stub
-    floor stays exactly as before."""
+    floor stays exactly as before. `messages`, when given, is the full prompt
+    as a model would get it (layered layout), for size and prefix accounting."""
+    messages = messages or [{"role": "system", "content": system}, {"role": "user", "content": user}]
     await ledger.persist({
         "call": call, "provider": "stub", "requested_model": "stub", "served_model": "stub",
-        "input_tokens": ledger.estimate_tokens(system + user),
+        "input_tokens": ledger.estimate_tokens(_serialise(messages)),
         "output_tokens": ledger.estimate_tokens(reply), "estimated": True,
+        **_prefix_account(call, messages),
     })
 
 
@@ -200,12 +205,49 @@ def _usage_dict(usage) -> dict:
     get = (lambda k: getattr(usage, k, None))
     details = get("completion_tokens_details")
     extra = getattr(usage, "model_extra", None) or {}
+    pdet = get("prompt_tokens_details")
+    pget = (lambda k: (pdet.get(k) if isinstance(pdet, dict) else
+                       getattr(pdet, k, None) if pdet is not None else None))
+    pextra = (getattr(pdet, "model_extra", None) or {}) if pdet is not None and not isinstance(pdet, dict) else {}
     return {
         "input_tokens": get("input_tokens") or get("prompt_tokens") or 0,
         "output_tokens": get("output_tokens") or get("completion_tokens") or 0,
         "reasoning_tokens": (getattr(details, "reasoning_tokens", None) or 0) if details else 0,
         "cost_usd": extra.get("cost", get("cost")),
+        # prompt caching: OpenAI-style prompt_tokens_details, Anthropic cache_* fields
+        "cached_tokens": pget("cached_tokens") or get("cache_read_input_tokens") or 0,
+        "cache_write_tokens": (pget("cache_write_tokens") or pextra.get("cache_write_tokens")
+                               or get("cache_creation_input_tokens") or 0),
     }
+
+
+# ── Prompt-prefix accounting (caching estimate) ───────────────────────────────
+# For each (learner, call) the last prompt sent, so every call can record how
+# much of its prompt matched the previous one from the front: the part a
+# provider could serve from cache. Per process; an estimate, not a bill.
+_last_prompt: dict[tuple, tuple[str, float]] = {}
+
+
+def _serialise(messages: list[dict]) -> str:
+    return "".join(f"\x1e{m['role']}\x1f{m['content']}" for m in messages)
+
+
+def _prefix_account(call: str, messages: list[dict]) -> dict:
+    learner = ledger.current_learner.get()
+    text = _serialise(messages)
+    now = time.time()
+    shared = 0
+    if learner is not None:
+        key = (learner, call)
+        prev = _last_prompt.get(key)
+        if prev and now - prev[1] <= settings.cache_ttl_seconds:
+            shared = len(os.path.commonprefix([prev[0], text]))
+        _last_prompt[key] = (text, now)
+        if len(_last_prompt) > 5000:  # bounded: drop the oldest half
+            for k in sorted(_last_prompt, key=lambda k: _last_prompt[k][1])[:2500]:
+                _last_prompt.pop(k, None)
+    return {"prompt_chars": len(text), "shared_chars": shared,
+            "layout": settings.prompt_layout.strip().lower() or "classic"}
 
 
 def _groq_reasoning(model: str, effort: str) -> dict:
@@ -244,6 +286,10 @@ def _reasoning_mandatory(exc: Exception) -> bool:
 def _openrouter_extra(effort: str, default_effort: str, max_tokens: int,
                       openrouter_max_tokens: int | None, headroom: int) -> dict:
     body = {"reasoning": {"effort": effort or default_effort}, "usage": {"include": True}}
+    learner = ledger.current_learner.get()
+    if settings.openrouter_session_ids and learner is not None:
+        # sticky routing: this learner's calls go back to the host that cached them
+        body["session_id"] = f"katlego-learner-{learner}"
     if settings.openrouter_provider.strip():
         body["provider"] = {"order": [settings.openrouter_provider.strip()], "allow_fallbacks": False}
     base = openrouter_max_tokens or max_tokens
@@ -262,6 +308,8 @@ async def _complete(
     openrouter_reasoning: str = "none",
     effort_override: str | None = None,
     json_schema: dict | None = None,
+    history: list[dict] | None = None,
+    turn_system: str | None = None,
 ) -> str:
     """One system + user turn on `provider`, returning the reply text
     (possibly empty -- callers decide what empty means).
@@ -273,8 +321,14 @@ async def _complete(
 
     ROUTER_EFFORT / REASONER_EFFORT, when set, override the per-call effort
     default and widen the token limit by EFFORT_HEADROOM; when blank,
-    behaviour is exactly as before."""
+    behaviour is exactly as before.
+
+    `history` (earlier turns as user/assistant messages) and `turn_system`
+    (this turn's instructions) are the layered prompt layout: they go after
+    the system prompt, so everything up to the newest turn stays an identical
+    prefix from one call to the next and can be served from cache."""
     model = _model(provider, tier)
+    history = list(history or [])
     # effort_override lets a caller's own retry (e.g. practice_question's
     # "retry without reasoning") win over the configured effort.
     effort = effort_override if effort_override is not None else _effort(tier)
@@ -289,22 +343,30 @@ async def _complete(
             kwargs["output_config"] = {"effort": effort if effort in ("low", "medium", "high") else "low"}
         if json_schema:
             kwargs.setdefault("output_config", {})["format"] = {"type": "json_schema", "schema": json_schema}
+        # Anthropic takes one system prompt: this turn's instructions ride in
+        # front of the learner's message instead.
+        last = f"{turn_system}\n\nLEARNER'S MESSAGE:\n{user}" if turn_system else user
+        a_messages = [*history, {"role": "user", "content": last}]
+        acct = _prefix_account(call, [{"role": "system", "content": system}, *a_messages])
         resp = await _anthropic_client().messages.create(
             model=model,
             max_tokens=max_tokens + headroom,
             system=system,
-            messages=[{"role": "user", "content": user}],
+            messages=a_messages,
             **kwargs,
         )
         await _emit(call=call, tier=tier, provider=provider, requested_model=model,
                 served_model=resp.model, finish_reason=resp.stop_reason, host="anthropic",
-                latency_s=round(time.perf_counter() - started, 3), **_usage_dict(resp.usage))
+                latency_s=round(time.perf_counter() - started, 3), **_usage_dict(resp.usage), **acct)
         return _text_or_empty(_anthropic_text(resp), provider, call)
 
     messages = [
         {"role": "system", "content": system},
+        *history,
+        *([{"role": "system", "content": turn_system}] if turn_system else []),
         {"role": "user", "content": user},
     ]
+    acct = _prefix_account(call, messages)
 
     if provider == "ollama":
         # Native Ollama chat API; no token cap (unchanged from before).
@@ -312,13 +374,14 @@ async def _complete(
                                            **({"format": json_schema} if json_schema else {}))
         await _emit(call=call, tier=tier, provider=provider, requested_model=model,
                 served_model=model, finish_reason=None, host="ollama",
-                latency_s=round(time.perf_counter() - started, 3))
+                latency_s=round(time.perf_counter() - started, 3), **acct)
         return _text_or_empty(resp["message"]["content"], provider, call)
 
     # groq + openrouter: OpenAI-style chat completions.
     if provider == "openrouter":
         client = _openrouter_client()
-        if model in _REASONING_REQUIRED and (effort or openrouter_reasoning) in ("none", ""):
+        if (model in _REASONING_REQUIRED and (effort or openrouter_reasoning) in ("none", "")
+                and _calls.get() is None):
             # This model refused "none" earlier in this process: go straight to low.
             effort, headroom = "low", EFFORT_HEADROOM["low"]
         extra = _openrouter_extra(effort, openrouter_reasoning, max_tokens, openrouter_max_tokens, headroom)
@@ -344,7 +407,10 @@ async def _complete(
         # Some OpenRouter models (GLM-5.x, gpt-oss) cannot switch reasoning off and
         # reject effort "none" with "Reasoning is mandatory". Retry once at low,
         # with room for the reasoning, and remember the model for later calls.
-        if provider != "openrouter" or not _reasoning_mandatory(exc) or model in _REASONING_REQUIRED:
+        # The bench (capture_calls active) must see the refusal: a variant run
+        # at effort "none" must not silently become "low".
+        if (provider != "openrouter" or not _reasoning_mandatory(exc) or model in _REASONING_REQUIRED
+                or _calls.get() is not None):
             raise
         _REASONING_REQUIRED.add(model)
         log.warning("%s rejected reasoning effort none; retrying %s at low", model, call)
@@ -360,7 +426,8 @@ async def _complete(
     await _emit(call=call, tier=tier, provider=provider, requested_model=model,
             served_model=getattr(resp, "model", model), finish_reason=choice.finish_reason,
             host=(getattr(resp, "model_extra", None) or {}).get("provider", provider),
-            latency_s=round(time.perf_counter() - started, 3), **_usage_dict(getattr(resp, "usage", None)))
+            latency_s=round(time.perf_counter() - started, 3), **_usage_dict(getattr(resp, "usage", None)),
+            **acct)
     return _text_or_empty(choice.message.content, provider, call, choice.finish_reason)
 
 
@@ -485,6 +552,7 @@ async def socratic_reply(
     lo_candidates: list[dict] | None = None,
     misconceptions: list[dict] | None = None,
     continuing: bool = False,
+    layered: dict | None = None,
 ) -> str:
     """`chunks` must already be the learner's own grade only (see
     app.tutor.rag.grade_scoped_context and the grade rule there).
@@ -506,12 +574,23 @@ async def socratic_reply(
             schema = turn_schema([lo["code"] for lo in (lo_candidates or [])],
                                  [m["code"] for m in (misconceptions or [])],
                                  list(ped.STRATEGIES))
-    system = prompts.socratic_system(
-        grade, chunks, above, grade_topics, term_focus,
-        memory_block=memory_block, pedagogy=pedagogy,
-        lo_candidates=lo_candidates, misconceptions=misconceptions,
-        output="json" if output == "json" else "state_line",
-    )
+    history, turn = None, None
+    if layered and pedagogy:
+        # settings.prompt_layout = "layered": stable system prompt, the session
+        # as chat messages, this turn's instructions last (see _complete).
+        system, turn = prompts.socratic_layers(
+            grade, chunks, above, grade_topics, term_focus,
+            profile_block=layered["profile"], turn_memory=layered["turn_memory"], pedagogy=pedagogy,
+            lo_candidates=lo_candidates, misconceptions=misconceptions,
+            output="json" if output == "json" else "state_line")
+        history = layered.get("history") or []
+    else:
+        system = prompts.socratic_system(
+            grade, chunks, above, grade_topics, term_focus,
+            memory_block=memory_block, pedagogy=pedagogy,
+            lo_candidates=lo_candidates, misconceptions=misconceptions,
+            output="json" if output == "json" else "state_line",
+        )
     provider = _provider("reasoner")
     if not provider:
         reply = _stub_socratic(question, chunks, grade, above, term_focus)
@@ -522,14 +601,18 @@ async def socratic_reply(
             st = _stub_state(question, pedagogy, lo_candidates, continuing)
             reply += "\n<<STATE " + " ".join(f"{k}={v}" for k, v in st.items()) + ">>"
         last_output_mode.set(output)
-        await _log_stub("socratic_reply", system, question, reply)
+        msgs = None
+        if turn is not None:
+            msgs = [{"role": "system", "content": system}, *history,
+                    {"role": "system", "content": turn}, {"role": "user", "content": question}]
+        await _log_stub("socratic_reply", system, question, reply, messages=msgs)
         return reply
     # 400 (was 600): a 120-word reply is ~160 tokens, plus ~40 for the state.
     # Effort headroom (REASONER_EFFORT) is added on top by _complete.
     mode = output
     try:
         text = await _complete(provider, "reasoner", "socratic_reply", system, question,
-                               max_tokens=400, json_schema=schema)
+                               max_tokens=400, json_schema=schema, history=history, turn_system=turn)
     except Exception as exc:
         if schema is None or not _is_refusal(exc):
             raise
@@ -537,7 +620,7 @@ async def socratic_reply(
                     provider, repr(exc)[:200])
         mode = "json_prompt"
         text = await _complete(provider, "reasoner", "socratic_reply", system, question,
-                               max_tokens=400)
+                               max_tokens=400, history=history, turn_system=turn)
     text = text.strip()
     if not text:
         # An empty message would be sent to the learner as a blank reply.

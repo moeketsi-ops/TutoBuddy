@@ -77,8 +77,10 @@ async def persist(fields: dict) -> int | None:
                 """
                 INSERT INTO llm_calls (learner_id, call, provider, model, prompt_version,
                     prompt_tokens, completion_tokens, reasoning_tokens, estimated,
-                    latency_ms, cost_usd, billed, finish_reason, host, strategy)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+                    latency_ms, cost_usd, billed, finish_reason, host, strategy,
+                    cached_tokens, cache_write_tokens, prompt_chars, shared_chars, layout)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+                        $16, $17, $18, $19, $20)
                 RETURNING id
                 """,
                 current_learner.get(), fields.get("call", "?"), fields.get("provider", "?"),
@@ -88,6 +90,9 @@ async def persist(fields: dict) -> int | None:
                 cost, billed is not None, fields.get("finish_reason"),
                 (str(fields["host"])[:40] if fields.get("host") else None),
                 current_strategy.get(),
+                fields.get("cached_tokens"), fields.get("cache_write_tokens"),
+                fields.get("prompt_chars"), fields.get("shared_chars"),
+                (str(fields["layout"])[:10] if fields.get("layout") else None),
             )
     except Exception:  # noqa: BLE001 -- never break a reply over bookkeeping
         log.exception("ledger: could not record %s call", fields.get("call"))

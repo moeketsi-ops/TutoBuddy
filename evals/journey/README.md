@@ -65,3 +65,20 @@ Tokens, cost, calls by type, by day and per learner, with a short "what to
 look at" list. Works on the pilot database the same way.
 
 Results land in `evals\bench\results\journey\` on your machine (that folder is shared with the container).
+
+## 4. Prompt caching: classic vs layered
+
+Run the scripted week once per prompt layout, then compare:
+
+```
+# .env: PROMPT_LAYOUT=classic, then: docker compose up -d --force-recreate worker
+docker compose run --rm -e GATEWAY_URL=http://gateway:8000 -e MOCKWA_URL=http://mockwa:8001 evals python -m evals.journey.week --learner scripted
+# .env: PROMPT_LAYOUT=layered, then: docker compose up -d --force-recreate worker
+docker compose run --rm -e GATEWAY_URL=http://gateway:8000 -e MOCKWA_URL=http://mockwa:8001 evals python -m evals.journey.week --learner scripted
+docker compose run --rm evals python -m app.reports.cache_eval --days 10 --fx 16.02
+```
+
+`--days 10` because the week moves timestamps back a day at a time. The
+report shows, per layout: prompt tokens sent, the share that could be served
+from cache, what the provider actually served from cache, and the cost with
+and without it. `--read-mult` sets the cached-input price (default 0.25x).

@@ -665,6 +665,13 @@ ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS billed boolean NOT NULL DEFAULT f
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS finish_reason varchar(30);
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS host varchar(40);
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS output_mode varchar(30);
+-- Prompt caching (5 Nov 2026): what the provider served from cache, and
+-- how much of this prompt matched the learner's previous one (estimate).
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS cached_tokens int;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS cache_write_tokens int;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS prompt_chars int;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS shared_chars int;
+ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS layout varchar(10);
 CREATE INDEX IF NOT EXISTS idx_llm_calls_created ON llm_calls(created_at);
 
 -- Starter misconception list: cross-topic, common in Senior Phase and FET

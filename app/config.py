@@ -74,6 +74,21 @@ class Settings(BaseSettings):
     # allow_fallbacks=false so a silent reroute can't change quality.
     openrouter_provider: str = ""
 
+    # Prompt layout for tutoring replies (prompt caching, 5 Nov 2026).
+    # "classic": rules, then this turn's teaching line, memory and notes in one
+    # system prompt (only ~650 tokens are the same from turn to turn).
+    # "layered": most stable first, so providers can cache the prefix:
+    # rules + grade frame + this learner's profile (frozen for the session)
+    # as the system prompt, then the session's turns as real chat messages,
+    # then this turn's teaching line and notes, then the learner's message.
+    prompt_layout: str = "classic"
+    # Send OpenRouter a session_id per learner so their turns stay on one host
+    # (sticky routing; ignored when OPENROUTER_PROVIDER pins a host).
+    openrouter_session_ids: bool = True
+    # How long a cached prefix is assumed to live when estimating cacheable
+    # tokens (OpenRouter sticky routing: 10 minutes idle).
+    cache_ttl_seconds: int = 600
+
     typesafe_api_key: str = PLACEHOLDER
     jev_model: str = "jev-1.13.0"
     jev_min_confidence: float = 0.6

@@ -53,7 +53,8 @@ async def collect(conn, since: datetime.datetime, learner: int | None = None) ->
         SELECT learner_id, call, model, coalesce(prompt_tokens, 0) AS tin,
                coalesce(completion_tokens, 0) AS tout, coalesce(reasoning_tokens, 0) AS treason,
                coalesce(cost_usd, 0)::float AS cost, latency_ms, finish_reason, state_valid,
-               strategy, estimated, created_at::date AS day
+               strategy, estimated, created_at::date AS day,
+               coalesce(cached_tokens, 0) AS tcached
         FROM llm_calls WHERE created_at >= $1 {lf}
         """, *args)]
     msgs = [dict(r) for r in await conn.fetch(
@@ -135,6 +136,9 @@ def report(data: dict, rows: list[dict], days: int, fx: float | None) -> str:
     lines.append(f"- Active learners: {len(learners)} · messages in: {msgs_in} · model calls: {len(calls)}")
     lines.append(f"- Tokens: {sum(c['tin'] for c in calls):,} in, {sum(c['tout'] for c in calls):,} out "
                  f"({sum(c['treason'] for c in calls):,} of them hidden reasoning)")
+    tin_all, cached_all = sum(c["tin"] for c in calls), sum(c.get("tcached", 0) for c in calls)
+    lines.append(f"- Prompt tokens served from cache: {cached_all:,} of {tin_all:,} ({_pct(cached_all, tin_all)})"
+                 " · see `python -m app.reports.cache_eval` for what caching could save")
     lines.append(f"- Model cost: {_money(total, fx)}"
                  + (f" · per message {_money(total / msgs_in, fx)}" if msgs_in else ""))
     if learners:

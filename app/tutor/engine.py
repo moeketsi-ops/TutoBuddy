@@ -8,6 +8,7 @@ import random
 import re
 
 from app.adapters import ledger, llm
+from app.config import settings
 from app.db import get_pool
 from app.tutor import answer_check, mastery, memory, pedagogy, prompts, representation, tmu
 from app.tutor.state import parse_state, parse_turn, strip_state
@@ -120,6 +121,9 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                 "SELECT mastery_score FROM learner_topic_mastery WHERE learner_id = $1 AND topic_id = $2",
                 learner_id, topic["id"])
             topic_score = float(topic_score) if topic_score is not None else None
+        layered = settings.prompt_layout.strip().lower() == "layered"
+        profile_lines = (await _profile_lines(conn, learner_id)
+                         if layered and not mem.get("profile") else [])
         review = None
         if memory.is_new_session(mem):
             review = await conn.fetchrow(
@@ -200,10 +204,19 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         # (saves ~200 prompt tokens on most turns).
         grade_topics=ctx["grade_topics"] if (ctx["above"] or not ctx["chunks"]) else None,
         term_focus=term_focus,
-        memory_block=memory.prompt_block(mem, name=name, grade=grade, lo_score=lo_score,
-                                         review=review),
+        memory_block=None if layered else memory.prompt_block(mem, name=name, grade=grade,
+                                                              lo_score=lo_score, review=review),
         pedagogy=decision, lo_candidates=prompt_los, misconceptions=miscs, continuing=continuing,
     )
+    if layered:
+        # Cache-friendly layout: the grade's topic list always goes in the
+        # (cached) grade frame; profile frozen for the session; turns as chat.
+        call["grade_topics"] = ctx["grade_topics"]
+        call["layered"] = {
+            "profile": memory.profile_block(mem, name=name, grade=grade, lines=profile_lines),
+            "turn_memory": memory.turn_block(mem, lo_score=lo_score, review=review),
+            "history": memory.history_messages(mem),
+        }
     # Leak guard: code knows the answer to many problems. Unless the engine
     # allowed a reveal, or the learner has already reached the answer, a
     # reply that states it is written again once, then masked.
@@ -396,6 +409,47 @@ def strip_greeting(reply: str) -> str:
         return reply
     rest = rest.lstrip()
     return rest[:1].upper() + rest[1:]
+
+
+async def _profile_lines(conn, learner_id: int) -> list[str]:
+    """The learner profile for the layered prompt: learning memory (weaker and
+    stronger topics, the last check-in) and personalisation memory (what has
+    worked for this learner). Read once per session."""
+    lines = []
+    topics = await conn.fetch(
+        """
+        SELECT t.name, m.mastery_score::float AS s FROM learner_topic_mastery m
+        JOIN topics t ON t.id = m.topic_id WHERE m.learner_id = $1 ORDER BY m.mastery_score
+        """, learner_id)
+    if topics:
+        weak = [f"{r['name']} {r['s']:.0f}%" for r in topics[:3] if r["s"] < 70]
+        strong = [f"{r['name']} {r['s']:.0f}%" for r in topics[::-1][:2] if r["s"] >= 70]
+        if weak:
+            lines.append("WEAKER TOPICS " + "; ".join(weak))
+        if strong:
+            lines.append("STRONGER TOPICS " + "; ".join(strong))
+    chk = await conn.fetchrow("SELECT score_pct, finished_at::date AS d FROM diagnostic_results "
+                              "WHERE learner_id = $1 ORDER BY finished_at DESC LIMIT 1", learner_id)
+    if chk:
+        lines.append(f"CHECK-IN {float(chk['score_pct']):.0f}% on {chk['d']}")
+    strat = await conn.fetch(
+        """
+        SELECT strategy, sum(tries) AS t, sum(successes) AS ok FROM learner_strategy_stats
+        WHERE learner_id = $1 GROUP BY 1 HAVING sum(tries) >= 3
+        ORDER BY sum(successes)::float / sum(tries) DESC, sum(tries) DESC LIMIT 2
+        """, learner_id)
+    if strat:
+        lines.append("WORKS WELL " + "; ".join(
+            f"{r['strategy'].lower().replace('_', ' ')} ({r['ok']}/{r['t']})" for r in strat))
+    lvl = await conn.fetchrow(
+        """
+        SELECT cpa_level, sum(tries) AS t, sum(successes) AS ok FROM learner_level_stats
+        WHERE learner_id = $1 GROUP BY 1 HAVING sum(tries) >= 3
+        ORDER BY sum(successes)::float / sum(tries) DESC LIMIT 1
+        """, learner_id)
+    if lvl:
+        lines.append(f"BEST LEVEL {lvl['cpa_level']} ({lvl['ok']}/{lvl['t']} moved forward)")
+    return lines
 
 
 async def eval_answer(question: str, grade: int) -> str:

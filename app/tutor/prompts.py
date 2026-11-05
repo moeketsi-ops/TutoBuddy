@@ -119,16 +119,7 @@ def socratic_system(
         )
     else:
         stuck_rule = "4. If the learner is clearly stuck after attempts, reveal the next step, then check understanding."
-    parts = [f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
-
-Rules (prompt policy {PROMPT_VERSION}):
-1. Be SOCRATIC: never give the final answer immediately. Guide with one small step or leading question at a time, and ask the learner to attempt it.
-2. {grade_rule(grade)} If the retrieved extracts cover the topic, follow their approach.
-3. WhatsApp style: short paragraphs, plain language, a little warmth and the occasional emoji. No markdown headings. Keep replies under 120 words.
-{stuck_rule}
-5. If the question is outside the school curriculum, gently steer back to schoolwork.
-6. Never invent curriculum facts. If unsure, say so and suggest the learner checks with their teacher.
-7. Praise specific behaviour (\"you caught your own sign error\"), never generic praise."""]
+    parts = [_identity_rules(grade, stuck_rule)]
     if pedagogy:
         parts.append(JSON_RULES if output == "json" else STATE_RULES)
         from app.tutor.pedagogy import decision_line
@@ -139,11 +130,88 @@ Rules (prompt policy {PROMPT_VERSION}):
         parts.append(_off_grade_block(grade, above, grade_topics, term_focus))
     parts.append(_context_block(chunks))
     if pedagogy:
-        los = "; ".join(f"{lo['code']} = {lo['objective'][:70]}" for lo in (lo_candidates or []))
-        parts.append("OBJECTIVES: " + (los or "none"))
-        miscs = ", ".join(m["code"] for m in (misconceptions or []))
-        parts.append("MISCONCEPTIONS: " + (miscs or "none"))
+        parts.append(_objectives_lines(lo_candidates, misconceptions))
     return "\n\n".join(parts)
+
+
+def _objectives_lines(lo_candidates: list[dict] | None, misconceptions: list[dict] | None) -> str:
+    los = "; ".join(f"{lo['code']} = {lo['objective'][:70]}" for lo in (lo_candidates or []))
+    miscs = ", ".join(m["code"] for m in (misconceptions or []))
+    return "OBJECTIVES: " + (los or "none") + "\n\nMISCONCEPTIONS: " + (miscs or "none")
+
+
+def socratic_layers(
+    grade: int,
+    chunks: list[dict],
+    above: dict | None,
+    grade_topics: list[str] | None,
+    term_focus: dict | None,
+    *,
+    profile_block: str,
+    turn_memory: str,
+    pedagogy: dict,
+    lo_candidates: list[dict] | None = None,
+    misconceptions: list[dict] | None = None,
+    output: str = "json",
+) -> tuple[str, str]:
+    """The layered layout (settings.prompt_layout = "layered"): returns
+    (system, turn). `system` is the same for every turn of a session, most
+    stable first: rules (all learners) -> grade frame (every learner in this
+    grade) -> this learner's profile (frozen when the session starts). The
+    session's turns follow as chat messages (llm._complete), then `turn`:
+    what changes every turn (teaching line, working problem, notes)."""
+    stuck_rule = (
+        "4. Follow the PEDAGOGY line in THIS TURN: use its strategy, give at most its hint "
+        "level, and reveal the final answer ONLY if it says reveal=yes."
+    )
+    from app.tutor.pedagogy import decision_line
+
+    system = "\n\n".join([
+        _identity_rules(grade, stuck_rule),
+        JSON_RULES if output == "json" else STATE_RULES,
+        "How this prompt is laid out: these rules, the grade frame and the learner profile stay "
+        "the same all session; the chat so far follows; the last system message (THIS TURN) "
+        "holds this turn's teaching instruction, working problem and curriculum notes, and "
+        "overrides anything earlier.",
+        _grade_frame(grade, grade_topics),
+        profile_block,
+    ])
+    turn = ["THIS TURN", decision_line(pedagogy, grade)]
+    if turn_memory:
+        turn.append(turn_memory)
+    if above:
+        turn.append(_off_grade_block(grade, above, None, term_focus))
+    turn.append(_context_block(chunks))
+    turn.append(_objectives_lines(lo_candidates, misconceptions))
+    return system, "\n\n".join(turn)
+
+
+def _grade_frame(grade: int, grade_topics: list[str] | None) -> str:
+    """Grade-level context that is identical for every learner in the grade."""
+    lines = [f"GRADE FRAME: Grade {grade} Mathematics (CAPS)."]
+    if grade_topics:
+        lines.append(f"Grade {grade} Mathematics CAPS topics: " + "; ".join(grade_topics) + ".")
+    lines.append(
+        f"If a question is about a topic that is not part of Grade {grade} (for example a "
+        f"higher-grade topic): say which grade it belongs to and give at most TWO sentences on "
+        f"what the topic is about: no method, no steps, no formula, no worked example. Do not "
+        f"set practice or track progress on it. Then redirect the learner to a Grade {grade} "
+        f"topic (THIS TURN may name this term's focus), and invite them to start on it (they "
+        f"can say \"quiz me\").")
+    return "\n".join(lines)
+
+
+def _identity_rules(grade: int, stuck_rule: str) -> str:
+    return f"""You are Katlego, a warm South African tutor on WhatsApp helping a Grade {grade} learner with the CAPS curriculum.
+
+Rules (prompt policy {PROMPT_VERSION}):
+1. Be SOCRATIC: never give the final answer immediately. Guide with one small step or leading question at a time, and ask the learner to attempt it.
+2. {grade_rule(grade)} If the retrieved extracts cover the topic, follow their approach.
+3. WhatsApp style: short paragraphs, plain language, a little warmth and the occasional emoji. No markdown headings. Keep replies under 120 words.
+{stuck_rule}
+5. If the question is outside the school curriculum, gently steer back to schoolwork.
+6. Never invent curriculum facts. If unsure, say so and suggest the learner checks with their teacher.
+7. Praise specific behaviour (\"you caught your own sign error\"), never generic praise."""
 
 
 def eval_system(grade: int, chunks: list[dict]) -> str:

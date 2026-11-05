@@ -33,6 +33,10 @@ IDLE_SECONDS = 30 * 60
 TTL_SECONDS = 14 * 24 * 3600
 DIGEST_KEEP = 6       # digest lines kept (session + persisted)
 DIGEST_IN_PROMPT = 3
+# Layered prompt layout: this session's turns as chat messages. Append-only
+# so each call's prompt starts with the previous call's; past the cap the
+# oldest half is dropped at once (one cache miss, then stable again).
+SESSION_LOG_MAX = 10
 
 NEW_QUESTION = re.compile(
     r"^(how|what|why|when|which|where|solve|simplify|find|calculate|work out|factor|"
@@ -57,6 +61,9 @@ def _new(learner_id: int, history: list[str] | None = None) -> dict:
         "digest": list(history or [])[-DIGEST_KEEP:],
         "working": _fresh_working(),
         "los_seen": [],         # LO codes touched this session
+        "session_log": [],      # layered layout: this session's turns, append-only
+        "profile": None,        # layered layout: learner profile, frozen for the session
+        "digest_at_start": len(list(history or [])[-DIGEST_KEEP:]),
     }
 
 
@@ -97,6 +104,9 @@ async def load(learner_id: int, history: list[str] | None = None) -> dict:
         mem["_persist"] = True  # engine writes the digest to Postgres
     if mem is None:
         mem = _new(learner_id, history)
+    mem.setdefault("session_log", [])
+    mem.setdefault("profile", None)
+    mem.setdefault("digest_at_start", len(mem.get("digest") or []))
     return mem
 
 
@@ -259,6 +269,10 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
         "level": (state or {}).get("level") or w.get("level"),
     })
     mem["turns"] = mem["turns"][-WINDOW:]
+    log_ = mem.setdefault("session_log", [])
+    log_.append({"learner": learner_text[:300], "katlego": compress_reply(reply)})
+    if len(log_) > SESSION_LOG_MAX:
+        del log_[:SESSION_LOG_MAX // 2]
     mem["turn_count"] += 1
     mem["session_turns"] += 1
     mem["last_turn_at"] = time.time()
@@ -312,7 +326,10 @@ def consolidate(mem: dict, keep: int = PROMPT_TURNS) -> str | None:
     mem["turn_count"] = len(mem["turns"])
     line = digest_line(rolled)
     if line:
+        before = len(mem["digest"]) + 1
         mem["digest"] = (mem["digest"] + [line])[-DIGEST_KEEP:]
+        dropped = before - len(mem["digest"])
+        mem["digest_at_start"] = max(0, mem.get("digest_at_start", 0) - dropped)
     return line
 
 
@@ -359,3 +376,54 @@ def prompt_block(mem: dict, *, name: str | None, grade: int, lo_score: float | N
             lines.append(f"  Learner: {t['learner']}")
             lines.append(f"  You: {t['katlego']}")
     return "\n".join(lines)
+
+
+# ── Layered prompt layout (settings.prompt_layout = "layered") ───────────────
+
+def profile_block(mem: dict, *, name: str | None, grade: int, lines: list[str]) -> str:
+    """Learning + personalisation memory for the system prompt. Built once per
+    session and frozen in mem["profile"], so it is the same text on every turn
+    (cacheable). `lines` come from the database (engine._profile_lines)."""
+    if mem.get("profile"):
+        return mem["profile"]
+    out = ["LEARNER PROFILE (what you know about this learner; never read it out)",
+           f"LEARNER {name or 'learner'} · Grade {grade}"]
+    out += lines
+    earlier = (mem.get("digest") or [])[:mem.get("digest_at_start", 0)][-DIGEST_IN_PROMPT:]
+    if earlier:
+        out.append("EARLIER SESSIONS " + " | ".join(earlier))
+    mem["profile"] = "\n".join(out)
+    return mem["profile"]
+
+
+def turn_block(mem: dict, *, lo_score: float | None, review: dict | None) -> str:
+    """What changes during the session: topic and mastery now, the working
+    problem, a due review, and digest lines rolled up this session."""
+    w = mem["working"]
+    lines = []
+    if w["topic"]:
+        now = f"NOW {w['topic']}"
+        if w["lo_code"]:
+            now += f" · {w['lo_code']}"
+        if lo_score is not None:
+            from app.tutor.mastery import band
+            now += f" · mastery {lo_score:.0f}% ({band(lo_score)})"
+        lines.append(now)
+    if w["problem"]:
+        lines.append(f"WORKING PROBLEM \"{w['problem']}\" · not-yet attempts {w['wrong_on_problem']}"
+                     + (f" · level {w['level']}" if w.get("level") else ""))
+    if review:
+        lines.append(f"REVIEW DUE {review['code']} ({review['score']:.0f}%): {review['objective'][:60]}")
+    this_session = (mem.get("digest") or [])[mem.get("digest_at_start", 0):]
+    if this_session:
+        lines.append("EARLIER THIS SESSION " + " | ".join(this_session[-DIGEST_IN_PROMPT:]))
+    return "\n".join(lines)
+
+
+def history_messages(mem: dict) -> list[dict]:
+    """This session's turns as chat messages, oldest first."""
+    out = []
+    for t in mem.get("session_log") or []:
+        out.append({"role": "user", "content": t["learner"]})
+        out.append({"role": "assistant", "content": t["katlego"]})
+    return out
