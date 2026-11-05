@@ -102,11 +102,8 @@ tiers = ["router", "reasoner"]
 group = "open"
 
 # ── Open-weight: small ───────────────────────────────────────────────────────
-[[model]]
-slug = "qwen/qwen3.6-35b-a3b"
-tiers = ["router", "reasoner"]
-group = "open"
-
+# Qwen 3.5 (the old default) and 3.6 were dropped after the 31 Oct pilot: half
+# their calls came back empty or cut off, spent on hidden reasoning.
 [[model]]
 slug = "qwen/qwen3.8-27b"
 tiers = ["router", "reasoner"]
@@ -116,13 +113,6 @@ group = "open"
 slug = "meta-llama/llama-4-scout"
 tiers = ["router"]
 group = "open"
-
-# ── Incumbent (Moeketsi's current OpenRouter default) ────────────────────────
-[[model]]
-slug = "qwen/qwen3.5-35b-a3b"
-tiers = ["router", "reasoner"]
-group = "open"
-vision = true
 
 # ── Groq direct (GROQ_API_KEY): Moeketsi's pick + the gpt-oss pair ───────────
 # Costs are estimated from the same model's OpenRouter list price (Groq returns no billed cost).

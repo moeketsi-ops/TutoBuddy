@@ -167,7 +167,10 @@ def test_no_progress_counts_resets_and_closes():
     _turn(mem, "3x = 15", "attempt_partial", "step_forward")
     assert mem["working"]["no_progress"] == 0
     _turn(mem, "x = 5", "attempt_correct", "solved")
-    assert mem["working"]["problem"] is None  # a solved problem is closed by code
+    # solved: open one more turn for the learner's echo (870fc2b), then closed
+    assert mem["working"]["problem"] == P8 and mem["working"]["closing"]
+    _turn(mem, "x = 5 yes", "attempt_correct")
+    assert mem["working"]["problem"] is None
 
 
 def test_old_memory_gets_the_new_fields():

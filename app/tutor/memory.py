@@ -69,6 +69,8 @@ def _fresh_working() -> dict:
         # CPA + switching (spec v0.1 section 4)
         "level": None, "no_progress": 0, "switches": 0, "bridge": False,
         "last_switch_id": None, "since_switch": 0,
+        # a "done" problem stays open one more turn (Immanuel, 870fc2b)
+        "closing": False,
     }
 
 
@@ -196,8 +198,9 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
             mem["los_seen"].append(state["lo"])
 
     # Working problem: a new question (or the first substantive message)
-    # opens it; a STATE step of "done" closes it after this turn.
-    if new_problem and ev == "none" and learner_text.strip():
+    # opens it, whatever the model labelled it ("What is -8 + 3?" often comes
+    # back as asked_for_answer). A STATE step of "done" closes it a turn later.
+    if new_problem and learner_text.strip():
         w["problem"] = learner_text[:200]
         w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[],
                  level=None, no_progress=0, switches=0, bridge=False, last_switch_id=None,
@@ -247,10 +250,18 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
     mem["session_turns"] += 1
     mem["last_turn_at"] = time.time()
 
-    if state and (state.get("step") == "done" or progress == "solved"):
-        w.update(problem=None, fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0,
-                 misc_recent=[], level=None, no_progress=0, switches=0, bridge=False,
-                 last_switch_id=None, since_switch=0)
+    # A "done" problem stays open for one more turn, so the learner's echo of
+    # the answer ("x = 32") is still read against it instead of retrieving
+    # a random topic for "x = 32" alone. A wrong or partial attempt on that
+    # turn means the "done" was premature, so it stays open. Code-checked
+    # "solved" (CPA branch) counts as done.
+    if w.get("closing") and not new_problem and ev not in ("attempt_wrong", "attempt_partial"):
+        w["problem"] = None
+    w["closing"] = bool(state and (state.get("step") == "done" or progress == "solved"))
+    if w["closing"]:
+        w.update(fails_in_row=0, tried=[], wrong_on_problem=0, asked_answer=0, misc_recent=[],
+                 level=None, no_progress=0, switches=0, bridge=False, last_switch_id=None,
+                 since_switch=0)
         if w["strategy"] == "RETRIEVAL_PRACTICE":
             w["strategy"] = None
 

@@ -23,12 +23,13 @@ import logging
 log = logging.getLogger("katlego.ledger")
 
 # USD per million tokens (input, output). Fallback only: OpenRouter bills
-# per call and that figure wins. Checked Oct 2026: qwen3.5-35b-a3b via the
-# pricepertoken.com OpenRouter listing (13 Oct 2026); Groq and Anthropic as
+# per call and that figure wins. Checked Oct 2026: the OpenRouter defaults
+# from the live models API (31 Oct 2026); Groq and Anthropic as
 # in the project's LLM cost blueprint (2 Sep 2026). `python -m
 # evals.bench.prices` prints live OpenRouter prices.
 PRICES: dict[str, tuple[float, float]] = {
-    "qwen/qwen3.5-35b-a3b": (0.08, 0.75),
+    "z-ai/glm-5.3-flash": (0.15, 0.50),
+    "openai/gpt-6-luna": (0.10, 0.50),
     "openai/gpt-oss-20b": (0.075, 0.30),
     "openai/gpt-oss-120b": (0.15, 0.60),
     "claude-haiku-4-5-20251001": (1.00, 5.00),
