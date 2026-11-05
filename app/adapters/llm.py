@@ -619,6 +619,24 @@ async def grade_practice_answer(
     return _parse_grade_response(raw)
 
 
+async def mark_against_memo(question: str, marks: int, memo: list[dict], learner_answer: str,
+                            grade: int, code_fact: str | None = None) -> dict | None:
+    """{"awarded": int, "feedback": str} from the model, or None when no
+    model is configured (stub: the caller marks what code can check)."""
+    provider = _provider("reasoner")
+    system = prompts.memo_marking_system(grade, question, marks, memo, code_fact)
+    if not provider:
+        await _log_stub("mark_against_memo", system, learner_answer, "")
+        return None
+    raw = await _complete(provider, "reasoner", "mark_against_memo", system, learner_answer,
+                          max_tokens=220)
+    m_ = re.search(r"AWARDED:\s*(\d+)\s*FEEDBACK:\s*(.*)", raw, re.DOTALL | re.IGNORECASE)
+    if not m_:
+        log.warning("mark_against_memo: response didn't match AWARDED:/FEEDBACK: format")
+        return None
+    return {"awarded": max(0, min(marks, int(m_.group(1)))), "feedback": m_.group(2).strip()[:400]}
+
+
 # ── Vision (homework photos) ──────────────────────────────────────────────────
 # anthropic or openrouter only (see module docstring). Multimodal message
 # shapes differ per API, so this stays outside _complete().

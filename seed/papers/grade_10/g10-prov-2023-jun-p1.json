@@ -1,0 +1,478 @@
+{
+ "id": "g10-prov-2023-jun-p1",
+ "grade": 10,
+ "title": "Provincial Grade 10 June 2023 Exam, Paper 1",
+ "source": {
+  "body": "Provincial examination (province not named on the file)",
+  "year": 2023,
+  "task": "June examination",
+  "paper": 1,
+  "original_marks": 50,
+  "original_minutes": 60,
+  "file": "seed/past_papers/grade_10/2023/unk_jun-exam_p1_qp.json + _memo.json",
+  "source_site": "unknown"
+ },
+ "left_out": [
+  {
+   "n": "5.3",
+   "marks": 3,
+   "why": "sketch"
+  },
+  {
+   "n": "1.2",
+   "marks": 3,
+   "why": "recurring-decimal dot notation not readable on WhatsApp"
+  }
+ ],
+ "questions": [
+  {
+   "n": "1.1",
+   "topic": "Exponents",
+   "marks": 2,
+   "text": "Without a calculator: between which two consecutive integers does -√69 lie?",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "-√81 < -√69 < -√64"
+    },
+    {
+     "m": 1,
+     "p": "between -9 and -8",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "between -9 and -8"
+  },
+  {
+   "n": "2.1",
+   "topic": "Algebraic expressions",
+   "marks": 2,
+   "text": "Factorise: 3x^2 + 9x - 2xy - 6y",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "grouping: 3x(x + 3) - 2y(x + 3)"
+    },
+    {
+     "m": 1,
+     "p": "(3x - 2y)(x + 3)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "(3*x - 2*y)*(x + 3)",
+    "form": "factorised"
+   },
+   "answer": "(3x - 2y)(x + 3)"
+  },
+  {
+   "n": "2.2.1",
+   "topic": "Algebraic expressions",
+   "marks": 4,
+   "text": "Simplify: (m^2 - 64)/(m^2 - 8m) ÷ (m + 8)/m",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "numerator (m - 8)(m + 8)"
+    },
+    {
+     "m": 1,
+     "p": "denominator m(m - 8)"
+    },
+    {
+     "m": 1,
+     "p": "multiply by the reciprocal m/(m + 8)"
+    },
+    {
+     "m": 1,
+     "p": "1",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "1"
+   },
+   "answer": "1"
+  },
+  {
+   "n": "2.2.2",
+   "topic": "Exponents",
+   "marks": 3,
+   "text": "Simplify: (2^(n - 1) · 8^(n + 1)) / 16^n",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "2^(3n + 3) and 2^(4n)"
+    },
+    {
+     "m": 1,
+     "p": "2^(n - 1 + 3n + 3 - 4n) = 2^2"
+    },
+    {
+     "m": 1,
+     "p": "4",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "4"
+   },
+   "answer": "4"
+  },
+  {
+   "n": "3.1",
+   "topic": "Equations and inequalities",
+   "marks": 3,
+   "text": "Solve for a: (a + 1)(a^2 + 2a - 3) = a(a^2 + 3a)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "left side a^3 + 3a^2 - a - 3"
+    },
+    {
+     "m": 1,
+     "p": "right side a^3 + 3a^2"
+    },
+    {
+     "m": 1,
+     "p": "a = -3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "a",
+    "values": [
+     "-3"
+    ]
+   },
+   "answer": "a = -3"
+  },
+  {
+   "n": "3.2",
+   "topic": "Equations and inequalities",
+   "marks": 2,
+   "text": "Solve for x: 2x^2 + x - 3 = 0",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "factors (2x + 3)(x - 1) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = -3/2 or x = 1",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "-3/2",
+     "1"
+    ]
+   },
+   "answer": "x = -3/2 or x = 1"
+  },
+  {
+   "n": "3.3",
+   "topic": "Equations and inequalities",
+   "marks": 2,
+   "text": "Solve the inequality: 3 ≤ 2x - 1 < 7",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "4 ≤ 2x < 8"
+    },
+    {
+     "m": 1,
+     "p": "2 ≤ x < 4",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "2 ≤ x < 4"
+  },
+  {
+   "n": "3.4",
+   "topic": "Exponents",
+   "marks": 4,
+   "text": "Solve for x and y simultaneously: 3^(x + y) = 27^2 and 2^y = 4^(x + 1)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x + y = 6"
+    },
+    {
+     "m": 1,
+     "p": "y = 2x + 2"
+    },
+    {
+     "m": 1,
+     "p": "x = 4/3",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y = 14/3",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x = 4/3 and y = 14/3"
+  },
+  {
+   "n": "4.1.1",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Write down the domain of g.",
+   "context": "f(x) = 2x^2 - 2 and g(x) = -k/x + 1½. A and B are the x-intercepts of f, and D(-2; 6) is where the graphs of f and g intersect.",
+   "memo": [
+    {
+     "m": 2,
+     "p": "x ∈ R, x ≠ 0",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x ∈ R, x ≠ 0"
+  },
+  {
+   "n": "4.1.2",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Write down the range of f.",
+   "context": "f(x) = 2x^2 - 2.",
+   "memo": [
+    {
+     "m": 2,
+     "p": "y ≥ -2",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y ≥ -2"
+  },
+  {
+   "n": "4.1.3",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Write down the equation of the horizontal asymptote of g.",
+   "context": "g(x) = -k/x + 1½.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "y = 1½",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y = 1½"
+  },
+  {
+   "n": "4.2",
+   "topic": "Functions",
+   "marks": 3,
+   "text": "Calculate the length of AB.",
+   "context": "f(x) = 2x^2 - 2; A and B are the x-intercepts of f.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "2x^2 - 2 = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = -1 and x = 1"
+    },
+    {
+     "m": 1,
+     "p": "AB = 2 units",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "2"
+   },
+   "answer": "2 units"
+  },
+  {
+   "n": "4.3",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Show that k = 9.",
+   "context": "g(x) = -k/x + 1½ passes through D(-2; 6).",
+   "memo": [
+    {
+     "m": 1,
+     "p": "substitute D(-2; 6): 6 = k/2 + 3/2"
+    },
+    {
+     "m": 1,
+     "p": "12 = k + 3, so k = 9"
+    }
+   ],
+   "check": null,
+   "answer": "6 = -k/(-2) + 3/2 gives k = 9"
+  },
+  {
+   "n": "4.4",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Write down the equation of the line of symmetry of g that has a positive gradient.",
+   "context": "g(x) = -9/x + 1½.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "gradient 1: y = x"
+    },
+    {
+     "m": 1,
+     "p": "+ 1,5",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y = x + 1.5"
+  },
+  {
+   "n": "4.5.1",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "For which values of x is g(x) > f(x)?",
+   "context": "f(x) = 2x^2 - 2 and g(x) = -9/x + 1½ intersect only at D(-2; 6).",
+   "memo": [
+    {
+     "m": 2,
+     "p": "-2 < x < 0",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "-2 < x < 0"
+  },
+  {
+   "n": "4.5.2",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "For which values of x do both f and g increase as x increases?",
+   "context": "f(x) = 2x^2 - 2 and g(x) = -9/x + 1½.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x > 0",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x > 0"
+  },
+  {
+   "n": "4.6",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Describe the transformation of g to h if h(x) = 9/x - 3,5.",
+   "context": "g(x) = -9/x + 1½.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "reflection in the y-axis (or the x-axis)",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "translation 5 units down (or 2 units down after reflecting in the x-axis)",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "reflect in the y-axis and move 5 units down"
+  },
+  {
+   "n": "5.1",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Calculate the x-intercept of h.",
+   "context": "h(x) = 2^x - 4",
+   "memo": [
+    {
+     "m": 1,
+     "p": "2^x = 4 = 2^2"
+    },
+    {
+     "m": 1,
+     "p": "x = 2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "2"
+    ]
+   },
+   "answer": "x = 2"
+  },
+  {
+   "n": "5.2",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Calculate the y-intercept of h.",
+   "context": "h(x) = 2^x - 4",
+   "memo": [
+    {
+     "m": 1,
+     "p": "y = -3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-3"
+   },
+   "answer": "y = -3"
+  },
+  {
+   "n": "5.4",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Write down the point of intersection of y = 2^x - 4 and y = (1/2)^x - 4.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x = 0",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y = -3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "point",
+    "point": [
+     "0",
+     "-3"
+    ]
+   },
+   "answer": "(0; -3)"
+  }
+ ],
+ "status": "unverified",
+ "marks": 44
+}

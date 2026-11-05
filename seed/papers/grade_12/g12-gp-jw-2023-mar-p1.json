@@ -1,0 +1,395 @@
+{
+ "id": "g12-gp-jw-2023-mar-p1",
+ "grade": 12,
+ "title": "Gauteng (Johannesburg West) Grade 12 March 2023 Test",
+ "source": {
+  "body": "Gauteng Department of Education, Johannesburg West District",
+  "year": 2023,
+  "task": "March test",
+  "paper": 1,
+  "original_marks": 50,
+  "original_minutes": 60,
+  "file": "seed/past_papers/grade_12/2023/gp-jw_mar-test_p1_qp-memo.json",
+  "source_site": "stanmorephysics.com"
+ },
+ "left_out": [
+  {
+   "n": "3",
+   "marks": 5,
+   "why": "the series' terms were garbled in OCR"
+  },
+  {
+   "n": "5.1, 5.2",
+   "marks": 4,
+   "why": "need the graph"
+  },
+  {
+   "n": "5.4",
+   "marks": 4,
+   "why": "sketch"
+  },
+  {
+   "n": "1.2",
+   "marks": 3,
+   "why": "denominator of the formula lost in OCR"
+  }
+ ],
+ "questions": [
+  {
+   "n": "1.1.1",
+   "topic": null,
+   "marks": 2,
+   "text": "Solve for x: x(2x - 3) = 0",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x = 0",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "x = 3/2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "0",
+     "3/2"
+    ]
+   },
+   "answer": "x = 0 or x = 3/2"
+  },
+  {
+   "n": "1.1.2",
+   "topic": null,
+   "marks": 3,
+   "text": "Solve for x, correct to two decimal places: 0 = 3x^2 - 5x - 11",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "correct substitution into the formula"
+    },
+    {
+     "m": 1,
+     "p": "x = -1,25",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "x = 2,92",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "-1.25",
+     "2.92"
+    ],
+    "tolerance": 0.006
+   },
+   "answer": "x = -1.25 or x = 2.92"
+  },
+  {
+   "n": "1.1.3",
+   "topic": null,
+   "marks": 3,
+   "text": "Solve for x: x(3x + 4) - 2(3x + 4) < 0",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "factors (x - 2)(3x + 4) < 0"
+    },
+    {
+     "m": 1,
+     "p": "critical values 2 and -4/3"
+    },
+    {
+     "m": 1,
+     "p": "-4/3 < x < 2",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "-4/3 < x < 2"
+  },
+  {
+   "n": "2.1",
+   "topic": "Patterns, sequences and series",
+   "marks": 4,
+   "text": "Determine the general term in the form Tn = an^2 + bn + c.",
+   "context": "The quadratic pattern 11; 20; 33; 50; ...",
+   "memo": [
+    {
+     "m": 1,
+     "p": "a = 2"
+    },
+    {
+     "m": 1,
+     "p": "b = 3"
+    },
+    {
+     "m": 1,
+     "p": "c = 6"
+    },
+    {
+     "m": 1,
+     "p": "Tn = 2n^2 + 3n + 6",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "2*n**2 + 3*n + 6",
+    "form": "expanded",
+    "var": "n"
+   },
+   "answer": "Tn = 2n^2 + 3n + 6"
+  },
+  {
+   "n": "2.2",
+   "topic": "Patterns, sequences and series",
+   "marks": 2,
+   "text": "Prove that the sum of the first n first differences is Sn = 2n^2 + 7n.",
+   "context": "The quadratic pattern 11; 20; 33; 50; ...",
+   "memo": [
+    {
+     "m": 1,
+     "p": "first differences 9; 13; 17: a = 9, d = 4 in Sn = n/2[2a + (n - 1)d]"
+    },
+    {
+     "m": 1,
+     "p": "simplifies to 2n^2 + 7n"
+    }
+   ],
+   "check": null,
+   "answer": "Sn = n/2[18 + 4(n - 1)] = 2n^2 + 7n"
+  },
+  {
+   "n": "4.1",
+   "topic": "Patterns, sequences and series",
+   "marks": 3,
+   "text": "(1 - x); (x + 2) and (2x - 5) are the first three terms of an arithmetic sequence. Determine the value of x.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "(2x - 5) - (x + 2) = (x + 2) - (1 - x)"
+    },
+    {
+     "m": 1,
+     "p": "x - 7 = 2x + 1"
+    },
+    {
+     "m": 1,
+     "p": "x = -8",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "-8"
+    ]
+   },
+   "answer": "x = -8"
+  },
+  {
+   "n": "4.2",
+   "topic": "Patterns, sequences and series",
+   "marks": 2,
+   "text": "The first three terms are 9; -6; -21; ... Calculate the sum of the first 100 terms.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "S100 = 100/2[2(9) + 99(-15)]"
+    },
+    {
+     "m": 1,
+     "p": "-73 350",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-73350"
+   },
+   "answer": "-73 350"
+  },
+  {
+   "n": "4.3",
+   "topic": "Patterns, sequences and series",
+   "marks": 4,
+   "text": "Calculate m if the sum of (24 - 15n) from n = 0 to m - 1 equals S100 + 73 320, where S100 = -73 350.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "right side = -30"
+    },
+    {
+     "m": 1,
+     "p": "m/2[2(24) + (m - 1)(-15)] = -30"
+    },
+    {
+     "m": 1,
+     "p": "5m^2 - 21m - 20 = 0"
+    },
+    {
+     "m": 1,
+     "p": "m = 5 (m = -4/5 rejected)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "m",
+    "values": [
+     "5"
+    ]
+   },
+   "answer": "m = 5"
+  },
+  {
+   "n": "5.3",
+   "topic": "Functions and inverse functions",
+   "marks": 3,
+   "text": "g(x) = -x - 4 and h(x) = -2[g(x)]. Determine the inverse of h in the form h⁻¹(x) = mx + c.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "h(x) = 2x + 8"
+    },
+    {
+     "m": 1,
+     "p": "swap x and y: x = 2y + 8"
+    },
+    {
+     "m": 1,
+     "p": "h⁻¹(x) = x/2 - 4",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "x/2 - 4",
+    "form": "simplified"
+   },
+   "answer": "h⁻¹(x) = x/2 - 4"
+  },
+  {
+   "n": "6.1",
+   "topic": "Exponential and logarithmic functions",
+   "marks": 2,
+   "text": "f(x) = ax^2 and g(x) = b^x intersect at A(-1; 2). Calculate the values of a and b.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "a = 2",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "b = 1/2",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "a = 2 and b = 1/2"
+  },
+  {
+   "n": "6.2",
+   "topic": "Functions and inverse functions",
+   "marks": 1,
+   "text": "The inverse of f(x) = 2x^2 is not a function. Write down one restriction on the domain of f so that its inverse is a function.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x ≥ 0 (or x ≤ 0)",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x ≥ 0 (or x ≤ 0)"
+  },
+  {
+   "n": "6.3",
+   "topic": "Exponential and logarithmic functions",
+   "marks": 2,
+   "text": "For which values of x, where x ≤ 0, is g(x) < f(x)?",
+   "context": "f(x) = 2x^2 and g(x) = (1/2)^x intersect at A(-1; 2).",
+   "memo": [
+    {
+     "m": 2,
+     "p": "x < -1",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x < -1"
+  },
+  {
+   "n": "6.4.1",
+   "topic": "Exponential and logarithmic functions",
+   "marks": 1,
+   "text": "If h(x) = g(x + 3), write down the coordinates of A', the image of A on the graph of h.",
+   "context": "g(x) = (1/2)^x passes through A(-1; 2).",
+   "memo": [
+    {
+     "m": 1,
+     "p": "A'(-4; 2)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "point",
+    "point": [
+     "-4",
+     "2"
+    ]
+   },
+   "answer": "(-4; 2)"
+  },
+  {
+   "n": "6.4.2",
+   "topic": "Exponential and logarithmic functions",
+   "marks": 2,
+   "text": "Write down the coordinates of A'', the image of A on the graph of h⁻¹ (the inverse of h).",
+   "context": "h(x) = g(x + 3) with g(x) = (1/2)^x; A'(-4; 2) is on h.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x = 2",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y = -4",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "point",
+    "point": [
+     "2",
+     "-4"
+    ]
+   },
+   "answer": "(2; -4)"
+  }
+ ],
+ "status": "unverified",
+ "marks": 34
+}

@@ -1,0 +1,453 @@
+{
+ "id": "g10-kzn-2024-jun-p1",
+ "grade": 10,
+ "title": "KZN Grade 10 June 2024 Common Test, Paper 1",
+ "source": {
+  "body": "KwaZulu-Natal Department of Education",
+  "year": 2024,
+  "task": "June common test",
+  "paper": 1,
+  "original_marks": 50,
+  "original_minutes": 60,
+  "file": "seed/past_papers/grade_10/2024/kzn_jun-exam_p1_qp-memo.json",
+  "source_site": "stanmorephysics.com"
+ },
+ "left_out": [
+  {
+   "n": "2.1.3",
+   "marks": 3,
+   "why": "inequality symbols lost in OCR"
+  },
+  {
+   "n": "3.2",
+   "marks": 3,
+   "why": "sketch"
+  },
+  {
+   "n": "3.3.4",
+   "marks": 3,
+   "why": "sketch"
+  }
+ ],
+ "questions": [
+  {
+   "n": "1.1.1",
+   "topic": "Algebraic expressions",
+   "marks": 2,
+   "text": "Simplify fully: (3x - 2)(2x^2 - 4x + 1)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "multiplying out: 6x^3 - 12x^2 + 3x - 4x^2 + 8x - 2"
+    },
+    {
+     "m": 1,
+     "p": "6x^3 - 16x^2 + 11x - 2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "6*x**3 - 16*x**2 + 11*x - 2",
+    "form": "expanded"
+   },
+   "answer": "6x^3 - 16x^2 + 11x - 2"
+  },
+  {
+   "n": "1.1.2",
+   "topic": "Exponents",
+   "marks": 3,
+   "text": "Simplify fully: (4^x · 8^(x+1)) / 32^(x+1)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "prime base 2: 2^(2x) · 2^(3x+3) / 2^(5x+5)"
+    },
+    {
+     "m": 1,
+     "p": "2^(-2)"
+    },
+    {
+     "m": 1,
+     "p": "1/4",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "1/4"
+   },
+   "answer": "1/4"
+  },
+  {
+   "n": "1.1.3",
+   "topic": "Algebraic expressions",
+   "marks": 5,
+   "text": "Simplify fully: (x + 7)/(x^2 - x - 6) - 3/(x - 3) + 2/(2x + 4)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "factors (x - 3)(x + 2) and 2(x + 2)"
+    },
+    {
+     "m": 1,
+     "p": "one fraction: [x + 7 - 3(x + 2) + (x - 3)] / [(x - 3)(x + 2)]"
+    },
+    {
+     "m": 1,
+     "p": "numerator -x - 2"
+    },
+    {
+     "m": 1,
+     "p": "-(x + 2)"
+    },
+    {
+     "m": 1,
+     "p": "-1/(x - 3)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "-1/(x - 3)",
+    "form": "simplified"
+   },
+   "answer": "-1/(x - 3)"
+  },
+  {
+   "n": "1.2.1",
+   "topic": "Algebraic expressions",
+   "marks": 2,
+   "text": "Factorise fully: 5x^2 - 2x - 3",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "(5x + 3)",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "(x - 1)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "(5*x + 3)*(x - 1)",
+    "form": "factorised"
+   },
+   "answer": "(5x + 3)(x - 1)"
+  },
+  {
+   "n": "1.2.2",
+   "topic": "Algebraic expressions",
+   "marks": 2,
+   "text": "Factorise fully: x^3 + 1/125",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "(x + 1/5)",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "(x^2 - x/5 + 1/25)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "(x + Rational(1, 5))*(x**2 - x/5 + Rational(1, 25))",
+    "form": "factorised"
+   },
+   "answer": "(x + 1/5)(x^2 - x/5 + 1/25)"
+  },
+  {
+   "n": "2.1.1",
+   "topic": "Equations and inequalities",
+   "marks": 3,
+   "text": "Solve for x: x(x - 1) = 6",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "standard form x^2 - x - 6 = 0"
+    },
+    {
+     "m": 1,
+     "p": "factors (x - 3)(x + 2) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = 3 or x = -2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "3",
+     "-2"
+    ]
+   },
+   "answer": "x = 3 or x = -2"
+  },
+  {
+   "n": "2.1.2",
+   "topic": "Exponents",
+   "marks": 3,
+   "text": "Solve for x: 3^x + 3^(x - 1) = 36",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "common factor 3^x(1 + 1/3) = 36"
+    },
+    {
+     "m": 1,
+     "p": "3^x = 27"
+    },
+    {
+     "m": 1,
+     "p": "x = 3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "3"
+    ]
+   },
+   "answer": "x = 3"
+  },
+  {
+   "n": "2.2",
+   "topic": "Equations and inequalities",
+   "marks": 5,
+   "text": "A shop sells bicycles and tricycles. In total there are 7 cycles and 19 wheels. A bicycle has two wheels and a tricycle has three. How many of each are there?",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x + y = 7"
+    },
+    {
+     "m": 1,
+     "p": "2x + 3y = 19"
+    },
+    {
+     "m": 1,
+     "p": "eliminating or substituting"
+    },
+    {
+     "m": 1,
+     "p": "5 tricycles",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "2 bicycles",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "2 bicycles and 5 tricycles"
+  },
+  {
+   "n": "3.1.1",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Write down the coordinates of C, where f cuts the y-axis.",
+   "context": "f(x) = x - 2 and g(x) = 3/x. A and B are where the graphs of f and g intersect.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "C(0; -2)",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "point",
+    "point": [
+     "0",
+     "-2"
+    ]
+   },
+   "answer": "(0; -2)"
+  },
+  {
+   "n": "3.1.2",
+   "topic": "Functions",
+   "marks": 4,
+   "text": "Determine the x-coordinates of A and B.",
+   "context": "f(x) = x - 2 and g(x) = 3/x. A and B are where the graphs of f and g intersect.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x - 2 = 3/x"
+    },
+    {
+     "m": 1,
+     "p": "x^2 - 2x - 3 = 0"
+    },
+    {
+     "m": 1,
+     "p": "(x - 3)(x + 1) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = -1 or x = 3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "-1",
+     "3"
+    ]
+   },
+   "answer": "x = -1 and x = 3"
+  },
+  {
+   "n": "3.1.3",
+   "topic": "Functions",
+   "marks": 3,
+   "text": "D is on the x-axis with OD = 6 units. A vertical line through D cuts g at E and f at F. Determine the length of EF.",
+   "context": "f(x) = x - 2 and g(x) = 3/x.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "y-value of F: f(6) = 4"
+    },
+    {
+     "m": 1,
+     "p": "y-value of E: g(6) = 1/2"
+    },
+    {
+     "m": 1,
+     "p": "EF = 3.5 units",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "7/2"
+   },
+   "answer": "3.5 units"
+  },
+  {
+   "n": "3.1.4",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Write down the equation of j if j(x) = g(x) + 2.",
+   "context": "g(x) = 3/x.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "j(x) = 3/x + 2",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "j(x) = 3/x + 2"
+  },
+  {
+   "n": "3.1.5",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "For which value(s) of x is f(x) ≥ g(x), where x < 0?",
+   "context": "f(x) = x - 2 and g(x) = 3/x. The graphs intersect at x = -1 and x = 3.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "-1 ≤ x",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "x < 0",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "-1 ≤ x < 0"
+  },
+  {
+   "n": "3.3.1",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Write down the equation of the asymptote of g.",
+   "context": "g(x) = 3·2^x - 12",
+   "memo": [
+    {
+     "m": 1,
+     "p": "y = -12",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y = -12"
+  },
+  {
+   "n": "3.3.2",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Determine the y-intercept of g.",
+   "context": "g(x) = 3·2^x - 12",
+   "memo": [
+    {
+     "m": 1,
+     "p": "g(0) = 3·2^0 - 12"
+    },
+    {
+     "m": 1,
+     "p": "-9",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-9"
+   },
+   "answer": "y = -9 (the point (0; -9))"
+  },
+  {
+   "n": "3.3.3",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Determine the x-intercept of g.",
+   "context": "g(x) = 3·2^x - 12",
+   "memo": [
+    {
+     "m": 1,
+     "p": "2^x = 4"
+    },
+    {
+     "m": 1,
+     "p": "x = 2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "2"
+    ]
+   },
+   "answer": "x = 2 (the point (2; 0))"
+  }
+ ],
+ "status": "unverified",
+ "marks": 41
+}

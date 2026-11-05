@@ -542,3 +542,22 @@ def mask(reply: str, forms: list[str]) -> str:
         lead = r"(?<![\d./^])" if f.startswith("-") else r"(?<![\d./^\u2212-])"
         reply = re.sub(lead + _loose(f) + r"(?!\d|[./]\d|\^)", "…", reply)
     return reply
+
+
+def forms_from_answer(answer: str, problem: str) -> list[str]:
+    """Leak-guard forms for a past-paper question whose memo answer is
+    known as text ("x = 3 or x = -2", "1/4", "3.5 units"). Only numbers:
+    expressions and words are left to the prompt rule."""
+    flat = _flat(answer)
+    forms = [f"{v}={n}" for v, n in re.findall(r"\b([a-z])=(-?\d+(?:\.\d+)?(?:/\d+)?)", flat)]
+    if not forms:
+        if re.search(r"[a-z]", re.sub(r"\b(units?|cm|mm|km|m|rand|r|degrees)\b", "", flat)):
+            return []  # an expression or words: the prompt rule covers it
+        nums = re.findall(r"(?<![\w.^/])-?\d+(?:\.\d+)?(?:/\d+)?(?![\w.^/])", flat)
+        if len(nums) == 1:
+            forms = [nums[0]]
+            if "/" in nums[0]:
+                a, b = nums[0].split("/")
+                forms.append(f"{float(a) / float(b):.4g}")
+    flat_problem = _flat(problem)
+    return [f for f in forms if not _contains(flat_problem, f)]

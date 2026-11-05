@@ -22,7 +22,7 @@ import redis.asyncio as aioredis
 from app.adapters import ledger, llm, router, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
-from app.orchestrator import safeguarding, safety, session
+from app.orchestrator import practice, safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
 from app.tutor import diagnostic, memory
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
@@ -36,6 +36,9 @@ HELP_MESSAGE = (
     "• Say \"quiz me\" (or similar) for a practice question\n"
     "• *SKIP* — drop the current practice question without answering it\n"
     "• *PROGRESS* — see how you're doing this term\n"
+    "• *PAPER* — a real past paper, marked against the memo (PAPER <topic> for one topic)\n"
+    "• *PREP* — practice for your next test (tell me when it is and what's in it)\n"
+    "• *SQUAD* — do a paper with friends and compare marks\n"
     "• *CHECK-IN* — the multiple-choice check-in on every topic in your grade\n"
     "• *REPORT* — your latest check-in summary (for you or a parent)\n"
     "• *ADD LEARNER* — add a sibling to this household\n"
@@ -195,6 +198,12 @@ async def handle_active(
         if sess.data.get("diagnostic"):
             reply += checkin_paused_note(sess)
         return reply, intent
+    # Past papers, test prep and study squads (app/orchestrator/practice.py).
+    # Before HELP/SKIP: inside a paper those words mean "help with this
+    # question" and "skip this question".
+    handled = await practice.handle(sess, text, tutor_reply)
+    if handled:
+        return handled
     if command == "HELP":
         return HELP_MESSAGE, "admin"
     if command == "RESET":

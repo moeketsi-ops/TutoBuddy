@@ -72,6 +72,8 @@ def _fresh_working() -> dict:
         # a "done" problem stays open one more turn (Immanuel, 870fc2b);
         # answered: the learner has reached the answer (leak guard off)
         "closing": False, "answered": False,
+        # memo answer of a past-paper question being worked through (HELP)
+        "reference": None,
     }
 
 

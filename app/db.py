@@ -562,6 +562,49 @@ CREATE TABLE IF NOT EXISTS diagnostic_results (
 );
 CREATE INDEX IF NOT EXISTS idx_diagnostic_results_learner ON diagnostic_results(learner_id, finished_at);
 
+-- Past papers marked against the memo (app/tutor/papers.py).
+CREATE TABLE IF NOT EXISTS paper_attempts (
+    id           bigserial PRIMARY KEY,
+    learner_id   int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    paper_id     varchar(60),
+    label        varchar(120) NOT NULL,
+    squad_code   varchar(8),
+    awarded      int NOT NULL,
+    out_of       int NOT NULL,
+    results      jsonb NOT NULL,
+    finished_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_paper_attempts_learner ON paper_attempts(learner_id, finished_at);
+
+-- Study squads: learners in one grade who do the same paper and see a
+-- shared scoreboard (nicknames and marks only).
+CREATE TABLE IF NOT EXISTS squads (
+    code             varchar(8) PRIMARY KEY,
+    grade            smallint NOT NULL,
+    host_learner_id  int REFERENCES learners(id) ON DELETE SET NULL,
+    paper_id         varchar(60),
+    created_at       timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS squad_members (
+    squad_code  varchar(8) NOT NULL REFERENCES squads(code) ON DELETE CASCADE,
+    learner_id  int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    joined_at   timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (squad_code, learner_id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_squad_members_learner ON squad_members(learner_id);
+
+-- Tests a learner told Katlego about (app/tutor/test_prep.py).
+CREATE TABLE IF NOT EXISTS learner_tests (
+    id          bigserial PRIMARY KEY,
+    learner_id  int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    due_on      date,
+    topics      jsonb NOT NULL DEFAULT '[]',
+    note        text,
+    source      varchar(12) NOT NULL DEFAULT 'learner',
+    created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_learner_tests_learner ON learner_tests(learner_id, created_at);
+
 CREATE TABLE IF NOT EXISTS pedagogy_decisions (
     id              bigserial PRIMARY KEY,
     learner_id      int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,

@@ -1,0 +1,705 @@
+{
+ "id": "g11-prov-2024-jun-p1",
+ "grade": 11,
+ "title": "Provincial Grade 11 June 2024 Exam, Paper 1 (algebra, patterns, graphs)",
+ "source": {
+  "body": "Provincial examination (province not named on the file)",
+  "year": 2024,
+  "task": "June examination",
+  "paper": 1,
+  "original_marks": 100,
+  "original_minutes": 120,
+  "file": "seed/past_papers/grade_11/2024/unk_jun-exam_p1_qp.json + _memo.json",
+  "source_site": "unknown"
+ },
+ "left_out": [
+  {
+   "n": "1.1.1-1.1.4",
+   "marks": 4,
+   "why": "the expression's root sign was lost in OCR"
+  },
+  {
+   "n": "1.6",
+   "marks": 5,
+   "why": "proof with symbols lost in OCR"
+  },
+  {
+   "n": "2.1.3, 2.3",
+   "marks": 7,
+   "why": "surd expressions garbled in OCR"
+  },
+  {
+   "n": "5.7",
+   "marks": 2,
+   "why": "inequality sign lost in OCR"
+  },
+  {
+   "n": "6.3-6.7",
+   "marks": 8,
+   "why": "h(x) garbled in OCR; 6.4 is a sketch"
+  }
+ ],
+ "questions": [
+  {
+   "n": "1.2.1",
+   "topic": "Equations and inequalities",
+   "marks": 2,
+   "text": "Given 2x^2 - 3x - k = 0. Solve for x if k = 5.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "factors (2x - 5)(x + 1) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = 5/2 or x = -1",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "5/2",
+     "-1"
+    ]
+   },
+   "answer": "x = 5/2 or x = -1"
+  },
+  {
+   "n": "1.2.2",
+   "topic": "Equations and inequalities",
+   "marks": 3,
+   "text": "Given 2x^2 - 3x - k = 0. Solve for x if k = 4, correct to TWO decimal places.",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "substitution into the quadratic formula"
+    },
+    {
+     "m": 2,
+     "p": "x = 2,35 or x = -0,85",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "2.35",
+     "-0.85"
+    ],
+    "tolerance": 0.006
+   },
+   "answer": "x = 2.35 or x = -0.85"
+  },
+  {
+   "n": "1.3.1",
+   "topic": "Equations and inequalities",
+   "marks": 5,
+   "text": "Solve for x: x - 4 = -√(x - 2)",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "square both sides: x^2 - 8x + 16 = x - 2"
+    },
+    {
+     "m": 1,
+     "p": "x^2 - 9x + 18 = 0"
+    },
+    {
+     "m": 1,
+     "p": "(x - 6)(x - 3) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = 3 or x = 6"
+    },
+    {
+     "m": 1,
+     "p": "reject x = 6, so x = 3",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "3"
+    ]
+   },
+   "answer": "x = 3 (x = 6 is rejected)"
+  },
+  {
+   "n": "1.3.2",
+   "topic": "Equations and inequalities",
+   "marks": 4,
+   "text": "Solve for x: x^2 + 4 > 3x + 2",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x^2 - 3x + 2 > 0"
+    },
+    {
+     "m": 1,
+     "p": "(x - 2)(x - 1) > 0"
+    },
+    {
+     "m": 2,
+     "p": "x < 1 or x > 2",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x < 1 or x > 2"
+  },
+  {
+   "n": "1.4",
+   "topic": "Equations and inequalities",
+   "marks": 6,
+   "text": "Solve simultaneously for x and y: 2x = y + 2 and 2x^2 = 2 - y^2",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "y = 2x - 2"
+    },
+    {
+     "m": 1,
+     "p": "substitution"
+    },
+    {
+     "m": 1,
+     "p": "3x^2 - 4x + 1 = 0"
+    },
+    {
+     "m": 1,
+     "p": "(3x - 1)(x - 1) = 0"
+    },
+    {
+     "m": 1,
+     "p": "x = 1/3 or x = 1",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y = -4/3 or y = 0",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x = 1/3, y = -4/3 or x = 1, y = 0"
+  },
+  {
+   "n": "1.5.1",
+   "topic": "Equations and inequalities",
+   "marks": 4,
+   "text": "For which values of p will -2x^2 + 4x - 3 = -p have two unequal real roots?",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "condition Δ > 0"
+    },
+    {
+     "m": 1,
+     "p": "standard form 2x^2 - 4x + (3 - p) = 0"
+    },
+    {
+     "m": 1,
+     "p": "Δ = -8 + 8p"
+    },
+    {
+     "m": 1,
+     "p": "p > 1",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "p > 1"
+  },
+  {
+   "n": "1.5.2",
+   "topic": "Equations and inequalities",
+   "marks": 2,
+   "text": "For which values of p will both roots of -2x^2 + 4x - 3 = -p be positive?",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "c > 0: 3 - p > 0"
+    },
+    {
+     "m": 1,
+     "p": "1 < p < 3",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "1 < p < 3"
+  },
+  {
+   "n": "2.1.1",
+   "topic": "Exponents and surds",
+   "marks": 3,
+   "text": "Simplify without a calculator: (2^-1 + 3^-1)^2",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "(1/2 + 1/3)^2"
+    },
+    {
+     "m": 1,
+     "p": "(5/6)^2"
+    },
+    {
+     "m": 1,
+     "p": "25/36",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "25/36"
+   },
+   "answer": "25/36"
+  },
+  {
+   "n": "2.1.2",
+   "topic": "Exponents and surds",
+   "marks": 3,
+   "text": "Simplify without a calculator: (2·4^(x + 2) - 4^(x - 3)) / (2^x · 2^x)",
+   "context": null,
+   "memo": [
+    {
+     "m": 2,
+     "p": "common factor 4^x(32 - 1/64)"
+    },
+    {
+     "m": 1,
+     "p": "2047/64",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "2047/64"
+   },
+   "answer": "2047/64 (= 31 63/64)"
+  },
+  {
+   "n": "2.2.1",
+   "topic": "Exponents and surds",
+   "marks": 3,
+   "text": "Solve for x without a calculator: 2x^(3/4) = 16",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "x^(3/4) = 8"
+    },
+    {
+     "m": 1,
+     "p": "x = 8^(4/3)"
+    },
+    {
+     "m": 1,
+     "p": "x = 16",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "16"
+    ]
+   },
+   "answer": "x = 16"
+  },
+  {
+   "n": "2.2.2",
+   "topic": "Exponents and surds",
+   "marks": 4,
+   "text": "Solve for x without a calculator: 5^(x + 1) + 5^x = 150",
+   "context": null,
+   "memo": [
+    {
+     "m": 1,
+     "p": "common factor 5^x(5 + 1)"
+    },
+    {
+     "m": 1,
+     "p": "5^x = 25"
+    },
+    {
+     "m": 1,
+     "p": "5^x = 5^2"
+    },
+    {
+     "m": 1,
+     "p": "x = 2",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "solutions",
+    "var": "x",
+    "values": [
+     "2"
+    ]
+   },
+   "answer": "x = 2"
+  },
+  {
+   "n": "3.1",
+   "topic": "Number patterns",
+   "marks": 1,
+   "text": "Write down the value of the 4th term.",
+   "context": "The number pattern 4; -3; -10; ...; -227",
+   "memo": [
+    {
+     "m": 1,
+     "p": "-17",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-17"
+   },
+   "answer": "-17"
+  },
+  {
+   "n": "3.2",
+   "topic": "Number patterns",
+   "marks": 1,
+   "text": "Determine the general term in the form Tn = an + b.",
+   "context": "The number pattern 4; -3; -10; ...; -227",
+   "memo": [
+    {
+     "m": 1,
+     "p": "Tn = -7n + 11",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "Tn = -7n + 11"
+  },
+  {
+   "n": "3.3",
+   "topic": "Number patterns",
+   "marks": 2,
+   "text": "Calculate the number of terms in the pattern.",
+   "context": "The number pattern 4; -3; -10; ...; -227",
+   "memo": [
+    {
+     "m": 1,
+     "p": "-227 = -7n + 11"
+    },
+    {
+     "m": 1,
+     "p": "n = 34",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "34"
+   },
+   "answer": "34 terms"
+  },
+  {
+   "n": "3.4",
+   "topic": "Number patterns",
+   "marks": 2,
+   "text": "This pattern is also the FIRST differences of a quadratic pattern Tn = an^2 + bn + c. Will the quadratic pattern have a maximum or a minimum value? Show why.",
+   "context": "The number pattern 4; -3; -10; ...; -227",
+   "memo": [
+    {
+     "m": 1,
+     "p": "2a = -7, so a = -7/2"
+    },
+    {
+     "m": 1,
+     "p": "a < 0: maximum",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "a maximum, because 2a = -7 so a < 0"
+  },
+  {
+   "n": "4.1",
+   "topic": "Number patterns",
+   "marks": 1,
+   "text": "Write down the next term of the pattern.",
+   "context": "The quadratic pattern 69; 0; -63; ...",
+   "memo": [
+    {
+     "m": 1,
+     "p": "-120",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-120"
+   },
+   "answer": "-120"
+  },
+  {
+   "n": "4.2",
+   "topic": "Number patterns",
+   "marks": 4,
+   "text": "Determine the nth term of the pattern.",
+   "context": "The quadratic pattern 69; 0; -63; ...",
+   "memo": [
+    {
+     "m": 1,
+     "p": "2a = 6, so a = 3"
+    },
+    {
+     "m": 1,
+     "p": "3a + b = -69, so b = -78"
+    },
+    {
+     "m": 1,
+     "p": "a + b + c = 69, so c = 144"
+    },
+    {
+     "m": 1,
+     "p": "Tn = 3n^2 - 78n + 144",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "expression",
+    "expr": "3*n**2 - 78*n + 144",
+    "form": "expanded",
+    "var": "n"
+   },
+   "answer": "Tn = 3n^2 - 78n + 144"
+  },
+  {
+   "n": "4.3",
+   "topic": "Number patterns",
+   "marks": 4,
+   "text": "Determine the value of the SMALLEST term in the pattern.",
+   "context": "The quadratic pattern 69; 0; -63; ... with Tn = 3n^2 - 78n + 144",
+   "memo": [
+    {
+     "m": 1,
+     "p": "turning point at n = 78/6"
+    },
+    {
+     "m": 1,
+     "p": "n = 13"
+    },
+    {
+     "m": 1,
+     "p": "substitute into Tn"
+    },
+    {
+     "m": 1,
+     "p": "-363",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "-363"
+   },
+   "answer": "-363"
+  },
+  {
+   "n": "5.1",
+   "topic": "Functions",
+   "marks": 3,
+   "text": "Determine the equation of g.",
+   "context": "f(x) = ax^2 + bx + c has x-intercepts A(-4; 0) and C(2; 0) and turning point P. g(x) = mx + k is a straight line through A(-4; 0) and B(0; 8); B is also on f.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "gradient 8/4 = 2"
+    },
+    {
+     "m": 1,
+     "p": "substitute a point"
+    },
+    {
+     "m": 1,
+     "p": "g(x) = 2x + 8",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "g(x) = 2x + 8"
+  },
+  {
+   "n": "5.2",
+   "topic": "Functions",
+   "marks": 5,
+   "text": "Calculate the values of a, b and c.",
+   "context": "f(x) = ax^2 + bx + c has x-intercepts A(-4; 0) and C(2; 0) and passes through B(0; 8).",
+   "memo": [
+    {
+     "m": 1,
+     "p": "f(x) = a(x + 4)(x - 2)"
+    },
+    {
+     "m": 1,
+     "p": "substitute B(0; 8): 8 = -8a"
+    },
+    {
+     "m": 1,
+     "p": "a = -1",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "b = -2",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "c = 8",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "a = -1, b = -2, c = 8"
+  },
+  {
+   "n": "5.3",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Show that the coordinates of the turning point P are (-1; 9).",
+   "context": "f(x) = -x^2 - 2x + 8",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x = -b/(2a) = -1"
+    },
+    {
+     "m": 1,
+     "p": "f(-1) = -1 + 2 + 8 = 9"
+    }
+   ],
+   "check": null,
+   "answer": "x = -1 and f(-1) = 9"
+  },
+  {
+   "n": "5.4",
+   "topic": "Functions",
+   "marks": 1,
+   "text": "Determine the range of f.",
+   "context": "f(x) = -x^2 - 2x + 8, turning point (-1; 9)",
+   "memo": [
+    {
+     "m": 1,
+     "p": "y ≤ 9",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y ≤ 9"
+  },
+  {
+   "n": "5.5",
+   "topic": "Functions",
+   "marks": 3,
+   "text": "Determine the equation of the line p perpendicular to g through C(2; 0).",
+   "context": "g(x) = 2x + 8",
+   "memo": [
+    {
+     "m": 1,
+     "p": "gradient -1/2"
+    },
+    {
+     "m": 1,
+     "p": "substitute C(2; 0)"
+    },
+    {
+     "m": 1,
+     "p": "y = -x/2 + 1",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "y = -x/2 + 1"
+  },
+  {
+   "n": "5.6",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Q is on g such that PQ is parallel to the y-axis. Calculate the length of PQ.",
+   "context": "g(x) = 2x + 8 and P(-1; 9) is the turning point of f.",
+   "memo": [
+    {
+     "m": 1,
+     "p": "Q(-1; 6)"
+    },
+    {
+     "m": 1,
+     "p": "PQ = 3 units",
+     "a": true
+    }
+   ],
+   "check": {
+    "type": "value",
+    "value": "3"
+   },
+   "answer": "3 units"
+  },
+  {
+   "n": "6.1",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Write down the equations of the asymptotes of k.",
+   "context": "k(x) = -4/(x + 3) + 1",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x = -3",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y = 1",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "x = -3 and y = 1"
+  },
+  {
+   "n": "6.2",
+   "topic": "Functions",
+   "marks": 2,
+   "text": "Determine the x- and y-intercepts of k.",
+   "context": "k(x) = -4/(x + 3) + 1",
+   "memo": [
+    {
+     "m": 1,
+     "p": "x-intercept x = 1",
+     "a": true
+    },
+    {
+     "m": 1,
+     "p": "y-intercept y = -1/3",
+     "a": true
+    }
+   ],
+   "check": null,
+   "answer": "(1; 0) and (0; -1/3)"
+  }
+ ],
+ "status": "unverified",
+ "marks": 74
+}

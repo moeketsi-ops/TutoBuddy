@@ -36,7 +36,7 @@ last_turn: contextvars.ContextVar[dict | None] = contextvars.ContextVar("last_tu
 
 
 async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
-                      name: str | None = None) -> str:
+                      name: str | None = None, *, reference: str | None = None) -> str:
     """One tutoring turn with memory, mastery and pedagogy (spec v0.1,
     steps 1-3). Still exactly ONE LLM call per turn.
 
@@ -49,6 +49,10 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
          credit/debit the strategy that prompted this message
       6. record the turn; consolidate the window every 5 turns / on a
          topic change (code-built digest, persisted)
+
+    `reference`: the memo answer when the problem is a past-paper question
+    the learner asked to work through (HELP in a paper). It guides the
+    model and the leak guard, and stays with the working problem.
 
     `grade` is the active learner's profile grade. Only that grade's CAPS
     extracts reach the model (rag.grade_scoped_context); a question about
@@ -173,6 +177,12 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                                   "the working problem. Praise what they did, specifically.")
     else:
         decision["code_check"] = answer_check.prompt_line(check)
+    ref = reference if not continuing else w.get("reference")
+    if ref:
+        decision["code_check"] = "\n".join(filter(None, [
+            decision.get("code_check"),
+            f"MEMO ANSWER for this past-paper question (guide towards it; never state it before the "
+            f"learner reaches it): {ref}"]))
     decision["mid_chat"] = mem["session_turns"] > 0
     if (decision["strategy"] == "MULTIPLE_METHODS" or decision.get("fallback") == "MULTIPLE_METHODS"
             or decision.get("switch") in ("strategy", "worked_example") or new_problem):
@@ -199,7 +209,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # reply that states it is written again once, then masked.
     forms = [] if (decision.get("reveal") or (check or {}).get("verdict") == "correct"
                    or (continuing and w.get("answered"))) \
-        else answer_check.answer_forms(w["problem"] if continuing else question)
+        else (answer_check.answer_forms(w["problem"] if continuing else question)
+              or (answer_check.forms_from_answer(ref, question) if ref else []))
     reply, body, parsed_as, guard = await _reply_with_guard(call, forms, mid_chat=decision["mid_chat"])
     mode = llm.last_output_mode.get()
     if mode == "json" and parsed_as != "json":
@@ -301,6 +312,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         consolidate_now = memory.record_turn(mem, question, reply, mem_state, topic, used,
                                              new_problem=new_problem)
         w = mem["working"]
+        if new_problem and w["problem"]:
+            w["reference"] = reference
         if w["problem"] and ev in ("attempt_correct", "explained_back"):
             w["answered"] = True  # the learner has reached it: restating it is fine now
         if w["problem"]:
