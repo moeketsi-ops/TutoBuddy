@@ -177,3 +177,19 @@ def test_answered_resets_for_the_next_problem():
     assert mem["working"]["problem"] is None and not mem["working"]["answered"]
     _t(mem, SQ, "none", new=True)
     assert mem["working"]["problem"] == SQ and not mem["working"]["answered"]
+
+
+def test_opening_message_label_does_not_count_as_an_answer_request():
+    """GPT-6 Luna labelled "Solve 5x = 35" asked_for_answer; counting it let
+    the first "just give me the answer" unlock the reveal (c03, 5 Nov)."""
+    mem = memory._new(1)
+    _t(mem, "Solve 5x = 35", "asked_for_answer", new=True)
+    assert mem["working"]["asked_answer"] == 0 and mem["working"]["no_progress"] == 0
+    _t(mem, "just give me the answer", "asked_for_answer")
+    assert mem["working"]["asked_answer"] == 1
+
+
+def test_an_explicit_request_in_the_opener_still_counts():
+    mem = memory._new(1)
+    _t(mem, "just give me the answer to 5x = 35", "asked_for_answer", new=True)
+    assert mem["working"]["asked_answer"] == 1

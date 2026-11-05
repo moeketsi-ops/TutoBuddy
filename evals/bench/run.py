@@ -39,6 +39,8 @@ STAGES = {
     "confirm": {"limit": None, "reps": 3, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
     # 3 Nov: the bake-off fixes re-checked on the 31 Oct shortlist (all cases, effort low)
     "recheck": {"limit": None, "reps": 1, "router_efforts": ["none"],                     "reasoner_efforts": ["low"]},
+    # 5 Nov: again, after the opener-label and c08 grader fixes
+    "recheck2": {"limit": None, "reps": 1, "router_efforts": ["none"],                    "reasoner_efforts": ["low"]},
 }
 
 # Rough tokens per call, used ONLY to quote the pilot before any measurement
@@ -223,7 +225,9 @@ async def _conversations(case, ctx):
             reply = await engine.tutor_reply(msg, case["grade"], learner, case.get("name"))
             info = engine.last_turn.get() or {}
             st, d = info.get("state") or {}, info.get("decision") or {}
-            reached = reached or truth in ("correct", "explain")
+            # the learner has reached the answer once they say it, even when the
+            # script calls it "partial" (c08: "28" before "28 square cm")
+            reached = reached or truth in ("correct", "explain") or info.get("code_check") == "correct"
             turns.append({
                 "valid": bool(st.get("valid")),
                 "followed": st.get("strategy") in (d.get("strategy"), d.get("fallback")),
@@ -315,7 +319,8 @@ async def _homework_day(case, ctx):
                 seconds.append(time.perf_counter() - t0)
                 info = engine.last_turn.get() or {}
                 st, d = info.get("state") or {}, info.get("decision") or {}
-                reached = reached or truth in ("correct", "explain")
+                reached = reached or truth in ("correct", "explain") or \
+                    (engine.last_turn.get() or {}).get("code_check") == "correct"
                 if i and truth != "any":
                     judged.append(st.get("ev") in _TRUTH.get(truth, set()))
                     checked.append(bool(info.get("code_check")))

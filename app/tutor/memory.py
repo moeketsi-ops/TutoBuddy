@@ -209,23 +209,33 @@ def record_turn(mem: dict, learner_text: str, reply: str, state: dict | None,
                  level=None, no_progress=0, switches=0, bridge=False, last_switch_id=None,
                  since_switch=0, closing=False, answered=False)
 
+    # The opening message is the problem itself, not an attempt or an answer
+    # request, whatever the model labelled it: models label "Solve 5x = 35"
+    # asked_for_answer, and counting that unlocked the reveal one ask early
+    # (GPT-6 Luna, c03, 5 Nov recheck). Only an explicit "just tell me" counts.
+    if new_problem:
+        ev_n = "asked_for_answer" if asks_for_answer(learner_text) else "none"
+    else:
+        ev_n = ev
+
     # No-progress count for the 3-turn switch rule: a turn with a step
     # forward (or a correct answer) resets it; a wrong / partial-without-
     # progress attempt, an answer request or "I don't get it" adds one.
-    if progress in ("step_forward", "solved") or ev in ("attempt_correct", "explained_back"):
+    if progress in ("step_forward", "solved") or ev_n in ("attempt_correct", "explained_back"):
         w["no_progress"] = 0
-    elif ev in ("attempt_wrong", "attempt_partial", "asked_for_answer") or is_confused(learner_text):
+    elif ev_n in ("attempt_wrong", "attempt_partial", "asked_for_answer") or \
+            (is_confused(learner_text) and not new_problem):
         w["no_progress"] += 1
 
     # `ev` judges the learner's message, i.e. the strategy of the PREVIOUS
     # reply; `strategy` is what THIS reply used.
-    if ev in ("attempt_wrong", "attempt_partial", "asked_for_answer"):
+    if ev_n in ("attempt_wrong", "attempt_partial", "asked_for_answer"):
         w["fails_in_row"] += 1
-        if ev == "asked_for_answer":
+        if ev_n == "asked_for_answer":
             w["asked_answer"] += 1
         else:
             w["wrong_on_problem"] += 1
-    elif ev in ("attempt_correct", "explained_back"):
+    elif ev_n in ("attempt_correct", "explained_back"):
         w["fails_in_row"] = 0
     if state and state.get("misc"):
         w["misc_recent"] = (w["misc_recent"] + [state["misc"]])[-WINDOW:]
