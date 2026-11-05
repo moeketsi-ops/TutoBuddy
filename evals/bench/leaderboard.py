@@ -304,7 +304,7 @@ def main() -> None:
         w = csv.writer(f)
         w.writerow(["suite", "model", "effort", *keys, "harness_errors"])
         for (suite, model, effort), m in sorted(by.items()):
-            err = errors.get((suite, f"{model.replace('/', '__')}@{effort}"), 0)
+            err = errors.get((suite, f"{model.replace(':', '_').replace('/', '__')}@{effort}"), 0)
             w.writerow([suite, model, effort, *[m.get(k) for k in keys], err])
             cells = [_fmt(m.get(k), "s" if k.endswith("_s") or k == "seconds_per_reply" else "usd" if "cost" in k or k.endswith("_usd") else "raw" if k in ("n", "reasoning_tokens", "tokens_per_turn", "turns_per_problem",
                                      "switches_per_problem", "calls_per_day", "wa_messages") else "pct")

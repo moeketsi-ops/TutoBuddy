@@ -95,7 +95,9 @@ def config() -> dict:
 
 
 def variant_name(model: dict, effort: str) -> str:
-    return f"{model['slug'].replace('/', '__')}@{effort or 'default'}"
+    """Result folder name. No ':' (Windows can't check out such paths):
+    groq:openai/gpt-oss-120b -> groq_openai__gpt-oss-120b."""
+    return f"{model['slug'].replace(':', '_').replace('/', '__')}@{effort or 'default'}"
 
 
 def is_paid(model: dict) -> bool:
