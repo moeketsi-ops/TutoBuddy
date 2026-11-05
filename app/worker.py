@@ -15,6 +15,7 @@ import asyncio
 import json
 import logging
 import os
+import time
 
 import httpx
 import redis.asyncio as aioredis
@@ -54,6 +55,20 @@ SMALLTALK_REPLY = (
     "Send me a question — like _how do I use the quadratic formula?_ — or a "
     "🎤 voice note or 📸 photo of the problem."
 )
+
+# Mid-conversation "thanks, got it": the full greeting reads as if Katlego
+# forgot the chat (week run, 5 Nov). A short close keeps the thread.
+SMALLTALK_MID_CHAT = "Pleasure! 🙂 Send me the next one whenever you're ready."
+
+
+
+def smalltalk_reply(mem: dict, now: float | None = None) -> str:
+    """The greeting on a fresh visit; a short close when the learner is
+    mid-session (last turn within the idle window)."""
+    turns = mem.get("turns") or []
+    recent = bool(turns) and (now or time.time()) - turns[-1].get("at", 0) < memory.IDLE_SECONDS
+    return SMALLTALK_MID_CHAT if recent else SMALLTALK_REPLY
+
 
 ADD_LEARNER_NO_SIBLINGS = (
     "It's just you on this account so far! Send *ADD LEARNER* any time to "
@@ -294,7 +309,7 @@ async def handle_active(
 
     intent = await router.classify_intent(text)
     if intent == "smalltalk":
-        return SMALLTALK_REPLY, intent
+        return smalltalk_reply(mem), intent
     if intent == "quiz":
         reply, pending = await practice_reply(sess.active_learner_id, sess.grade)
         if pending:

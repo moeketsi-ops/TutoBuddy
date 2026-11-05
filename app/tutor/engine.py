@@ -259,10 +259,14 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # credit that reply's strategy, hint level and topic, not this one's.
     prev_strategy, prev_hint, prev_topic = w["strategy"], w.get("last_hint", 0), w["topic_id"]
     ev_topic_id = prev_topic if (continuing and prev_topic) else (topic["id"] if topic else None)
+    # Saying an answer already reached again ("thanks, area = 24 cm²") is not new
+    # evidence: counting each restatement took mastery from 20 to 91 on day 1
+    # of the AI-learner week (5 Nov) and inflated strategy success.
+    restated = bool(continuing and w.get("answered") and ev in ("attempt_correct", "explained_back"))
     async with pool.acquire() as conn:
         try:
             async with conn.transaction():
-                if ev_topic_id and ev != "none":
+                if ev_topic_id and ev != "none" and not restated:
                     lo_id = next((lo["id"] for lo in los
                                   if lo["code"] == state.get("lo") and ev_topic_id == (topic or {}).get("id")),
                                  None)
@@ -271,7 +275,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                         lo_id=lo_id, hint_level=prev_hint, strategy=prev_strategy or used,
                         misconception=state.get("misc"), cpa_level=level_shown,
                         strand=tmu.strand_for(prev_strategy or used, ev, level_shown))
-                ok = pedagogy.outcome(ev)
+                ok = None if restated else pedagogy.outcome(ev)
                 if prev_topic and prev_strategy and ok is not None:
                     await pedagogy.record_outcome(conn, learner_id, prev_topic, prev_strategy, ok)
                 moved = progress in ("step_forward", "solved") or ok is True

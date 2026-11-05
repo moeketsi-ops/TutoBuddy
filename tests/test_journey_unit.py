@@ -33,3 +33,12 @@ def test_problems_land_on_the_days_topic(day, topic, prob):
 
 def test_every_problem_type_has_a_misconception():
     assert {p["type"] for _, _, p in PROBLEMS} <= set(WEEK["misconceptions"])
+
+
+def test_ai_learner_prose_answers_are_read_by_their_final_number():
+    from evals.journey.week import _verdict
+    p = "How do I find the perimeter of a rectangle that is 8 cm by 3 cm?"
+    assert _verdict(p, "i add 8+3=11 then again for the other two sides so the perimeter is 22 cm", ["22"]) == "correct"
+    assert _verdict(p, "so 8 times 3 is 24 cm", ["22"]) == "wrong"
+    assert _verdict("Convert 3 m² to cm²", "so it's 30 000 cm²", ["30000", "30 000"]) == "correct"
+    assert _verdict(p, "i dont get it", ["22"]) is None

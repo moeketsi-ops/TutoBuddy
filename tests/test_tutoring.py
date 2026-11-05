@@ -75,6 +75,13 @@ def test_smalltalk_does_not_trigger_the_tutor_engine(onboarded_chat):
     assert "question" in reply.lower()
 
 
+def test_thanks_mid_chat_gets_a_short_close_not_the_greeting():
+    from app.worker import SMALLTALK_MID_CHAT, SMALLTALK_REPLY, smalltalk_reply
+    assert smalltalk_reply({"turns": []}) == SMALLTALK_REPLY
+    assert smalltalk_reply({"turns": [{"at": 1000.0}]}, now=1000.0 + 60) == SMALLTALK_MID_CHAT
+    assert smalltalk_reply({"turns": [{"at": 1000.0}]}, now=1000.0 + 3 * 3600) == SMALLTALK_REPLY
+
+
 def test_help_command(onboarded_chat):
     onboarded_chat.send_text("HELP")
     reply = onboarded_chat.wait_for_reply()

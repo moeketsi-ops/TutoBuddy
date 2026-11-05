@@ -35,6 +35,7 @@ import asyncio
 import csv
 import datetime
 import json
+import re
 from pathlib import Path
 
 from evals.bench import graders
@@ -43,6 +44,47 @@ from evals.journey.full import answer_checkin
 
 HERE = Path(__file__).parent
 MAX_TURNS = 8
+
+
+def _final_number(msg: str) -> float | None:
+    """The last number in a learner's message, units stripped: "so 8+3=11,
+    doubled is 22 cm" -> 22. Code's answer_check leaves prose to the model, so
+    the week falls back to this to tell whether the AI learner got there."""
+    from app.tutor import answer_check
+
+    t = answer_check._UNITS.sub(" ", answer_check._normalise(msg))
+    t = re.sub(r"\^\s*\d+", " ", t)
+    nums = re.findall(r"-?\d+(?:\.\d+)?", t)
+    return float(nums[-1]) if nums else None
+
+
+def _verdict(problem: str, msg: str, answers: list[str]) -> str | None:
+    from app.tutor import answer_check
+
+    v = (answer_check.check(problem, msg) or {}).get("verdict")
+    if v is None:
+        n = _final_number(msg)
+        if n is not None:
+            right = any(abs(n - float(a.replace(" ", ""))) < 1e-6 for a in answers)
+            v = "correct" if right else "wrong"
+    return v
+
+
+async def sim_checkin(phone: Phone, r: str, sim, grade: int) -> str:
+    """The AI learner answers the check-in itself (baseline and end-line alike)."""
+    from evals.journey.full import _bank
+
+    bank = _bank(grade)
+    while "Check-in done" not in r:
+        head = next((l for l in r.splitlines() if l.startswith("*Check-in")), None)
+        if head is None:
+            break
+        topic = head.split("·", 1)[1].strip(" *").replace(" (one more on this)", "")
+        kind = "easier" if "one more on this" in head else "core"
+        it = bank[(topic, kind)]
+        q = it["stem"] + "\n" + "\n".join(f"{l}) {o}" for l, o in zip("ABCD", it["options"]))
+        r = phone.say(await sim.answer_mcq(q))
+    return r
 
 
 def _first_correct(turns_truth: list[str]) -> bool:
@@ -67,8 +109,6 @@ async def run_problem_scripted(phone: Phone, prob: dict) -> dict:
 
 
 async def run_problem_ai(phone: Phone, prob: dict, sim) -> dict:
-    from app.tutor import answer_check
-
     problem = prob["turns"][0]
     chat = [("learner", problem)]
     errors_before = phone.errors
@@ -78,7 +118,7 @@ async def run_problem_ai(phone: Phone, prob: dict, sim) -> dict:
     for _ in range(MAX_TURNS):
         msg = await sim.reply(prob["type"], chat)
         chat.append(("learner", msg))
-        verdict = (answer_check.check(problem, msg) or {}).get("verdict")
+        verdict = _verdict(problem, msg, prob["answers"])
         if verdict in ("correct", "wrong", "step_forward"):
             attempts += 1
             if first_try is None:
@@ -119,7 +159,10 @@ async def run(mode: str, learner_model: str) -> Path:
     r = phone.say(str(spec["grade"]))
     weak = set(spec["checkin"]["baseline_wrong"])
     pick = lambda it: (next(l for l in "ABCD" if l != it["answer"]) if it["topic"] in weak else it["answer"])  # noqa: E731
-    r, _ = answer_checkin(phone, r, spec["grade"], pick)
+    if sim:
+        r = await sim_checkin(phone, r, sim, spec["grade"])
+    else:
+        r, _ = answer_checkin(phone, r, spec["grade"], pick)
     async with pool.acquire() as conn:
         lid = await learner_id(conn, phone, spec["name"])
         day0 = await snapshot(conn, lid, topics)
@@ -148,17 +191,7 @@ async def run(mode: str, learner_model: str) -> Path:
         await time_travel(conn, lid, 1)
     r = phone.say("CHECK-IN")
     if sim:
-        from evals.journey.full import _bank
-        bank = _bank(spec["grade"])
-        while "Check-in done" not in r:
-            head = next((l for l in r.splitlines() if l.startswith("*Check-in")), None)
-            if head is None:
-                break
-            topic = head.split("·", 1)[1].strip(" *").replace(" (one more on this)", "")
-            kind = "easier" if "one more on this" in head else "core"
-            it = bank[(topic, kind)]
-            q = it["stem"] + "\n" + "\n".join(f"{l}) {o}" for l, o in zip("ABCD", it["options"]))
-            r = phone.say(await sim.answer_mcq(q))
+        r = await sim_checkin(phone, r, sim, spec["grade"])
     else:
         weak_end = set(spec["checkin"]["endline_wrong"])
         r, _ = answer_checkin(phone, r, spec["grade"],
