@@ -1,0 +1,466 @@
+{
+ "version": "2026-11-05",
+ "reviewed": false,
+ "items": [
+  {
+   "id": "G12-patternssequencesa-core",
+   "grade": 12,
+   "topic": "Patterns, sequences and series",
+   "kind": "core",
+   "stem": "What is the sum to infinity of 16 + 8 + 4 + ...?",
+   "options": [
+    "32",
+    "28",
+    "64",
+    "16"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "16/(1 - Rational(1, 2))"
+  },
+  {
+   "id": "G12-patternssequencesa-easier",
+   "grade": 12,
+   "topic": "Patterns, sequences and series",
+   "kind": "easier",
+   "stem": "In the arithmetic sequence 3; 7; 11; ..., what is T20?",
+   "options": [
+    "79",
+    "83",
+    "80",
+    "76"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "3 + 19*4"
+  },
+  {
+   "id": "G12-functionsandinvers-core",
+   "grade": 12,
+   "topic": "Functions and inverse functions",
+   "kind": "core",
+   "stem": "What is the inverse of f(x) = 2x + 4?",
+   "options": [
+    "f⁻¹(x) = (x - 4)/2",
+    "f⁻¹(x) = 2x - 4",
+    "f⁻¹(x) = x/2 + 4",
+    "f⁻¹(x) = 1/(2x + 4)"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "ORDER_OPS",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-functionsandinvers-easier",
+   "grade": 12,
+   "topic": "Functions and inverse functions",
+   "kind": "easier",
+   "stem": "The graph of an inverse function is the reflection of the graph in the line ...",
+   "options": [
+    "y = x",
+    "y = 0",
+    "x = 0",
+    "y = -x"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G12-exponentialandloga-core",
+   "grade": 12,
+   "topic": "Exponential and logarithmic functions",
+   "kind": "core",
+   "stem": "Solve log2(x) = 5",
+   "options": [
+    "x = 32",
+    "x = 10",
+    "x = 25",
+    "x = 2.5"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "EXP_AS_MULT",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "2**5"
+  },
+  {
+   "id": "G12-exponentialandloga-easier",
+   "grade": 12,
+   "topic": "Exponential and logarithmic functions",
+   "kind": "easier",
+   "stem": "What is the inverse of y = 3^x?",
+   "options": [
+    "y = log3(x)",
+    "y = x^3",
+    "y = 3^(-x)",
+    "y = 1/3^x"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-financegrowthandde-core",
+   "grade": 12,
+   "topic": "Finance, growth and decay",
+   "kind": "core",
+   "stem": "What is the effective annual rate of 12% per year compounded monthly, to two decimals?",
+   "options": [
+    "12.68%",
+    "12.00%",
+    "1.00%",
+    "13.00%"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(1268, 100)"
+  },
+  {
+   "id": "G12-financegrowthandde-easier",
+   "grade": 12,
+   "topic": "Finance, growth and decay",
+   "kind": "easier",
+   "stem": "Which formula gives the future value of equal monthly payments into savings?",
+   "options": [
+    "F = x[(1 + i)^n - 1]/i",
+    "A = P(1 + i)^n",
+    "A = P(1 + in)",
+    "P = x[1 - (1 + i)^(-n)]/i"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-trigonometrycompou-core",
+   "grade": 12,
+   "topic": "Trigonometry - compound angles",
+   "kind": "core",
+   "stem": "cos(A - B) = ?",
+   "options": [
+    "cos A cos B + sin A sin B",
+    "cos A cos B - sin A sin B",
+    "sin A cos B - cos A sin B",
+    "cos A - cos B"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "PARTIAL_DISTRIB"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-trigonometrycompou-easier",
+   "grade": 12,
+   "topic": "Trigonometry - compound angles",
+   "kind": "easier",
+   "stem": "sin 2x = ?",
+   "options": [
+    "2 sin x cos x",
+    "2 sin x",
+    "sin^2 x - cos^2 x",
+    "sin x + sin x"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "PARTIAL_DISTRIB",
+    "C": "MISREAD",
+    "D": "PARTIAL_DISTRIB"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-trigonometry2dand3-core",
+   "grade": 12,
+   "topic": "Trigonometry 2D and 3D",
+   "kind": "core",
+   "stem": "From the top of a 20 m building, the angle of depression to a car is 30°. How far is the car from the foot of the building?",
+   "options": [
+    "34.6 m",
+    "11.5 m",
+    "40 m",
+    "17.3 m"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(346, 10)"
+  },
+  {
+   "id": "G12-trigonometry2dand3-easier",
+   "grade": 12,
+   "topic": "Trigonometry 2D and 3D",
+   "kind": "easier",
+   "stem": "The angle of elevation from A to B equals the angle of depression from B to A because they are ...",
+   "options": [
+    "Alternate angles",
+    "Co-interior angles",
+    "Vertically opposite angles",
+    "Supplementary angles"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G12-polynomialfunction-core",
+   "grade": 12,
+   "topic": "Polynomial functions",
+   "kind": "core",
+   "stem": "f(x) = x^3 - 2x^2 - 5x + 6. Is (x - 1) a factor of f(x)?",
+   "options": [
+    "Yes, because f(1) = 0",
+    "No, because f(-1) ≠ 0",
+    "Yes, because f(-1) = 0",
+    "No, because f(1) = 6"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-polynomialfunction-easier",
+   "grade": 12,
+   "topic": "Polynomial functions",
+   "kind": "easier",
+   "stem": "What is the remainder when x^2 + 3x - 4 is divided by (x - 2)?",
+   "options": [
+    "6",
+    "0",
+    "-6",
+    "2"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": "2**2 + 3*2 - 4"
+  },
+  {
+   "id": "G12-differentialcalcul-core",
+   "grade": 12,
+   "topic": "Differential calculus",
+   "kind": "core",
+   "stem": "If f(x) = x^3 - 6x, what is f'(x)?",
+   "options": [
+    "3x^2 - 6",
+    "3x - 6",
+    "3x^2 - 6x",
+    "x^2 - 6"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "EXP_AS_MULT",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-differentialcalcul-easier",
+   "grade": 12,
+   "topic": "Differential calculus",
+   "kind": "easier",
+   "stem": "What is the derivative of 5x^2?",
+   "options": [
+    "10x",
+    "5x",
+    "10x^2",
+    "2x"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-analyticalgeometry-core",
+   "grade": 12,
+   "topic": "Analytical Geometry",
+   "kind": "core",
+   "stem": "What are the centre and radius of (x - 2)^2 + (y + 3)^2 = 16?",
+   "options": [
+    "(2; -3) and r = 4",
+    "(-2; 3) and r = 4",
+    "(2; -3) and r = 16",
+    "(2; 3) and r = 4"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "SIGN_ERR"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-analyticalgeometry-easier",
+   "grade": 12,
+   "topic": "Analytical Geometry",
+   "kind": "easier",
+   "stem": "A tangent to a circle is ... to the radius at the point of contact.",
+   "options": [
+    "Perpendicular",
+    "Parallel",
+    "Equal",
+    "Half"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G12-euclideangeometry-core",
+   "grade": 12,
+   "topic": "Euclidean Geometry",
+   "kind": "core",
+   "stem": "In triangle ABC, DE ∥ BC with D on AB and E on AC. AD = 4, DB = 6 and AE = 6. What is EC?",
+   "options": [
+    "9",
+    "4",
+    "6",
+    "10"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "6*6/4"
+  },
+  {
+   "id": "G12-euclideangeometry-easier",
+   "grade": 12,
+   "topic": "Euclidean Geometry",
+   "kind": "easier",
+   "stem": "Two triangles are similar when their angles are equal and their sides are ...",
+   "options": [
+    "In proportion",
+    "Equal",
+    "Parallel",
+    "Perpendicular"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G12-statisticsregressi-core",
+   "grade": 12,
+   "topic": "Statistics (regression and correlation)",
+   "kind": "core",
+   "stem": "A correlation coefficient of r = -0.92 shows ...",
+   "options": [
+    "A strong negative correlation",
+    "A weak negative correlation",
+    "A strong positive correlation",
+    "No correlation"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G12-statisticsregressi-easier",
+   "grade": 12,
+   "topic": "Statistics (regression and correlation)",
+   "kind": "easier",
+   "stem": "In the least squares line y = a + bx, what is b?",
+   "options": [
+    "The gradient",
+    "The y-intercept",
+    "The correlation coefficient",
+    "The mean"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G12-countingandprobabi-core",
+   "grade": 12,
+   "topic": "Counting and Probability",
+   "kind": "core",
+   "stem": "How many different arrangements of the letters of the word MATHS are there?",
+   "options": [
+    "120",
+    "25",
+    "5",
+    "60"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "factorial(5)"
+  },
+  {
+   "id": "G12-countingandprobabi-easier",
+   "grade": 12,
+   "topic": "Counting and Probability",
+   "kind": "easier",
+   "stem": "How many outfits can you make from 3 shirts and 4 pairs of pants?",
+   "options": [
+    "12",
+    "7",
+    "34",
+    "81"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "3*4"
+  }
+ ]
+}

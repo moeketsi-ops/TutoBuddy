@@ -1,0 +1,478 @@
+{
+ "version": "2026-11-05",
+ "reviewed": false,
+ "items": [
+  {
+   "id": "G11-exponentsandsurds-core",
+   "grade": 11,
+   "topic": "Exponents and surds",
+   "kind": "core",
+   "stem": "Simplify √50 - √8",
+   "options": [
+    "3√2",
+    "√42",
+    "7√2",
+    "3"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "UNLIKE_TERMS",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": "sqrt(50) - sqrt(8)"
+  },
+  {
+   "id": "G11-exponentsandsurds-easier",
+   "grade": 11,
+   "topic": "Exponents and surds",
+   "kind": "easier",
+   "stem": "Solve 2^x = 16",
+   "options": [
+    "x = 4",
+    "x = 8",
+    "x = 2",
+    "x = 32"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "EXP_AS_MULT",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "4"
+  },
+  {
+   "id": "G11-equationsandinequa-core",
+   "grade": 11,
+   "topic": "Equations and inequalities",
+   "kind": "core",
+   "stem": "Solve x^2 - 4x - 1 = 0 with the quadratic formula.",
+   "options": [
+    "x = 2 ± √5",
+    "x = -2 ± √5",
+    "x = 4 ± √5",
+    "x = 2 ± √3"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-equationsandinequa-easier",
+   "grade": 11,
+   "topic": "Equations and inequalities",
+   "kind": "easier",
+   "stem": "Solve x^2 - 9 < 0",
+   "options": [
+    "-3 < x < 3",
+    "x < 3",
+    "x < -3 or x > 3",
+    "x < 9"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-numberpatterns-core",
+   "grade": 11,
+   "topic": "Number patterns",
+   "kind": "core",
+   "stem": "What is the general term of 2; 5; 10; 17; ...?",
+   "options": [
+    "Tn = n^2 + 1",
+    "Tn = 3n - 1",
+    "Tn = 2n^2",
+    "Tn = n^2 + 2"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-numberpatterns-easier",
+   "grade": 11,
+   "topic": "Number patterns",
+   "kind": "easier",
+   "stem": "The first differences of a pattern are 3; 5; 7; 9. What is the second difference?",
+   "options": [
+    "2",
+    "3",
+    "0",
+    "9"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "2"
+  },
+  {
+   "id": "G11-analyticalgeometry-core",
+   "grade": 11,
+   "topic": "Analytical Geometry",
+   "kind": "core",
+   "stem": "What is the gradient of a line perpendicular to y = 2x + 1?",
+   "options": [
+    "-1/2",
+    "2",
+    "-2",
+    "1/2"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "SIGN_ERR"
+   },
+   "check": "Rational(-1, 2)"
+  },
+  {
+   "id": "G11-analyticalgeometry-easier",
+   "grade": 11,
+   "topic": "Analytical Geometry",
+   "kind": "easier",
+   "stem": "A line has gradient 2 and passes through (0; 3). What is its equation?",
+   "options": [
+    "y = 2x + 3",
+    "y = 3x + 2",
+    "y = 2x - 3",
+    "y = x + 3"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-functions-core",
+   "grade": 11,
+   "topic": "Functions",
+   "kind": "core",
+   "stem": "What is the turning point of y = (x - 2)^2 + 3?",
+   "options": [
+    "(2; 3)",
+    "(-2; 3)",
+    "(2; -3)",
+    "(3; 2)"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-functions-easier",
+   "grade": 11,
+   "topic": "Functions",
+   "kind": "easier",
+   "stem": "What are the asymptotes of y = 1/(x - 1) + 2?",
+   "options": [
+    "x = 1 and y = 2",
+    "x = -1 and y = 2",
+    "x = 2 and y = 1",
+    "x = 0 and y = 0"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-trigonometryreduct-core",
+   "grade": 11,
+   "topic": "Trigonometry (reduction formulae, graphs, equations)",
+   "kind": "core",
+   "stem": "Simplify sin(180° - θ)",
+   "options": [
+    "sin θ",
+    "-sin θ",
+    "cos θ",
+    "-cos θ"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-trigonometryreduct-easier",
+   "grade": 11,
+   "topic": "Trigonometry (reduction formulae, graphs, equations)",
+   "kind": "easier",
+   "stem": "cos(360° - θ) = ?",
+   "options": [
+    "cos θ",
+    "-cos θ",
+    "sin θ",
+    "-sin θ"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G11-measurement-core",
+   "grade": 11,
+   "topic": "Measurement",
+   "kind": "core",
+   "stem": "What is the volume of a sphere with radius 3 cm? V = 4/3 π r^3, use π ≈ 3.14.",
+   "options": [
+    "113.04 cm³",
+    "37.68 cm³",
+    "28.26 cm³",
+    "339.12 cm³"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(4, 3)*Rational(314, 100)*27"
+  },
+  {
+   "id": "G11-measurement-easier",
+   "grade": 11,
+   "topic": "Measurement",
+   "kind": "easier",
+   "stem": "What is the total surface area of a cube with edges of 3 cm?",
+   "options": [
+    "54 cm²",
+    "27 cm²",
+    "9 cm²",
+    "36 cm²"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "6*3**2"
+  },
+  {
+   "id": "G11-euclideangeometry-core",
+   "grade": 11,
+   "topic": "Euclidean Geometry",
+   "kind": "core",
+   "stem": "An angle at the centre of a circle is 100°. What is the angle at the circumference on the same arc?",
+   "options": [
+    "50°",
+    "100°",
+    "200°",
+    "80°"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "100/2"
+  },
+  {
+   "id": "G11-euclideangeometry-easier",
+   "grade": 11,
+   "topic": "Euclidean Geometry",
+   "kind": "easier",
+   "stem": "The angle in a semicircle is ...",
+   "options": [
+    "90°",
+    "180°",
+    "60°",
+    "45°"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "90"
+  },
+  {
+   "id": "G11-trigonometrysinear-core",
+   "grade": 11,
+   "topic": "Trigonometry (sine, area, cosine rules)",
+   "kind": "core",
+   "stem": "A triangle has sides 6 cm and 8 cm with an included angle of 30°. What is its area?",
+   "options": [
+    "12 cm²",
+    "24 cm²",
+    "48 cm²",
+    "20.8 cm²"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(1, 2)*6*8*Rational(1, 2)"
+  },
+  {
+   "id": "G11-trigonometrysinear-easier",
+   "grade": 11,
+   "topic": "Trigonometry (sine, area, cosine rules)",
+   "kind": "easier",
+   "stem": "You know two sides and the angle between them and need the third side. Which rule?",
+   "options": [
+    "Cosine rule",
+    "Sine rule",
+    "Area rule",
+    "Theorem of Pythagoras"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G11-probability-core",
+   "grade": 11,
+   "topic": "Probability",
+   "kind": "core",
+   "stem": "A and B are independent, P(A) = 0.4 and P(B) = 0.5. What is P(A and B)?",
+   "options": [
+    "0.2",
+    "0.9",
+    "0.1",
+    "0.45"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(4, 10)*Rational(5, 10)"
+  },
+  {
+   "id": "G11-probability-easier",
+   "grade": 11,
+   "topic": "Probability",
+   "kind": "easier",
+   "stem": "If P(A) = 0.35, what is P(not A)?",
+   "options": [
+    "0.65",
+    "0.35",
+    "1.35",
+    "0"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "1 - Rational(35, 100)"
+  },
+  {
+   "id": "G11-financegrowthandde-core",
+   "grade": 11,
+   "topic": "Finance, growth and decay",
+   "kind": "core",
+   "stem": "A car worth R200 000 loses value at 10% per year on the reducing balance. What is it worth after 2 years?",
+   "options": [
+    "R162 000",
+    "R160 000",
+    "R180 000",
+    "R242 000"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "SIGN_ERR"
+   },
+   "check": "200000*Rational(9, 10)**2"
+  },
+  {
+   "id": "G11-financegrowthandde-easier",
+   "grade": 11,
+   "topic": "Finance, growth and decay",
+   "kind": "easier",
+   "stem": "Interest is 12% per year, compounded monthly. What is the interest rate per month?",
+   "options": [
+    "1%",
+    "12%",
+    "0.12%",
+    "144%"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "PLACE_VALUE",
+    "D": "MISREAD"
+   },
+   "check": "12/12"
+  },
+  {
+   "id": "G11-statistics-core",
+   "grade": 11,
+   "topic": "Statistics",
+   "kind": "core",
+   "stem": "A data set has Q1 = 20 and Q3 = 35. What is the interquartile range?",
+   "options": [
+    "15",
+    "55",
+    "27.5",
+    "35"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "35 - 20"
+  },
+  {
+   "id": "G11-statistics-easier",
+   "grade": 11,
+   "topic": "Statistics",
+   "kind": "easier",
+   "stem": "In a box-and-whisker plot, the line inside the box shows the ...",
+   "options": [
+    "Median",
+    "Mean",
+    "Mode",
+    "Range"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  }
+ ]
+}

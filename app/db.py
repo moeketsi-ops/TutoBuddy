@@ -544,6 +544,24 @@ CREATE TABLE IF NOT EXISTS learner_level_stats (
 -- The evidence log: every switch the engine makes, why, and what happened
 -- over the next 2 turns. chosen_by = 'random' marks the 10% exploration
 -- share, so we can show the engine's pick beats chance.
+-- Sign-up check-in (app/tutor/diagnostic.py): one row per completed
+-- check-in. The first is the learner's baseline; later ones (CHECK-IN
+-- again) are end-lines for the pilot's learning-gain measure.
+CREATE TABLE IF NOT EXISTS diagnostic_results (
+    id            bigserial PRIMARY KEY,
+    learner_id    int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+    grade         smallint NOT NULL,
+    bank_version  varchar(20) NOT NULL,
+    started_at    timestamptz,
+    finished_at   timestamptz NOT NULL DEFAULT now(),
+    score_pct     numeric(5,2) NOT NULL,
+    first_try     smallint NOT NULL,
+    topics        jsonb NOT NULL,
+    focus         jsonb NOT NULL,
+    answers       jsonb NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_diagnostic_results_learner ON diagnostic_results(learner_id, finished_at);
+
 CREATE TABLE IF NOT EXISTS pedagogy_decisions (
     id              bigserial PRIMARY KEY,
     learner_id      int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,

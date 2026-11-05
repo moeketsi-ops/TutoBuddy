@@ -108,6 +108,14 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
             "SELECT mastery_score FROM learner_lo_mastery WHERE learner_id = $1 AND lo_id = $2",
             learner_id, focus["id"]) if focus else None
         lo_score = float(lo_score) if lo_score is not None else None
+        topic_score = None
+        if lo_score is None and topic:
+            # No evidence on this objective yet: pitch from the topic score
+            # (the sign-up check-in seeds it), not the neutral 50.
+            topic_score = await conn.fetchval(
+                "SELECT mastery_score FROM learner_topic_mastery WHERE learner_id = $1 AND topic_id = $2",
+                learner_id, topic["id"])
+            topic_score = float(topic_score) if topic_score is not None else None
         review = None
         if memory.is_new_session(mem):
             review = await conn.fetchrow(
@@ -124,7 +132,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # A new question starts a new problem: its decision must not inherit the
     # previous problem's failures, tried strategies or answer requests.
     new_problem = not continuing
-    score = lo_score if lo_score is not None else mastery.MASTERY_START
+    score = lo_score if lo_score is not None else (
+        topic_score if topic_score is not None else mastery.MASTERY_START)
     rng = random.Random(f"{learner_id}:{mem['session_turns']}")
     # choose() keeps its guard-rail rules (review, new objective, repeated
     # misconception, hint and reveal); the 3-turn switch is plan_switch's.

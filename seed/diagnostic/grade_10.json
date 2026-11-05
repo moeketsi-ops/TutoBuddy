@@ -1,0 +1,522 @@
+{
+ "version": "2026-11-05",
+ "reviewed": false,
+ "items": [
+  {
+   "id": "G10-algebraicexpressio-core",
+   "grade": 10,
+   "topic": "Algebraic expressions",
+   "kind": "core",
+   "stem": "Factorise x^2 + 5x + 6",
+   "options": [
+    "(x + 2)(x + 3)",
+    "(x + 1)(x + 6)",
+    "(x - 2)(x - 3)",
+    "x(x + 5) + 6"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "SIGN_ERR",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-algebraicexpressio-easier",
+   "grade": 10,
+   "topic": "Algebraic expressions",
+   "kind": "easier",
+   "stem": "Expand (x + 3)(x - 2)",
+   "options": [
+    "x^2 + x - 6",
+    "x^2 - 6",
+    "x^2 + 5x - 6",
+    "x^2 - x - 6"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "PARTIAL_DISTRIB",
+    "C": "SIGN_ERR",
+    "D": "SIGN_ERR"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-equationsandinequa-core",
+   "grade": 10,
+   "topic": "Equations and inequalities",
+   "kind": "core",
+   "stem": "Solve x^2 - 5x + 6 = 0",
+   "options": [
+    "x = 2 or x = 3",
+    "x = -2 or x = -3",
+    "x = 6 or x = 1",
+    "x = 5"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-equationsandinequa-easier",
+   "grade": 10,
+   "topic": "Equations and inequalities",
+   "kind": "easier",
+   "stem": "Solve 2x - 3 > 7",
+   "options": [
+    "x > 5",
+    "x > 2",
+    "x < 5",
+    "x > 10"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "SIGN_ERR",
+    "C": "MISREAD",
+    "D": "ONE_SIDE_OP"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-exponents-core",
+   "grade": 10,
+   "topic": "Exponents",
+   "kind": "core",
+   "stem": "Simplify (2x^3)^2",
+   "options": [
+    "4x^6",
+    "2x^6",
+    "4x^5",
+    "2x^9"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "PARTIAL_DISTRIB",
+    "C": "EXP_AS_MULT",
+    "D": "EXP_AS_MULT"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-exponents-easier",
+   "grade": 10,
+   "topic": "Exponents",
+   "kind": "easier",
+   "stem": "Calculate 5^0 + 2^(-1)",
+   "options": [
+    "3/2",
+    "1/2",
+    "5/2",
+    "-2"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "EXP_AS_MULT",
+    "C": "EXP_AS_MULT",
+    "D": "SIGN_ERR"
+   },
+   "check": "5**0 + Rational(1, 2)"
+  },
+  {
+   "id": "G10-numberpatterns-core",
+   "grade": 10,
+   "topic": "Number patterns",
+   "kind": "core",
+   "stem": "What is the general term of 7; 11; 15; 19; ...?",
+   "options": [
+    "Tn = 4n + 3",
+    "Tn = 4n + 7",
+    "Tn = 7n + 4",
+    "Tn = n + 4"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-numberpatterns-easier",
+   "grade": 10,
+   "topic": "Number patterns",
+   "kind": "easier",
+   "stem": "What is the next term: 2; 5; 8; 11; ...?",
+   "options": [
+    "14",
+    "13",
+    "15",
+    "22"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "14"
+  },
+  {
+   "id": "G10-trigonometry-core",
+   "grade": 10,
+   "topic": "Trigonometry",
+   "kind": "core",
+   "stem": "In triangle ABC, angle B = 90°, AB = 3, BC = 4 and AC = 5. What is sin A?",
+   "options": [
+    "4/5",
+    "3/5",
+    "3/4",
+    "4/3"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(4, 5)"
+  },
+  {
+   "id": "G10-trigonometry-easier",
+   "grade": 10,
+   "topic": "Trigonometry",
+   "kind": "easier",
+   "stem": "What is sin 30°?",
+   "options": [
+    "1/2",
+    "√3/2",
+    "1",
+    "30"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(1, 2)"
+  },
+  {
+   "id": "G10-functions-core",
+   "grade": 10,
+   "topic": "Functions",
+   "kind": "core",
+   "stem": "Where does the graph of y = 2x^2 - 8 cut the x-axis?",
+   "options": [
+    "x = -2 and x = 2",
+    "x = -8",
+    "x = -4 and x = 4",
+    "x = 8"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-functions-easier",
+   "grade": 10,
+   "topic": "Functions",
+   "kind": "easier",
+   "stem": "What is the y-intercept of y = 3x - 6?",
+   "options": [
+    "-6",
+    "3",
+    "2",
+    "6"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "SIGN_ERR"
+   },
+   "check": "-6"
+  },
+  {
+   "id": "G10-trigonometricfunct-core",
+   "grade": 10,
+   "topic": "Trigonometric functions",
+   "kind": "core",
+   "stem": "What is the maximum value of y = 2 sin x + 1?",
+   "options": [
+    "3",
+    "2",
+    "1",
+    "4"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "2 + 1"
+  },
+  {
+   "id": "G10-trigonometricfunct-easier",
+   "grade": 10,
+   "topic": "Trigonometric functions",
+   "kind": "easier",
+   "stem": "What is the period of y = cos x?",
+   "options": [
+    "360°",
+    "180°",
+    "90°",
+    "720°"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "360"
+  },
+  {
+   "id": "G10-euclideangeometry-core",
+   "grade": 10,
+   "topic": "Euclidean Geometry",
+   "kind": "core",
+   "stem": "In parallelogram ABCD, angle A = 110°. What is angle B?",
+   "options": [
+    "70°",
+    "110°",
+    "250°",
+    "55°"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "180 - 110"
+  },
+  {
+   "id": "G10-euclideangeometry-easier",
+   "grade": 10,
+   "topic": "Euclidean Geometry",
+   "kind": "easier",
+   "stem": "The diagonals of a rectangle are always ...",
+   "options": [
+    "Equal in length",
+    "Perpendicular",
+    "Parallel",
+    "Equal to the sides"
+   ],
+   "answer": "A",
+   "misc": {},
+   "check": null
+  },
+  {
+   "id": "G10-analyticalgeometry-core",
+   "grade": 10,
+   "topic": "Analytical Geometry",
+   "kind": "core",
+   "stem": "What is the distance between A(1; 2) and B(4; 6)?",
+   "options": [
+    "5",
+    "7",
+    "25",
+    "√7"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "sqrt((4 - 1)**2 + (6 - 2)**2)"
+  },
+  {
+   "id": "G10-analyticalgeometry-easier",
+   "grade": 10,
+   "topic": "Analytical Geometry",
+   "kind": "easier",
+   "stem": "What is the midpoint of (2; 4) and (6; 8)?",
+   "options": [
+    "(4; 6)",
+    "(8; 12)",
+    "(2; 2)",
+    "(3; 4)"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": null
+  },
+  {
+   "id": "G10-financeandgrowth-core",
+   "grade": 10,
+   "topic": "Finance and growth",
+   "kind": "core",
+   "stem": "R1 000 is invested at 10% per year compound interest for 2 years. What is it worth?",
+   "options": [
+    "R1 210",
+    "R1 200",
+    "R1 100",
+    "R1 020"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "PLACE_VALUE"
+   },
+   "check": "1000*Rational(11, 10)**2"
+  },
+  {
+   "id": "G10-financeandgrowth-easier",
+   "grade": 10,
+   "topic": "Finance and growth",
+   "kind": "easier",
+   "stem": "R500 earns 8% per year simple interest for 3 years. How much interest is that?",
+   "options": [
+    "R120",
+    "R40",
+    "R620",
+    "R1 200"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "PLACE_VALUE"
+   },
+   "check": "500*Rational(8, 100)*3"
+  },
+  {
+   "id": "G10-measurement-core",
+   "grade": 10,
+   "topic": "Measurement",
+   "kind": "core",
+   "stem": "What is the volume of a cylinder with radius 3 cm and height 10 cm? Use π ≈ 3.14.",
+   "options": [
+    "282.6 cm³",
+    "94.2 cm³",
+    "188.4 cm³",
+    "28.26 cm³"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "PLACE_VALUE"
+   },
+   "check": "Rational(314, 100)*3**2*10"
+  },
+  {
+   "id": "G10-measurement-easier",
+   "grade": 10,
+   "topic": "Measurement",
+   "kind": "easier",
+   "stem": "What is the area of a circle with radius 2 m? Use π ≈ 3.14.",
+   "options": [
+    "12.56 m²",
+    "6.28 m²",
+    "12.56 m",
+    "4 m²"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "UNITS",
+    "D": "MISREAD"
+   },
+   "check": "Rational(314, 100)*2**2"
+  },
+  {
+   "id": "G10-statistics-core",
+   "grade": 10,
+   "topic": "Statistics",
+   "kind": "core",
+   "stem": "What is the median of 3; 8; 5; 12; 7; 10?",
+   "options": [
+    "7.5",
+    "5",
+    "8.5",
+    "9"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(7 + 8, 2)"
+  },
+  {
+   "id": "G10-statistics-easier",
+   "grade": 10,
+   "topic": "Statistics",
+   "kind": "easier",
+   "stem": "What is the range of 4; 9; 2; 15; 7?",
+   "options": [
+    "13",
+    "15",
+    "11",
+    "7.4"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "15 - 2"
+  },
+  {
+   "id": "G10-probability-core",
+   "grade": 10,
+   "topic": "Probability",
+   "kind": "core",
+   "stem": "A and B are mutually exclusive, P(A) = 0.3 and P(B) = 0.5. What is P(A or B)?",
+   "options": [
+    "0.8",
+    "0.15",
+    "0.65",
+    "0.2"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(3, 10) + Rational(5, 10)"
+  },
+  {
+   "id": "G10-probability-easier",
+   "grade": 10,
+   "topic": "Probability",
+   "kind": "easier",
+   "stem": "A fair dice is rolled once. What is the probability of an even number?",
+   "options": [
+    "1/2",
+    "1/3",
+    "1/6",
+    "2/3"
+   ],
+   "answer": "A",
+   "misc": {
+    "B": "MISREAD",
+    "C": "MISREAD",
+    "D": "MISREAD"
+   },
+   "check": "Rational(3, 6)"
+  }
+ ]
+}

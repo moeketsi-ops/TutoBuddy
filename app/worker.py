@@ -24,7 +24,7 @@ from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
-from app.tutor import memory
+from app.tutor import diagnostic, memory
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
 
 log = logging.getLogger("katlego.worker")
@@ -36,6 +36,8 @@ HELP_MESSAGE = (
     "• Say \"quiz me\" (or similar) for a practice question\n"
     "• *SKIP* — drop the current practice question without answering it\n"
     "• *PROGRESS* — see how you're doing this term\n"
+    "• *CHECK-IN* — the multiple-choice check-in on every topic in your grade\n"
+    "• *REPORT* — your latest check-in summary (for you or a parent)\n"
     "• *ADD LEARNER* — add a sibling to this household\n"
     "• *SWITCH* — change who's studying\n"
     "• *HELP* — this message\n"
@@ -106,11 +108,93 @@ async def log_message(
         )
 
 
+def start_checkin(sess: session.Session, grade: int) -> str | None:
+    """Begin the sign-up check-in for the active learner; returns its intro
+    and first question, or None when the grade has no bank (Grade 9)."""
+    if not diagnostic.available(grade):
+        return None
+    sess.data["diagnostic"] = {**diagnostic.start(grade), "learner_id": sess.active_learner_id}
+    return diagnostic.intro(sess.name, grade) + "\n\n" + diagnostic.question_text(sess.data["diagnostic"])
+
+
+async def finish_checkin(sess: session.Session) -> str:
+    state = sess.data.pop("diagnostic")
+    res = diagnostic.results(state)
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            focus = diagnostic.focus(res, await diagnostic.topic_weights(conn, state["grade"]))
+            await diagnostic.save(conn, sess.active_learner_id, state, res, focus)
+    return diagnostic.report(sess.name, state["grade"], res, focus)
+
+
+async def handle_checkin(sess: session.Session, text: str) -> str | None:
+    """The check-in's turn, or None when this message isn't an answer
+    (then the check-in pauses and the message is handled as usual)."""
+    state = sess.data["diagnostic"]
+    letter = diagnostic.parse_answer(text, diagnostic.current(state))
+    if letter is None:
+        state["paused"] = True
+        await session.save(sess)
+        return None
+    diagnostic.answer(state, letter)
+    if diagnostic.finished(state):
+        reply = await finish_checkin(sess)
+    else:
+        reply = diagnostic.question_text(state)
+    await session.save(sess)
+    return reply
+
+
+def checkin_paused_note(sess: session.Session) -> str:
+    st = sess.data["diagnostic"]
+    done = sum(1 for q in st["queue"][:st["i"]] if q.endswith("-core"))
+    return f"\n\n⏸️ Check-in paused at {done}/{st['topics']}. Send CHECK-IN to carry on."
+
+
 async def handle_active(
     wa: WhatsAppClient, sess: session.Session, phone: str, text: str
 ) -> tuple[str, str]:
     """Returns (reply, intent) for a consented, onboarded learner."""
     command = text.strip().upper()
+    st = sess.data.get("diagnostic")
+    if st and (st.get("learner_id") != sess.active_learner_id or st["grade"] != sess.grade):
+        sess.data.pop("diagnostic")  # a sibling's check-in, or the grade changed
+        await session.save(sess)
+    if command in ("CHECK-IN", "CHECKIN", "CHECK IN"):
+        st = sess.data.get("diagnostic")
+        if st:
+            st["paused"] = False
+            await session.save(sess)
+            return "Carrying on with your check-in 👍\n\n" + diagnostic.question_text(st), "checkin"
+        first = start_checkin(sess, sess.grade)
+        if first is None:
+            return ("The check-in isn't ready for Grade 9 yet. Ask me anything, or say \"quiz me\".",
+                    "checkin")
+        await session.save(sess)
+        return first, "checkin"
+    if command == "PAUSE" and sess.data.get("diagnostic"):
+        sess.data["diagnostic"]["paused"] = True
+        await session.save(sess)
+        return "Check-in paused ⏸️ Send CHECK-IN whenever you want to carry on.", "checkin"
+    if command == "REPORT":
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            last = await diagnostic.latest(conn, sess.active_learner_id)
+        if not last:
+            return ("No check-in yet. Send CHECK-IN to do one (about 15 minutes), then REPORT "
+                    "shows the summary.", "admin")
+        return diagnostic.report(sess.name, last["grade"], last, last["focus"]), "admin"
+    st = sess.data.get("diagnostic")
+    if st and not st.get("paused") and command not in ("HELP", "RESET", "ADD LEARNER", "SWITCH",
+                                                        "DELETE", "PROGRESS", "SKIP"):
+        reply = await handle_checkin(sess, text)
+        if reply is not None:
+            return reply, "checkin"
+        reply, intent = await handle_active(wa, sess, phone, text)
+        if sess.data.get("diagnostic"):
+            reply += checkin_paused_note(sess)
+        return reply, intent
     if command == "HELP":
         return HELP_MESSAGE, "admin"
     if command == "RESET":
@@ -309,6 +393,11 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
                 reply = session.added_learner_welcome(sess.name, grade)
             else:
                 reply = session.welcome_message(sess.name, grade)
+            # Sign-up check-in (app/tutor/diagnostic.py): straight after the grade.
+            first = start_checkin(sess, grade)
+            if first:
+                await session.save(sess)
+                reply += "\n\n" + first
         else:
             reply = session.GRADE_REPROMPT
     elif sess.state == "choosing_learner":
