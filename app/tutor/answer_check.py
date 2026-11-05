@@ -39,6 +39,8 @@ def _normalise(text: str) -> str:
     t = text.lower().strip().rstrip("?.!")
     t = t.replace("×", "*").replace("÷", "/").replace("−", "-").replace("–", "-")
     t = t.replace("²", "^2").replace("³", "^3")
+    t = re.sub(r"(?<=\d),(?=\d)", ".", t)                 # SA decimal comma: 78,5
+    t = re.sub(r"(?<=\d)[ \u00a0](?=\d{3}(?!\d))", "", t)   # thousands space: 30 000
     t = re.sub(r"\blog_?\s*(\d+)\s*\(", r"logb\1(", t)  # log2(x), log_2(x)
     return t
 
@@ -181,8 +183,8 @@ _SIMPLE = re.compile(rf"^\(?{_NUM}\)?$")
 _PURE = re.compile(r"^[0-9+\-*/^(). ]+$")
 _ASK = re.compile(r"^(?:how do i |can you help me |help me )?(?:what is|what's|whats|calculate|"
                   r"work out|evaluate|find the value of|find|simplify|compute)\s+(.+)$")
-_UNITS = re.compile(r"\b(?:square|sq|cm\^?2|m\^?2|mm\^?2|km\^?2|cm|mm|km|m|units?|kg|g|ml|l|"
-                    r"rand|degrees|metres|meters|centimetres|centimeters)\b")
+_UNITS = re.compile(r"\b(?:square|sq|cubic|units?|kg|g|ml|l|rand|degrees|metres|meters|centimetres|"
+                    r"centimeters)\b|\b(?:cm|mm|km|m)(?:\^?[23])?(?![a-z])")
 
 
 def _num(text: str):
@@ -196,13 +198,68 @@ def _num(text: str):
     return val
 
 
+_D = r"(?:cm|mm|m|km|units?)?"
+
+
+def _measurement(t: str):
+    """Grade 8 measurement problems (area, perimeter, circles, volume,
+    surface area, missing sides, unit conversion): (value, tolerance) or None.
+    pi problems accept a learner's rounding (0.5%)."""
+    from sympy import Rational
+
+    pi = Rational(314, 100) if re.search(r"3[.,]14", t) else None
+    num = lambda s_: _num(s_.replace(",", "."))  # noqa: E731
+    n = rf"({_NUM}) ?{_D}"
+    tests = (
+        (rf"has an area of {n}\^?2? and a length of {n}.*\bwidth", lambda a, b: num(a) / num(b)),
+        (rf"has a perimeter of {n} and a length of {n}.*\bwidth", lambda p, l_: num(p) / 2 - num(l_)),
+        (rf"square has a perimeter of {n}.*\barea", lambda p: (num(p) / 4) ** 2),
+        (rf"perimeter of a (?:rectangle|rectangular \w+)\D*?{n} (?:by|x) {n}", lambda a, b: 2 * (num(a) + num(b))),
+        (rf"perimeter of a square with sides? (?:of )?{n}", lambda a: 4 * num(a)),
+        (rf"area of a square with sides? (?:of )?{n}", lambda a: num(a) ** 2),
+        (rf"area of a triangle with (?:a )?base (?:of )?{n} and (?:a )?(?:perpendicular )?height (?:of )?{n}",
+         lambda b, h: num(b) * num(h) / 2),
+        (rf"perimeter\D*?sides? (?:of )?{n},? {n},? and {n}", lambda a, b, c: num(a) + num(b) + num(c)),
+        (rf"(?:triangle )?has sides (?:of )?{n},? {n},? and {n}.*\bperimeter",
+         lambda a, b, c: num(a) + num(b) + num(c)),
+        (rf"surface area of a cube with edges? (?:of )?{n}", lambda a: 6 * num(a) ** 2),
+        (rf"volume of a cube with edges? (?:of )?{n}", lambda a: num(a) ** 3),
+        (rf"volume of a (?:rectangular prism|box|cuboid)\D*?{n} (?:by|x) {n} (?:by|x) {n}",
+         lambda a, b, c: num(a) * num(b) * num(c)),
+        (rf"convert {n}\^2 to cm\^2", None),
+    )
+    for pat, fn in tests:
+        m = re.search(pat, t)
+        if m and fn:
+            return fn(*m.groups()), None
+    m = re.search(rf"convert ({_NUM}) ?(m|cm|mm|km)\^?(2|3)? to (m|cm|mm|km)\^?(2|3)?", t)
+    if m:
+        size = {"km": Rational(100000), "m": Rational(100), "cm": Rational(1), "mm": Rational(1, 10)}
+        power = int(m.group(3) or m.group(5) or 1)
+        return num(m.group(1)) * (size[m.group(2)] / size[m.group(4)]) ** power, None
+    if pi is not None:
+        m = re.search(rf"area of a circle with (?:a )?(radius|diameter) (?:of )?{n}", t)
+        if m:
+            r = num(m.group(2)) / (2 if m.group(1) == "diameter" else 1)
+            return pi * r ** 2, 0.005
+        m = re.search(rf"circumference of a circle with (?:a )?(radius|diameter) (?:of )?{n}", t)
+        if m:
+            r = num(m.group(2)) / (2 if m.group(1) == "diameter" else 1)
+            return 2 * pi * r, 0.005
+    return None
+
+
 def _value_problem(problem: str) -> dict | None:
     from sympy import Abs, Rational, sqrt
 
     t = _normalise(problem)
     t = re.sub(r"\s+", " ", t)
     val = None
-    m = re.search(rf"sum to infinity of ({_NUM}) ?\+ ?({_NUM}) ?\+ ?({_NUM})", t)
+    tol = None
+    got = _measurement(t)
+    if got:
+        val, tol = got
+    m = None if val is not None else re.search(rf"sum to infinity of ({_NUM}) ?\+ ?({_NUM}) ?\+ ?({_NUM})", t)
     if m:
         a, b, c = (_num(g) for g in m.groups())
         if a and b and c is not None and b != 0:
@@ -243,7 +300,8 @@ def _value_problem(problem: str) -> dict | None:
     if val is None or not getattr(val, "is_real", False):
         return None
     val = Rational(val) if val.is_Rational else val
-    return {"kind": "value", "equation": problem.strip()[:80], "answer": _show(val), "_val": val}
+    return {"kind": "value", "equation": problem.strip()[:80], "answer": _show(val), "_val": val,
+            "_tol": tol}
 
 
 def _show(val) -> str:
@@ -270,7 +328,11 @@ def _check_value(solved: dict, text: str) -> str | None:
             return None  # words or symbols code can't read: the model judges
         vals.append((seg, v))
     target = solved["_val"]
-    hits = [_same(v, target) for _, v in vals]
+    tol = solved.get("_tol")
+    if tol:  # a rounded pi answer (78.54 for 78.5) is still right
+        hits = [abs(float(v - target)) <= tol * abs(float(target)) for _, v in vals]
+    else:
+        hits = [_same(v, target) for _, v in vals]
     simple_hit = any(h and _SIMPLE.match(seg.replace(" ", "")) for (seg, _), h in zip(vals, hits))
     if simple_hit and all(_same(v, vals[0][1]) for _, v in vals):
         return "correct"

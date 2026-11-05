@@ -1,0 +1,69 @@
+{
+ "grade": 8,
+ "name": "Ntando",
+ "atp": "Grade 8 Term 4: Area and Perimeter (weeks 5-6), then Surface Area and Volume (weeks 6-7), 2026 ATP",
+ "topics": ["Area and Perimeter", "Surface Area and Volume"],
+ "persona": "Starts with three misconceptions: mixes up area and perimeter, forgets the half in a triangle's area, and uses 2πr for a circle's area. Each one fades after the learner has been shown it a couple of times; by the end of the week most answers are right first time.",
+ "checkin": {
+  "baseline_wrong": ["Area and Perimeter", "Surface Area and Volume", "Integers"],
+  "endline_wrong": ["Integers"]
+ },
+ "days": [
+  {"day": 1, "theme": "Rectangles and squares", "topic": "Area and Perimeter", "problems": [
+   {"type": "rect_perimeter", "turns": ["How do I find the perimeter of a rectangle that is 8 cm by 3 cm?", "24", "11", "22 cm"], "truth": ["none", "wrong", "wrong", "correct"], "answers": ["22"]},
+   {"type": "rect_area", "turns": ["Find the area of a rectangle that is 8 cm by 3 cm", "22", "24 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["24"]},
+   {"type": "square_area", "turns": ["What is the area of a square with sides of 6 cm?", "24", "I don't get it", "36 cm²"], "truth": ["none", "wrong", "none", "correct"], "answers": ["36"]},
+   {"type": "square_perimeter", "turns": ["What is the perimeter of a square with sides of 6 cm?", "36", "24 cm"], "truth": ["none", "wrong", "correct"], "answers": ["24"]}
+  ]},
+  {"day": 2, "theme": "Triangles", "topic": "Area and Perimeter", "problems": [
+   {"type": "triangle_area", "turns": ["Find the area of a triangle with base 10 cm and height 6 cm", "60", "60 cm²", "30 cm²"], "truth": ["none", "wrong", "wrong", "correct"], "answers": ["30"]},
+   {"type": "triangle_area", "turns": ["Find the area of a triangle with base 8 cm and height 5 cm", "40", "20 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["20"]},
+   {"type": "triangle_perimeter", "turns": ["A triangle has sides 5 cm, 6 cm and 7 cm. What is its perimeter?", "210", "18 cm"], "truth": ["none", "wrong", "correct"], "answers": ["18"]},
+   {"type": "triangle_area", "turns": ["Find the area of a triangle with base 12 cm and height 4 cm", "24 cm²"], "truth": ["none", "correct"], "answers": ["24"]}
+  ]},
+  {"day": 3, "theme": "Missing sides", "topic": "Area and Perimeter", "problems": [
+   {"type": "missing_width_area", "turns": ["A rectangle has an area of 48 cm² and a length of 8 cm. What is its width?", "40", "6 cm"], "truth": ["none", "wrong", "correct"], "answers": ["6"]},
+   {"type": "missing_width_perimeter", "turns": ["A rectangle has a perimeter of 30 cm and a length of 10 cm. What is its width?", "20", "just tell me the answer", "5 cm"], "truth": ["none", "wrong", "asked", "correct"], "answers": ["5"]},
+   {"type": "square_area", "turns": ["Find the area of a square with sides of 9 m", "81 m²"], "truth": ["none", "correct"], "answers": ["81"]},
+   {"type": "rect_perimeter", "turns": ["What is the perimeter of a rectangle that is 12 cm by 7 cm?", "84", "38 cm"], "truth": ["none", "wrong", "correct"], "answers": ["38"]}
+  ]},
+  {"day": 4, "theme": "Circles (π ≈ 3.14)", "topic": "Area and Perimeter", "problems": [
+   {"type": "circle_area", "turns": ["What is the area of a circle with radius 5 cm? Use π ≈ 3.14", "31.4", "I don't understand", "78.5 cm²"], "truth": ["none", "wrong", "none", "correct"], "answers": ["78.5"]},
+   {"type": "circumference", "turns": ["What is the circumference of a circle with radius 5 cm? Use π ≈ 3.14", "78.5", "31.4 cm"], "truth": ["none", "wrong", "correct"], "answers": ["31.4"]},
+   {"type": "circle_area", "turns": ["What is the area of a circle with diameter 10 cm? Use π ≈ 3.14", "314", "78.5 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["78.5"]}
+  ]},
+  {"day": 5, "theme": "Units and mixed practice", "topic": "Area and Perimeter", "problems": [
+   {"type": "convert", "turns": ["Convert 3 m² to cm²", "300", "30 000 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["30000", "30 000"]},
+   {"type": "rect_area", "turns": ["Find the area of a rectangle that is 200 cm by 50 cm", "10 000 cm²"], "truth": ["none", "correct"], "answers": ["10000", "10 000"]},
+   {"type": "rect_perimeter", "turns": ["Find the perimeter of a rectangle that is 15 cm by 4 cm", "38 cm"], "truth": ["none", "correct"], "answers": ["38"]},
+   {"type": "triangle_area", "turns": ["Find the area of a triangle with base 9 cm and height 4 cm", "18 cm²"], "truth": ["none", "correct"], "answers": ["18"]}
+  ]},
+  {"day": 6, "theme": "Review", "topic": "Area and Perimeter", "problems": [
+   {"type": "circle_area", "turns": ["What is the area of a circle with radius 10 cm? Use π ≈ 3.14", "314 cm²"], "truth": ["none", "correct"], "answers": ["314"]},
+   {"type": "square_from_perimeter", "turns": ["A square has a perimeter of 36 cm. What is its area?", "36", "81 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["81"]},
+   {"type": "triangle_area", "turns": ["Find the area of a triangle with base 14 cm and height 10 cm", "70 cm²"], "truth": ["none", "correct"], "answers": ["70"]}
+  ]},
+  {"day": 7, "theme": "Surface area and volume (next on the ATP)", "topic": "Surface Area and Volume", "problems": [
+   {"type": "prism_volume", "turns": ["What is the volume of a rectangular prism that is 5 cm by 4 cm by 3 cm?", "12", "60 cm³"], "truth": ["none", "wrong", "correct"], "answers": ["60"]},
+   {"type": "cube_surface", "turns": ["What is the surface area of a cube with edges of 3 cm?", "27", "54 cm²"], "truth": ["none", "wrong", "correct"], "answers": ["54"]},
+   {"type": "cube_volume", "turns": ["What is the volume of a cube with edges of 4 cm?", "64 cm³"], "truth": ["none", "correct"], "answers": ["64"]}
+  ]}
+ ],
+ "misconceptions": {
+  "rect_perimeter": "You multiply the two sides instead of adding all four.",
+  "square_perimeter": "You multiply side by side (that is the area).",
+  "rect_area": "You add the sides instead of multiplying.",
+  "square_area": "You do 4 times the side (that is the perimeter).",
+  "triangle_area": "You forget to halve: you do base times height.",
+  "triangle_perimeter": "You multiply the three sides.",
+  "missing_width_area": "You subtract instead of divide.",
+  "missing_width_perimeter": "You subtract the length from the perimeter once and stop.",
+  "circle_area": "You use 2 times pi times r, or you use the diameter as the radius.",
+  "circumference": "You use pi times r squared.",
+  "convert": "You multiply by 100 instead of 10 000 for square units.",
+  "square_from_perimeter": "You give the perimeter back as the area.",
+  "prism_volume": "You add the three lengths.",
+  "cube_surface": "You work out the volume.",
+  "cube_volume": "You do 3 times the edge."
+ }
+}
