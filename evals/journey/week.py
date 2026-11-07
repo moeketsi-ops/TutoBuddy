@@ -7,6 +7,8 @@ WhatsApp path: what happens to pedagogy and mastery over seven days?
     # AI-played learner (a cheap model with misconceptions that fade)
     docker compose run --rm -e GATEWAY_URL=http://gateway:8000 -e MOCKWA_URL=http://mockwa:8001 \\
         evals python -m evals.journey.week --learner ai
+    # another homework week (e.g. the Grade 8 algebra homework, Question 1)
+    ... evals python -m evals.journey.week --learner ai --spec homework_week_g8_algebra.json
 
 Day 0: sign-up and the 15-minute check-in (baseline; weak on Area and
 Perimeter). Days 1-7: homework from evals/journey/homework_week_g8.json,
@@ -62,6 +64,14 @@ def _verdict(problem: str, msg: str, answers: list[str]) -> str | None:
     from app.tutor import answer_check
 
     v = (answer_check.check(problem, msg) or {}).get("verdict")
+    if v is None and any(re.search(r"[a-z]", a) for a in answers):
+        # an expression answer: try the tail of the message ("so it's -16x^2 + 47x")
+        parts = re.split(r"=|:|\b(?:is|so|its|it's|equals|answer)\b", answer_check._normalise(msg))
+        for tail in reversed([p.strip(" .?!") for p in parts if p.strip(" .?!")]):
+            v = (answer_check.check(problem, tail) or {}).get("verdict")
+            if v:
+                break
+        return v
     if v is None:
         n = _final_number(msg)
         if n is not None:
@@ -138,17 +148,19 @@ async def run_problem_ai(phone: Phone, prob: dict, sim) -> dict:
             "early_answer": early, "error_replies": phone.errors - errors_before}
 
 
-async def run(mode: str, learner_model: str) -> Path:
+async def run(mode: str, learner_model: str, spec_file: str = "homework_week_g8.json") -> Path:
     from app.db import get_pool
 
-    spec = json.loads((HERE / "homework_week_g8.json").read_text())
+    spec = json.loads((HERE / spec_file).read_text())
     topics = spec["topics"]
+    main = topics[0]
     pool = await get_pool()
     phone = Phone()
     sim = None
     if mode == "ai":
         from evals.journey.sim_learner import SimLearner
-        sim = SimLearner(spec["misconceptions"], name=spec["name"], grade=spec["grade"], model=learner_model)
+        sim = SimLearner(spec["misconceptions"], name=spec["name"], grade=spec["grade"], model=learner_model,
+                         traits=spec.get("traits", ""))
     print(f"Homework week ({mode}), phone {phone.number}")
     if not await preflight():
         raise SystemExit(1)
@@ -166,13 +178,14 @@ async def run(mode: str, learner_model: str) -> Path:
     async with pool.acquire() as conn:
         lid = await learner_id(conn, phone, spec["name"])
         day0 = await snapshot(conn, lid, topics)
-    print(f"  day 0: check-in done; Area and Perimeter starts at {day0['topics'].get('Area and Perimeter')}")
+    print(f"  day 0: check-in done; {main} starts at {day0['topics'].get(main)}")
 
-    days, results = [], []
+    days, results, bounds = [], [], []
     for d in spec["days"]:
         async with pool.acquire() as conn:
             await time_travel(conn, lid, 1)
             start = await conn.fetchval("SELECT now()")
+            bounds.append(await conn.fetchval("SELECT coalesce(max(id), 0) FROM tutor_turns"))
         phone.say("hi")
         probs = []
         for prob in d["problems"]:
@@ -180,9 +193,9 @@ async def run(mode: str, learner_model: str) -> Path:
         async with pool.acquire() as conn:
             snap = await snapshot(conn, lid, topics, since=start)
         days.append({"day": d["day"], "theme": d["theme"], "topic": d["topic"], "problems": probs, "snap": snap})
-        a = snap["topics"].get("Area and Perimeter")
+        a = snap["topics"].get(main)
         print(f"  day {d['day']}: {d['theme']}: {sum(p['solved'] for p in probs)}/{len(probs)} solved, "
-              f"Area and Perimeter mastery {a if a is None else round(a)}, cost ${snap['calls']['cost']:.4f}"
+              f"{main} mastery {a if a is None else round(a)}, cost ${snap['calls']['cost']:.4f}"
               + (f", {sum(p['error_replies'] for p in probs)} ERROR replies" if any(p['error_replies'] for p in probs) else ""))
         results += probs
 
@@ -204,10 +217,33 @@ async def run(mode: str, learner_model: str) -> Path:
         strat_stats = await conn.fetch("SELECT strategy, sum(tries) AS t, sum(successes) AS s FROM "
                                        "learner_strategy_stats WHERE learner_id = $1 GROUP BY 1 ORDER BY 2 DESC", lid)
         level_stats = await conn.fetch("SELECT * FROM learner_level_stats WHERE learner_id = $1", lid)
-    return write_report(mode, spec, phone, day0, days, checks, final, strat_stats, level_stats, sim)
+        trace = await turn_trace(conn, lid, spec, bounds, day0, checks)
+    out = write_report(mode, spec, phone, day0, days, checks, final, strat_stats, level_stats, sim)
+    (out / "trace.json").write_text(json.dumps(trace, indent=1, ensure_ascii=False, default=str))
+    print(f"Turn-by-turn trace: {out / 'trace.json'}")
+    return out
+
+
+async def turn_trace(conn, lid: int, spec: dict, bounds: list[int], day0: dict, checks) -> dict:
+    """Every tutoring turn of the week from tutor_turns, by day: what the
+    learner sent, what Katlego replied, who judged it, the evidence, the
+    teaching decision and how mastery moved. Feeds the walkthrough page."""
+    rows = [dict(r) for r in await conn.fetch(
+        "SELECT * FROM tutor_turns WHERE learner_id = $1 ORDER BY id", lid)]
+    days = []
+    for i, d in enumerate(spec["days"]):
+        lo, hi = bounds[i], (bounds[i + 1] if i + 1 < len(bounds) else float("inf"))
+        turns = [{k: v for k, v in r.items() if k not in ("learner_id",)} for r in rows if lo < r["id"] <= hi]
+        days.append({"day": d["day"], "theme": d["theme"], "turns": turns})
+    return {"learner": spec["name"], "grade": spec["grade"], "persona": spec["persona"], "atp": spec["atp"],
+            "main_topic": spec["topics"][0], "baseline": day0["topics"],
+            "checkins": [{"topics": json.loads(c["topics"]), "score_pct": c["score_pct"]} for c in checks],
+            "days": days}
 
 
 def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, level_stats, sim) -> Path:
+    t1 = spec["topics"][0]
+    t2 = spec["topics"][1] if len(spec["topics"]) > 1 else None
     # evals/bench/results is mounted from the host, so the report survives the container
     out = HERE.parent / "bench" / "results" / "journey" / f"week-{mode}-{datetime.datetime.now():%Y%m%d-%H%M}"
     out.mkdir(parents=True, exist_ok=True)
@@ -221,8 +257,8 @@ def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, leve
             "solved": sum(p["solved"] for p in ps), "first_try": sum(p["first_try"] for p in ps),
             "learner_turns": sum(p["learner_turns"] for p in ps),
             "answer_early": sum(p["early_answer"] for p in ps),
-            "area_perimeter": s["topics"].get("Area and Perimeter"),
-            "surface_volume": s["topics"].get("Surface Area and Volume"),
+            "main_topic": s["topics"].get(t1),
+            "second_topic": s["topics"].get(t2) if t2 else None,
             "objectives_covered": (s["objectives"].get(d["topic"]) or {}).get("covered", 0),
             "evidence_right": sum(v for k, v in ev.items() if k.endswith("attempt_correct") or k.endswith("explained_back")),
             "evidence_partial": sum(v for k, v in ev.items() if k.endswith("attempt_partial")),
@@ -248,7 +284,7 @@ def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, leve
     base = json.loads(checks[0]["topics"]) if checks else {}
     end = json.loads(checks[-1]["topics"]) if len(checks) > 1 else {}
     total_cost = sum(r["cost_usd"] for r in rows)
-    lines = [f"# Homework week: Grade 8 {', '.join(spec['topics'])} ({mode} learner)", "",
+    lines = [f"# Homework week: Grade {spec['grade']} {', '.join(spec['topics'])} ({mode} learner)", "",
              f"{spec['atp']}. Learner: {spec['persona']}", "",
              "Simulated learner: this shows whether the engine behaves well over a week, not whether real "
              "children learn. The pilot measures that.", "",
@@ -256,17 +292,17 @@ def write_report(mode, spec, phone, day0, days, checks, final, strat_stats, leve
                 "problems they hit are not counted as solved. Check `docker compose logs worker --tail 80`.", ""]
                if phone.errors else []),
              "## Day by day", "",
-             "| Day | Theme | Solved | First try | Learner msgs | Answer given early | Area & Perimeter mastery | "
-             "Surface Area & Volume mastery | Objectives with evidence | Evidence right/partial/wrong | Reviews | "
+             f"| Day | Theme | Solved | First try | Learner msgs | Answer given early | {t1} mastery | "
+             f"{t2 or '-'} mastery | Objectives with evidence | Evidence right/partial/wrong | Reviews | "
              "Switches (led to progress) | Main strategy | Model calls | Cost | Median s |",
              "|" + "---|" * 16]
-    lines.append(f"| 0 | Check-in | | | | | {score(day0['topics'].get('Area and Perimeter'))} | "
-                 f"{score(day0['topics'].get('Surface Area and Volume'))} | | | | | | | | |")
+    lines.append(f"| 0 | Check-in | | | | | {score(day0['topics'].get(t1))} | "
+                 f"{score(day0['topics'].get(t2)) if t2 else '-'} | | | | | | | | |")
     for r in rows:
         lines.append(
             f"| {r['day']} | {r['theme']} | {r['solved']}/{r['problems']} | {r['first_try']}/{r['problems']} | "
-            f"{r['learner_turns']} | {r['answer_early']} | {score(r['area_perimeter'])} | "
-            f"{score(r['surface_volume'])} | {r['objectives_covered']} | "
+            f"{r['learner_turns']} | {r['answer_early']} | {score(r['main_topic'])} | "
+            f"{score(r['second_topic'])} | {r['objectives_covered']} | "
             f"{r['evidence_right']}/{r['evidence_partial']}/{r['evidence_wrong']} | {r['reviews']} | "
             f"{r['switches']} ({r['switches_progress']}) | {r['top_strategy'].lower().replace('_', ' ')} | "
             f"{r['calls']} | ${r['cost_usd']:.4f} | {r['median_s']} |")
@@ -316,8 +352,10 @@ def main() -> None:
     ap.add_argument("--learner", choices=["scripted", "ai"], default="scripted")
     ap.add_argument("--learner-model", default="openai/gpt-5.4-nano",
                     help="OpenRouter model that plays the learner (ai mode)")
+    ap.add_argument("--spec", default="homework_week_g8.json",
+                    help="homework week file in evals/journey/ (default: Grade 8 Area and Perimeter)")
     args = ap.parse_args()
-    asyncio.run(run(args.learner, args.learner_model))
+    asyncio.run(run(args.learner, args.learner_model, args.spec))
 
 
 if __name__ == "__main__":

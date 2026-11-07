@@ -1,0 +1,45 @@
+{
+ "grade": 8,
+ "name": "Sipho",
+ "atp": "Grade 8 Algebraic Expressions (CAPS Term 1 topic): the learner's own homework, Question 1 a) and b), then six days of similar practice",
+ "topics": ["Algebraic Expressions", "Algebraic Equations"],
+ "persona": "Does not know how to start. Multiplies the outside term by only the first term in a bracket, forgets that a minus in front of a bracket changes the signs inside it, and divides only the first term of a fraction. Says so when lost and sometimes asks for the answer. Each mistake fades after Katlego has helped with that kind of problem twice.",
+ "traits": "You find algebra hard. On a new problem you usually don't know how to start: say so in your own words (for example \"i dont know how to start\" or \"what do i do with the brackets\"). If you are stuck twice in a row, ask Katlego to just tell you the answer. When Katlego asks you a small question (one multiplication, one sign), answer only that.",
+ "checkin": {
+  "baseline_wrong": ["Algebraic Expressions", "Algebraic Equations", "Integers"],
+  "endline_wrong": ["Integers"]
+ },
+ "days": [
+  {"day": 1, "theme": "Homework Q1 a): expand two brackets and subtract", "topic": "Algebraic Expressions", "problems": [
+   {"type": "expand_subtract", "turns": ["Help with my homework. Simplify 3x(4x + 5) - 4x(7x - 8)", "i dont know how to start", "12x² + 5 - 28x² - 8", "12x² + 15x - 28x² - 32x", "12x² + 15x - 28x² + 32x", "-16x² + 47x"], "truth": ["none", "none", "wrong", "wrong", "partial", "correct"], "answers": ["-16x^2 + 47x"]}
+  ]},
+  {"day": 2, "theme": "Homework Q1 b): divide by a monomial, then expand", "topic": "Algebraic Expressions", "problems": [
+   {"type": "divide_then_expand", "turns": ["Simplify (27x³ + 33x² - 12x)/(3x) - 4x(5x - 8)", "i dont get the fraction part", "9x² + 33x² - 12x", "just tell me the answer", "9x² + 11x - 4", "9x² + 11x - 4 - 20x² + 32x", "-11x² + 43x - 4"], "truth": ["none", "none", "wrong", "asked", "partial", "partial", "correct"], "answers": ["-11x^2 + 43x - 4"]}
+  ]},
+  {"day": 3, "theme": "Practice: two brackets with a minus", "topic": "Algebraic Expressions", "problems": [
+   {"type": "expand_subtract", "turns": ["Simplify 2x(3x + 4) - 5x(x - 2)", "6x² + 8x - 5x² - 10x", "x² + 18x"], "truth": ["none", "wrong", "correct"], "answers": ["x^2 + 18x"]},
+   {"type": "expand_subtract", "turns": ["Simplify 4a(2a - 3) - 3a(a + 5)", "5a² - 27a"], "truth": ["none", "correct"], "answers": ["5a^2 - 27a"]}
+  ]},
+  {"day": 4, "theme": "Practice: dividing by a monomial", "topic": "Algebraic Expressions", "problems": [
+   {"type": "divide_monomial", "turns": ["Simplify (12x³ - 18x² + 6x)/(6x)", "2x² - 18x² + 6x", "2x² - 3x + 1"], "truth": ["none", "wrong", "correct"], "answers": ["2x^2 - 3x + 1"]},
+   {"type": "divide_monomial", "turns": ["Simplify (20y³ + 15y²)/(5y)", "4y² + 3y"], "truth": ["none", "correct"], "answers": ["4y^2 + 3y"]}
+  ]},
+  {"day": 5, "theme": "Practice: both steps together", "topic": "Algebraic Expressions", "problems": [
+   {"type": "divide_then_expand", "turns": ["Simplify (8x³ + 4x² - 16x)/(4x) - 2x(x - 3)", "2x² + x - 4 - 2x² - 6x", "7x - 4"], "truth": ["none", "wrong", "correct"], "answers": ["7x - 4"]},
+   {"type": "expand_subtract", "turns": ["Simplify 5x(2x - 1) - 3x(4x + 2)", "-2x² - 11x"], "truth": ["none", "correct"], "answers": ["-2x^2 - 11x"]}
+  ]},
+  {"day": 6, "theme": "Review", "topic": "Algebraic Expressions", "problems": [
+   {"type": "expand_subtract", "turns": ["Simplify 6x(x + 2) - 2x(3x - 4)", "20x"], "truth": ["none", "correct"], "answers": ["20x"]},
+   {"type": "divide_then_expand", "turns": ["Simplify (15x³ - 10x² + 5x)/(5x) - x(3x - 2)", "1"], "truth": ["none", "correct"], "answers": ["1"]}
+  ]},
+  {"day": 7, "theme": "Homework-style check", "topic": "Algebraic Expressions", "problems": [
+   {"type": "expand_subtract", "turns": ["Simplify 2x(5x + 3) - 3x(2x - 7)", "4x² + 27x"], "truth": ["none", "correct"], "answers": ["4x^2 + 27x"]},
+   {"type": "divide_then_expand", "turns": ["Simplify (18x³ + 24x² - 6x)/(6x) - 2x(4x - 1)", "-5x² + 6x - 1"], "truth": ["none", "correct"], "answers": ["-5x^2 + 6x - 1"]}
+  ]}
+ ],
+ "misconceptions": {
+  "expand_subtract": "You multiply the outside term by only the FIRST term inside each bracket, and you keep the signs inside the second bracket as they are even though there is a minus in front of it.",
+  "divide_monomial": "You divide only the first term on top by the bottom and copy the other terms as they are.",
+  "divide_then_expand": "You divide only the first term on top, and you keep the signs inside the bracket after the minus as they are."
+ }
+}

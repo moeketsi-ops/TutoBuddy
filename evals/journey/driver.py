@@ -124,6 +124,7 @@ SHIFT = (
     ("learner_practice_attempts", ("created_at",)), ("learner_tests", ("created_at",)),
     ("learner_topic_mastery", ("last_assessed_at",)), ("llm_calls", ("created_at",)),
     ("paper_attempts", ("finished_at",)), ("pedagogy_decisions", ("created_at",)),
+    ("tutor_turns", ("created_at",)),
 )
 
 

@@ -672,6 +672,43 @@ ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS cache_write_tokens int;
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS prompt_chars int;
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS shared_chars int;
 ALTER TABLE llm_calls ADD COLUMN IF NOT EXISTS layout varchar(10);
+
+-- One row per tutoring turn (7 Nov 2026): what the engine decided and why,
+-- who judged the learner's message (code or model), and how mastery moved.
+-- Explains a learner's progress to a teacher or parent; feeds the week walkthrough.
+CREATE TABLE IF NOT EXISTS tutor_turns (
+    id             bigserial PRIMARY KEY,
+    learner_id     int REFERENCES learners(id) ON DELETE CASCADE,
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    topic_id       int,
+    topic          varchar(255),
+    lo_code        varchar(60),
+    problem        text,
+    new_problem    boolean,
+    learner_text   text,
+    reply          text,
+    judged_by      varchar(10),
+    code_verdict   varchar(20),
+    evidence       varchar(30),
+    progress       varchar(20),
+    misconception  varchar(40),
+    strategy       varchar(40),
+    why            text,
+    hint           int,
+    reveal         boolean,
+    level          varchar(12),
+    switch         varchar(20),
+    trigger        varchar(30),
+    no_progress    int,
+    switches       int,
+    mastery_before numeric(6,2),
+    mastery_after  numeric(6,2),
+    topic_score    numeric(6,2),
+    restated       boolean,
+    leak_guard     varchar(12),
+    layout         varchar(10)
+);
+CREATE INDEX IF NOT EXISTS idx_tutor_turns_learner ON tutor_turns(learner_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_llm_calls_created ON llm_calls(created_at);
 
 -- Starter misconception list: cross-topic, common in Senior Phase and FET

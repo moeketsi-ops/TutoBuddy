@@ -380,10 +380,34 @@ def _simplify_problem(problem: str) -> dict | None:
         return None
     raw = m.group(1).strip()
     expr = _parse(raw)
-    if expr is None or not expr.free_symbols or "(" in raw or "/" in raw:
-        return None  # only like-term collecting; brackets and fractions are the model's
-    return {"kind": "simplify", "equation": raw[:80], "answer": _pretty(expr), "_expr": expr,
-            "_terms": _term_count(_pretty(expr))}
+    if expr is None or not expr.free_symbols:
+        return None
+    if "(" not in raw and "/" not in raw:
+        return {"kind": "simplify", "equation": raw[:80], "answer": _pretty(expr), "_expr": expr,
+                "_terms": _term_count(_pretty(expr))}
+    # Brackets and division by a monomial (Grade 8-9 "simplify 3x(4x + 5) - 4x(7x - 8)"):
+    # only when the result is a polynomial, so the answer is unambiguous.
+    from sympy import Add, Mul, cancel, expand
+
+    simp = expand(cancel(expr))
+    if not simp.is_polynomial(*expr.free_symbols):
+        return None
+    # Correct pieces of the working: each bracket product expanded, and each of
+    # its terms. A learner answering Katlego's sub-question ("what is 3x times
+    # 4x?") gives one of these; that is a step forward, not a wrong answer.
+    parts = []
+    for arg in Add.make_args(expr):
+        e = expand(cancel(arg))
+        parts.append(e)
+        parts.extend(Add.make_args(e))
+        coeff, rest = arg.as_coeff_Mul()
+        for f in Mul.make_args(rest):
+            if f.is_Add:  # the bracket's terms times the outside factor, one at a time
+                outside = arg / f
+                parts.extend(expand(outside * t) for t in Add.make_args(f))
+    return {"kind": "simplify", "equation": raw[:80], "answer": _pretty(simp), "_expr": simp,
+            "_terms": _term_count(_pretty(simp)), "_parts": [p for p in parts if p != 0],
+            "_brackets": True}
 
 
 def _term_count(text: str) -> int:
@@ -409,9 +433,18 @@ def _check_expression(solved: dict, text: str) -> str | None:
         return None
     if solved["kind"] == "simplify":
         if not same:
+            for part in solved.get("_parts", []):
+                try:
+                    if simplify(got - part) == 0:
+                        return "step_forward"  # a correct piece of the working
+                except Exception:  # noqa: BLE001
+                    continue
             return "wrong"
-        # equivalent but not simpler (the learner echoed the problem) is no answer yet
-        return "correct" if _term_count(body) <= solved["_terms"] else None
+        if _term_count(body) <= solved["_terms"]:
+            return "correct"
+        # equivalent but not simpler: brackets multiplied out but terms not yet
+        # collected is progress; the problem echoed back is no answer yet
+        return "step_forward" if solved.get("_brackets") and "(" not in body else None
     return "correct" if same else "wrong"
 
 

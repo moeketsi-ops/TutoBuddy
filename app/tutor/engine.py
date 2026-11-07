@@ -276,6 +276,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # evidence: counting each restatement took mastery from 20 to 91 on day 1
     # of the AI-learner week (5 Nov) and inflated strategy success.
     restated = bool(continuing and w.get("answered") and ev in ("attempt_correct", "explained_back"))
+    ev_result = None
     async with pool.acquire() as conn:
         try:
             async with conn.transaction():
@@ -283,7 +284,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                     lo_id = next((lo["id"] for lo in los
                                   if lo["code"] == state.get("lo") and ev_topic_id == (topic or {}).get("id")),
                                  None)
-                    await mastery.record_event(
+                    ev_result = await mastery.record_event(
                         conn, learner_id, ev_topic_id, source="chat", evidence=ev,
                         lo_id=lo_id, hint_level=prev_hint, strategy=prev_strategy or used,
                         misconception=state.get("misc"), cpa_level=level_shown,
@@ -359,7 +360,43 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                    "no_progress": mem["working"].get("no_progress"),
                    "switches": mem["working"].get("switches"),
                    "methods": decision.get("methods_id")})
+    await _log_turn(learner_id, question, reply, decision, state, check, topic, ev_result, restated,
+                    continuing, mem["working"], guard)
     return reply
+
+
+async def _log_turn(learner_id, question, reply, decision, state, check, topic, ev_result, restated,
+                    continuing, working, guard) -> None:
+    """One row per tutoring turn in tutor_turns: what the engine decided and
+    why, who judged the learner's message, and how mastery moved. It explains
+    any learner's progress to a teacher or parent, and feeds the week
+    walkthrough. Bookkeeping only: a failure never costs the learner a reply."""
+    try:
+        pool = await get_pool()
+        st = state or {}
+        judged = "code" if check else ("model" if st.get("ev") not in (None, "none") else "none")
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO tutor_turns (learner_id, topic_id, topic, lo_code, problem, new_problem,
+                    learner_text, reply, judged_by, code_verdict, evidence, progress, misconception,
+                    strategy, why, hint, reveal, level, switch, trigger, no_progress, switches,
+                    mastery_before, mastery_after, topic_score, restated, leak_guard, layout)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+                        $21,$22,$23,$24,$25,$26,$27,$28)
+                """,
+                learner_id, (topic or {}).get("id"), (topic or {}).get("name"), st.get("lo"),
+                working.get("problem") or question[:200], not continuing, question[:500], reply[:2000],
+                judged, check["verdict"] if check else None, st.get("ev"), st.get("progress"),
+                st.get("misc"), decision.get("strategy"), str(decision.get("why") or "")[:200],
+                decision.get("hint"), bool(decision.get("reveal")), decision.get("level"),
+                decision.get("switch"), decision.get("trigger"), working.get("no_progress"),
+                working.get("switches"),
+                (ev_result or {}).get("before"), (ev_result or {}).get("after"),
+                (ev_result or {}).get("topic_score"), restated, guard,
+                settings.prompt_layout.strip().lower() or "classic")
+    except Exception:  # noqa: BLE001
+        log.exception("tutor_reply: turn log failed (learner %s)", learner_id)
 
 
 LEAK_REDO = ("REWRITE: your draft stated the final answer ({answer}) before the learner reached "
