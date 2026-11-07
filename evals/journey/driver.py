@@ -41,7 +41,8 @@ async def preflight() -> bool:
 
     tiers = {t: llm._provider(t) for t in ("router", "reasoner")}
     print("Models: " + "  ".join(f"{t}={p + ':' + llm._model(p, t) if p else 'stub'}" for t, p in tiers.items())
-          + f"  (LLM_PROVIDER={settings.llm_provider})")
+          + f"  (LLM_PROVIDER={settings.llm_provider}, PROMPT_LAYOUT={settings.prompt_layout or 'classic'})")
+    print("  (layout as this container's .env says; the worker uses its own copy, so recreate it after a change)")
     if not any(tiers.values()):
         print("  stub: no model calls; tutoring replies are canned. Set LLM_PROVIDER in .env for a real run.")
         return True

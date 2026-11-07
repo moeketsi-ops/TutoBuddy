@@ -2,7 +2,7 @@
 
     python -m app.reports.cache_eval                    # last day
     python -m app.reports.cache_eval --days 7 --fx 16.02
-    python -m app.reports.cache_eval --read-mult 0.25   # cached tokens billed at 25% of input
+    python -m app.reports.cache_eval --read-mult 0.25 --write-mult 1.0   # another provider's prices
 
 In Docker: docker compose run --rm evals python -m app.reports.cache_eval --fx 16.02
 
@@ -43,7 +43,7 @@ def cacheable(prompt_tokens: int, prompt_chars: int | None, shared_chars: int | 
     return int(shared // STEP * STEP) if shared >= MIN_CACHE else 0
 
 
-def summarise(rows: list[dict], read_mult: float, model: str) -> dict:
+def summarise(rows: list[dict], read_mult: float, model: str, write_mult: float = 1.0) -> dict:
     out: dict[tuple, dict] = {}
     for r in rows:
         key = (r["layout"] or "classic", r["call"])
@@ -59,20 +59,23 @@ def summarise(rows: list[dict], read_mult: float, model: str) -> dict:
         g["cacheable"] += c
         g["cached"] += r["cached"]
         g["cost_in"] += r["tin"] * price[0] / 1e6
-        g["cost_in_cached"] += ((r["tin"] - hit) + hit * read_mult) * price[0] / 1e6
+        # uncached tokens are written to cache; some models bill that above input price
+        g["cost_in_cached"] += ((r["tin"] - hit) * write_mult + hit * read_mult) * price[0] / 1e6
         g["cost_out"] += r["tout"] * price[1] / 1e6
         g["billed"] += r["cost"] or 0.0
     return out
 
 
-def report(groups: dict, read_mult: float, fx: float | None, days: float) -> str:
+def report(groups: dict, read_mult: float, fx: float | None, days: float, write_mult: float = 1.0) -> str:
     def money(x):
         return f"${x:.4f}" + (f" (R{x * fx:.2f})" if fx else "")
 
-    lines = [f"# Prompt caching: what it saves (last {days:g} days, cached input billed at {read_mult:g}x)", "",
+    lines = [f"# Prompt caching: what it saves (last {days:g} days; estimate prices cache reads at "
+             f"{read_mult:g}x and writes at {write_mult:g}x input)", "",
              "| Layout | Call | Calls | Avg prompt tokens | Cacheable (est.) | Served from cache (provider) | "
-             "Input cost, no cache | Input cost, cached | Output cost | Total, cached | Saving |",
-             "|---|---|---|---|---|---|---|---|---|---|---|"]
+             "Input cost, no cache | Input cost, cached (est.) | Output cost | Total, cached (est.) | "
+             "Billed (provider) | Saving (est.) |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for (layout, call), g in sorted(groups.items(), key=lambda kv: (kv[0][1], kv[0][0])):
         total_nc = g["cost_in"] + g["cost_out"]
         total_c = g["cost_in_cached"] + g["cost_out"]
@@ -81,7 +84,8 @@ def report(groups: dict, read_mult: float, fx: float | None, days: float) -> str
             f"| {layout} | {call} | {g['calls']} | {g['tin'] / g['calls']:.0f} | "
             f"{100 * g['cacheable'] / g['tin'] if g['tin'] else 0:.0f}% | "
             f"{100 * g['cached'] / g['tin'] if g['tin'] else 0:.0f}% | {money(g['cost_in'])} | "
-            f"{money(g['cost_in_cached'])} | {money(g['cost_out'])} | {money(total_c)} | {save:.0f}% |")
+            f"{money(g['cost_in_cached'])} | {money(g['cost_out'])} | {money(total_c)} | "
+            f"{money(g['billed']) if g['billed'] else '—'} | {save:.0f}% |")
     tut = {k[0]: v for k, v in groups.items() if k[1] == "socratic_reply"}
     if "classic" in tut and "layered" in tut:
         a, b = tut["classic"], tut["layered"]
@@ -95,13 +99,17 @@ def report(groups: dict, read_mult: float, fx: float | None, days: float) -> str
                   f"- Cost per tutoring reply with caching: {money(ca)} classic, {money(cb)} layered "
                   f"({(cb / ca - 1) * 100:+.0f}%)." if ca else "",
                   f"- Per 1,000 tutoring replies: {money(ca * 1000)} classic, {money(cb * 1000)} layered."]
+        if a["billed"] and b["billed"]:
+            ba, bb = a["billed"] / a["calls"], b["billed"] / b["calls"]
+            lines.append(f"- Actually billed per 1,000 tutoring replies: {money(ba * 1000)} classic, "
+                         f"{money(bb * 1000)} layered ({(bb / ba - 1) * 100:+.0f}%). This is the number to trust.")
     lines += ["", "Cacheable = the part of each prompt identical, from the start, to the same learner's previous "
               "prompt within the cache lifetime, counted in 128-token steps from 1,024 tokens. "
               "Real runs: 'served from cache' is the provider's own figure and the one to trust."]
     return "\n".join(l for l in lines if l is not None)
 
 
-async def main(days: float, read_mult: float, fx: float | None, model: str) -> None:
+async def main(days: float, read_mult: float, fx: float | None, model: str, write_mult: float = 1.0) -> None:
     from app.db import get_pool
 
     since = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
@@ -117,18 +125,20 @@ async def main(days: float, read_mult: float, fx: float | None, model: str) -> N
     if not rows:
         print("No calls with prompt accounting yet: run some traffic on this version first.")
         return
-    print(report(summarise(rows, read_mult, model), read_mult, fx, days))
+    print(report(summarise(rows, read_mult, model, write_mult), read_mult, fx, days, write_mult))
 
 
 def cli() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=float, default=1)
-    ap.add_argument("--read-mult", type=float, default=0.25,
-                    help="cached input price as a share of normal input (OpenAI 0.1-0.5, Z.AI ~0.2)")
+    ap.add_argument("--read-mult", type=float, default=0.1,
+                    help="cached input price as a share of normal input (GPT-6 Luna measured 0.1; Z.AI ~0.2)")
+    ap.add_argument("--write-mult", type=float, default=1.25,
+                    help="price of writing uncached input to cache (GPT-6 Luna measured 1.25; most others 1.0)")
     ap.add_argument("--fx", type=float, default=None, help="rand per dollar")
     ap.add_argument("--model", default="openai/gpt-6-luna", help="price offline (stub) rows as this model")
     a = ap.parse_args()
-    asyncio.run(main(a.days, a.read_mult, a.fx, a.model))
+    asyncio.run(main(a.days, a.read_mult, a.fx, a.model, a.write_mult))
 
 
 if __name__ == "__main__":
