@@ -37,13 +37,53 @@ DATA_STATEMENT = (
 
 EXAMPLE = "_AGREE Nomsa Dlamini, mother_"
 SCHOOL_CODE_LINE = "Got a Katlego code from your school? Send it instead, like _SCH-K7M2QX_."
-HOW_TO_AGREE = (
-    "*Parent or guardian, to agree:*\n"
-    "• From your own WhatsApp (best): the learner sends *LINK* here and I "
-    "give them a code for you.\n"
-    "• On this phone: reply *AGREE* with your full name and how you are "
-    f"related to the learner, like {EXAMPLE}.\n\n{SCHOOL_CODE_LINE}"
-)
+
+
+def how_to_agree() -> str:
+    media = (
+        "• One phone in the family? Send *VOICE* to agree with a 🎤 voice note, "
+        "or *SLIP* to send a 📸 photo of a signed note. I keep the recording or "
+        "photo as the record.\n"
+    ) if settings.consent_media_enabled else ""
+    return (
+        "*Parent or guardian, to agree:*\n"
+        "• From your own WhatsApp (best): the learner sends *LINK* here and I "
+        "give them a code for you.\n"
+        f"{media}"
+        "• On this phone: reply *AGREE* with your full name and how you are "
+        f"related to the learner, like {EXAMPLE}.\n\n{SCHOOL_CODE_LINE}"
+    )
+
+
+# Consent by voice note or signed-slip photo: what the guardian is asked to
+# say or write, keyed by the learner's choice (VOICE or SLIP).
+MEDIA = {
+    "voice": {
+        "method": "voice_note", "level": "voice", "type": "audio",
+        "ask": (
+            "Ask your parent or guardian to record a 🎤 voice note here, saying:\n\n"
+            "_“My name is (full name). I am this learner's (mother, father or "
+            "guardian), and I agree to Katlego keeping their study progress.”_\n\n"
+            "Any language is fine. I keep the recording as the record of their agreement."
+        ),
+    },
+    "slip": {
+        "method": "signed_slip", "level": "slip", "type": "image",
+        "ask": (
+            "Ask your parent or guardian to write this on paper, sign it, and "
+            "send me a 📸 photo:\n\n"
+            "_“I, (full name), am this learner's (mother, father or guardian). I "
+            "agree to Katlego keeping their study progress. (Signature and date)”_\n\n"
+            "I keep the photo as the record of their agreement."
+        ),
+    },
+}
+
+
+def media_choice(text: str) -> str | None:
+    """"voice" or "slip" when the learner picks that route and it is switched on."""
+    kind = text.strip().lower()
+    return kind if settings.consent_media_enabled and kind in MEDIA else None
 
 # School sign-up codes (seed/load_enrolment_codes.py). The SCH prefix keeps an
 # ordinary word from being mistaken for a code.
@@ -73,14 +113,14 @@ def notice(reason: str = "new_household") -> str:
         return (
             "Adding another learner needs permission from a parent or guardian "
             "for that learner too (POPIA).\n\n"
-            f"{DATA_STATEMENT}\n\n{HOW_TO_AGREE}\n\nSend *CANCEL* to go back."
+            f"{DATA_STATEMENT}\n\n{how_to_agree()}\n\nSend *CANCEL* to go back."
         )
     return (
         "Hi! I'm *Katlego* 🎓 — your CAPS study buddy on WhatsApp.\n\n"
         "Before we start, South African law (POPIA) requires permission from your "
         "parent or guardian, because I keep track of your progress to tutor you "
         "better.\n\n"
-        f"{DATA_STATEMENT}\n\n{HOW_TO_AGREE}"
+        f"{DATA_STATEMENT}\n\n{how_to_agree()}"
     )
 
 
@@ -155,11 +195,14 @@ async def record(
     reply_text: str | None = None,
     guardian_name: str | None = None,
     school_code: str | None = None,
+    media: tuple[str, bytes, str] | None = None,
 ) -> int:
     """Save one consent event and return its id. `message` is the inbound
     WhatsApp message that agreed: its id and its own timestamp are the
     evidence (consent time is when the guardian sent it, not when a profile
-    was created later)."""
+    was created later). `media` is (kind, bytes, mime) for a voice note
+    or slip photo, stored as the evidence; reply_text is then the transcript
+    or caption."""
     ts = str(message.get("timestamp") or "")
     consent_at = (datetime.fromtimestamp(int(ts), timezone.utc) if ts.isdigit()
                   else datetime.now(timezone.utc))
@@ -180,6 +223,17 @@ async def record(
             await conn.execute(
                 "UPDATE enrolment_codes SET consent_record_id = $2 WHERE code = $1",
                 school_code, consent_id)
+        if media:
+            kind, content, mime = media
+            await conn.execute(
+                "INSERT INTO consent_media (consent_record_id, kind, mime, content, sha256, transcript) "
+                "VALUES ($1, $2, $3, $4, $5, $6)",
+                consent_id, kind, mime, content, hashlib.sha256(content).hexdigest(), reply_text)
+            # Nobody has looked at a slip photo; a voice note is flagged when
+            # its transcript has no "agree" (it may be in another language).
+            unchecked = kind == "slip" or "agree" not in (reply_text or "").lower()
+            await conn.execute(
+                "UPDATE consent_records SET needs_review = $2 WHERE id = $1", consent_id, unchecked)
     return consent_id
 
 

@@ -290,12 +290,14 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     transcript_prefix = ""
     image_bytes: bytes | None = None
     image_mime = ""
+    audio_bytes: bytes | None = None
+    audio_mime = ""
 
     if msg_type == "text":
         text = message.get("text", {}).get("body", "")
     elif msg_type == "audio":
-        audio_bytes, mime = await wa.get_media(message["audio"]["id"])
-        text = await stt.transcribe(audio_bytes, mime)
+        audio_bytes, audio_mime = await wa.get_media(message["audio"]["id"])
+        text = await stt.transcribe(audio_bytes, audio_mime)
         transcript_prefix = f"🎤 I heard: _{text}_\n\n"
     elif msg_type == "image":
         image_bytes, image_mime = await wa.get_media(message["image"]["id"])
@@ -347,8 +349,16 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         reason = sess.data.get("onboarding_reason", "new_household")
         code = consent.school_code(text)
         school = await consent.redeem_school_code(code) if code else None
-        guardian = consent.agreement(text)  # the name typed after AGREE; "" if left out
-        if school or guardian:
+        # The name typed after AGREE; "" if left out. Typed only: a voice note
+        # counts as consent only on the VOICE route below.
+        guardian = consent.agreement(text) if msg_type == "text" else None
+        # A voice note or slip photo, when the learner chose that route.
+        route = consent.MEDIA.get(sess.data.get("expect_media"))
+        media = None
+        if route and msg_type == route["type"]:
+            media = ((sess.data["expect_media"], audio_bytes, audio_mime) if msg_type == "audio"
+                     else (sess.data["expect_media"], image_bytes, image_mime))
+        if school or guardian or media:
             # create_household is idempotent: a sibling lands on the same account.
             account_id, guardian_id = await session.create_household(phone)
             if school:
@@ -358,6 +368,13 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
                     message=message, notice={"version": school["slip_version"]},
                     reply_text=code, school_code=code,
                 )
+            elif media:
+                # The recording or photo is the evidence; `text` is the
+                # transcript or caption.
+                consent_id = await consent.record(
+                    account_id, method=route["method"], level=route["level"], replied_from=phone,
+                    message=message, notice=sess.data.get("notice"), reply_text=text, media=media,
+                )
             else:
                 consent_id = await consent.record(
                     account_id, method="typed_agree", level="declared", replied_from=phone,
@@ -365,6 +382,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
                     guardian_name=guardian,
                 )
             await consent.drop_link(sess)  # a code waiting for the guardian's phone is now moot
+            sess.data.pop("expect_media", None)
             sess.data.update(
                 state="awaiting_name",
                 account_id=account_id,
@@ -376,6 +394,10 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             reply = session.NAME_PROMPT
         elif text.strip().upper() == "LINK":
             reply = await consent.start_link(sess, phone)
+        elif msg_type == "text" and consent.media_choice(text):
+            sess.data["expect_media"] = consent.media_choice(text)
+            await session.save(sess)
+            reply = consent.MEDIA[sess.data["expect_media"]]["ask"]
         elif reason == "add_learner" and text.strip().upper() == "CANCEL":
             # Back to the learner who was studying; nobody was added.
             sess.data.pop("onboarding_reason", None)

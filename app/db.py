@@ -138,6 +138,22 @@ ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS last_notice_at timestamptz;
 ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirmed_at timestamptz;
 ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirm_message_id text;
 
+-- Consent given as a voice note or a photo of a signed slip (only when
+-- CONSENT_MEDIA_ENABLED is on). The recording or photo is the evidence, so
+-- it is kept with the record and erased with it. needs_review marks a
+-- consent nobody has checked: every slip photo, and any voice note whose
+-- transcript does not contain "agree" (the transcript never decides).
+CREATE TABLE IF NOT EXISTS consent_media (
+    consent_record_id int PRIMARY KEY REFERENCES consent_records(id) ON DELETE CASCADE,
+    kind       text NOT NULL,  -- voice | slip
+    mime       text NOT NULL,
+    content    bytea NOT NULL,
+    sha256     text NOT NULL,
+    transcript text,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS needs_review boolean NOT NULL DEFAULT false;
+
 -- School route (seed/load_enrolment_codes.py): the school collects a signed
 -- slip from each parent and keeps it; each returned slip earns one sign-up
 -- code. The row holds the school's own reference for the learner, never a

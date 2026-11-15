@@ -119,6 +119,11 @@ class Settings(BaseSettings):
     # days, then reminded how to withdraw at the longer interval.
     consent_reconfirm_days: int = 7
     consent_reminder_days: int = 30
+    # Lets a guardian agree with a voice note or a photo of a signed slip,
+    # for families who share one phone. Katlego then stores the recording or
+    # photo. OFF until a privacy lawyer has settled storage and retention
+    # (docs/guardian-consent-findings.md, questions 10 and 11).
+    consent_media_enabled: bool = False
 
     # Infra
     database_url: str = "postgresql://katlego:katlego@db:5432/katlego"
