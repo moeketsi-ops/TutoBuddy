@@ -7,6 +7,7 @@ GRAPH_API_BASE_URL points here. Extra local-only endpoints:
   GET  /outbox            — captured outbound sends (tests + demo UI poll this)
   DELETE /outbox          — clear captured sends
   POST /media             — upload media (the demo UI's voice notes / photos)
+  POST /block/{to}        — make the next send to that number fail once
 """
 
 import itertools
@@ -26,12 +27,18 @@ app.add_middleware(
 )
 
 OUTBOX: list[dict] = []
+BLOCKED: set[str] = set()  # numbers whose next send fails once (POST /block/{to})
 MEDIA: dict[str, tuple[bytes, str]] = {}
 _counter = itertools.count(1)
 
 
 @app.post("/{version}/{phone_number_id}/messages")
 async def send_message(version: str, phone_number_id: str, payload: dict):
+    if payload.get("to") in BLOCKED:
+        # Like the real API outside the 24-hour customer service window.
+        BLOCKED.discard(payload["to"])
+        return JSONResponse({"error": {"code": 131047, "message": "Re-engagement message"}},
+                            status_code=400)
     OUTBOX.append(
         {
             "index": len(OUTBOX),
@@ -46,6 +53,12 @@ async def send_message(version: str, phone_number_id: str, payload: dict):
         "contacts": [{"input": payload.get("to", ""), "wa_id": payload.get("to", "")}],
         "messages": [{"id": f"wamid.mock.{next(_counter)}"}],
     }
+
+
+@app.post("/block/{to}")
+async def block_next_send(to: str):
+    BLOCKED.add(to)
+    return {"blocked": to}
 
 
 @app.get("/outbox")

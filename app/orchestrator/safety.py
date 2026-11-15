@@ -23,6 +23,8 @@ trade-off; false negatives are not.
 
 import re
 
+from app.config import settings
+
 # Each category is scanned independently so a flagged case can be logged
 # and escalated with *why*, not just a bare yes/no.
 _RISK_PATTERNS: dict[str, list[str]] = {
@@ -125,4 +127,8 @@ def sanitize_output(text: str) -> str:
     """
     if classify_risk(text) is not None:
         return REFERRAL_MESSAGE
-    return _URL.sub("[link removed]", text)
+    # The one link Katlego sends on purpose: its own wa.me address, which a
+    # guardian opens to confirm consent from their own phone (consent.py).
+    own = f"https://wa.me/{settings.whatsapp_public_number}?" if settings.whatsapp_public_number else None
+    return _URL.sub(
+        lambda m: m.group(0) if own and m.group(0).startswith(own) else "[link removed]", text)

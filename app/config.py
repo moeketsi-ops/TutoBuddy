@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "katlego-verify-token"
     meta_app_secret: str = PLACEHOLDER
     graph_api_base_url: str = "http://mockwa:8001"
+    # Katlego's own WhatsApp number, digits only in international form (e.g.
+    # 27600000000). Used to build the wa.me link a guardian opens to confirm
+    # consent from their own phone. Empty: the code is shown without a link.
+    whatsapp_public_number: str = ""
 
     # LLM
     llm_provider: str = "stub"  # stub | anthropic | groq | ollama | openrouter

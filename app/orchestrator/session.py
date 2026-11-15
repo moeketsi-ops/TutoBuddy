@@ -21,6 +21,7 @@ import json
 
 from app.db import get_pool
 from app.queue import get_redis
+from app.tutor import memory
 
 SESSION_TTL_SECONDS = 30 * 24 * 3600
 
@@ -299,3 +300,58 @@ async def delete_household(account_id: int | None, phone: str) -> None:
             if account_id is not None:
                 await conn.execute("DELETE FROM accounts WHERE id = $1", account_id)
     await reset(phone)
+
+
+def activate_without_grade(sess: Session, learner: dict) -> None:
+    """Make `learner` active but ask for their grade first. Grade rule
+    (app.tutor.rag.grade_scoped_context): every reply is pitched at the
+    active learner's profile grade, so a profile with no grade must never
+    fall back to a default (it used to be silently treated as Grade 11)."""
+    sess.data.update(
+        state="awaiting_grade",
+        active_learner_id=learner["id"],
+        grade=None,
+        name=learner["nickname"],
+        onboarding_reason="add_learner",
+    )
+
+
+async def erase_learner(
+    sess: Session, phone: str, account_id: int, learner_id: int, name: str
+) -> str:
+    """Erase one learner (DELETE or WITHDRAW in their chat, or a guardian
+    withdrawing from their own phone) and return the message for the chat on
+    `phone`, whose session is `sess`. If that learner was the one studying,
+    the session moves to a sibling; with no learners left the whole
+    household goes (POPIA: "erase everything" must mean everything, incl.
+    the phone number, consent records and pre-consent chat rows).
+    Safeguarding flags are kept by design."""
+    await memory.forget(learner_id)
+    await delete_active_learner(learner_id)
+    remaining = await list_learners(account_id)
+    if not remaining:
+        await delete_household(account_id, phone)
+        sess.data["household_erased"] = True  # in-memory only; Redis was reset
+        return (
+            f"{name}'s profile was deleted, and with no learners left "
+            f"everything else has been erased too — phone number, consent and "
+            f"chat history. ✅\n\nIf you ever want to study together again, just "
+            f"say hi; a parent or guardian will need to AGREE again."
+        )
+    if sess.active_learner_id != learner_id:
+        return f"{name}'s profile was deleted. ✅"
+    sess.data.pop("pending_practice", None)
+    nxt = remaining[0]
+    if not nxt["grade"]:
+        # Grade rule: never guess a grade. Ask for it before tutoring.
+        activate_without_grade(sess, nxt)
+        await save(sess)
+        return (
+            f"{name}'s profile was deleted. ✅ Switched to "
+            f"{nxt['nickname']}.\n\n{grade_prompt(nxt['nickname'])}"
+        )
+    sess.data.update(
+        state="active", active_learner_id=nxt["id"], grade=nxt["grade"], name=nxt["nickname"]
+    )
+    await save(sess)
+    return f"{name}'s profile was deleted. ✅ Switched to {nxt['nickname']} (Grade {nxt['grade']})."

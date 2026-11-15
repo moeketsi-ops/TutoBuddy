@@ -130,6 +130,7 @@ CREATE TABLE IF NOT EXISTS consent_records (
 );
 CREATE INDEX IF NOT EXISTS idx_consent_records_learner ON consent_records(learner_id);
 CREATE INDEX IF NOT EXISTS idx_consent_records_account ON consent_records(account_id);
+CREATE INDEX IF NOT EXISTS idx_consent_records_from ON consent_records(replied_from);
 
 -- Follow-up on consents that no second account or school backs up: when the
 -- guardian was last shown a reminder, and their CONFIRM a week or so later.
