@@ -92,16 +92,44 @@ CREATE TABLE IF NOT EXISTS learners (
 );
 CREATE INDEX IF NOT EXISTS idx_learners_account ON learners(account_id);
 
--- Per-learner guardian consent. Phase 1 simplification: one guardian's
--- consent (given once, at household creation) covers every learner they
--- add -- there's no separate per-child consent capture flow yet, even
--- though this table is already shaped for it (its own consent_given_at).
+-- Guardian-to-learner link. consent_given_at is the time the guardian
+-- agreed (copied from the consent_records row that covers this learner).
 CREATE TABLE IF NOT EXISTS guardian_learner (
     guardian_id int NOT NULL REFERENCES guardians(id) ON DELETE CASCADE,
     learner_id  int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
     consent_given_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (guardian_id, learner_id)
 );
+
+-- Guardian consent evidence (app/orchestrator/consent.py,
+-- docs/guardian-consent-findings.md). consent_notices holds each wording
+-- ever shown, keyed by a hash of the text; it holds no personal data.
+-- consent_records is one row per consent event per learner. Both FKs
+-- cascade, so erasing a learner or a household erases its consent record
+-- too -- the existing "erase everything" promise. Whether a minimal proof
+-- may be kept after erasure is an open legal question (findings note, Q7).
+CREATE TABLE IF NOT EXISTS consent_notices (
+    version       text PRIMARY KEY,
+    body          text NOT NULL,
+    first_sent_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS consent_records (
+    id                serial PRIMARY KEY,
+    account_id        int NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    learner_id        int REFERENCES learners(id) ON DELETE CASCADE,  -- set once the profile exists
+    method            text NOT NULL,  -- typed_agree | school_code | guardian_whatsapp | voice_note | signed_slip
+    level             text NOT NULL,  -- declared | voice | slip | second_account | school
+    notice_version    text REFERENCES consent_notices(version),
+    notice_message_id text,           -- WhatsApp id of the notice Katlego sent
+    reply_message_id  text,           -- WhatsApp id of the message that agreed
+    reply_text        text,           -- as sent, not the redacted chat-log copy
+    replied_from      text NOT NULL,  -- WhatsApp account that agreed
+    guardian_name     text,
+    consent_at        timestamptz NOT NULL,
+    created_at        timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_consent_records_learner ON consent_records(learner_id);
+CREATE INDEX IF NOT EXISTS idx_consent_records_account ON consent_records(account_id);
 
 CREATE TABLE IF NOT EXISTS conversation_log (
     id serial PRIMARY KEY,

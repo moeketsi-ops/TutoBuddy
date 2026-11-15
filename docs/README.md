@@ -16,6 +16,7 @@ not the current state of `main`.
 | `memory-pedagogy.md` | Per-learner memory window, STATE line, evidence-weighted mastery, pedagogy engine v1, bench `conversations` suite | `app/tutor/memory.py`, `state.py`, `mastery.py`, `pedagogy.py`, `app/adapters/ledger.py` |
 | `cpa-tmu-switching.md` | CPA levels, TMU strands and methods, the 3-turn switching rule, code-side answer checking, evidence log, bench CPA cases and homework day | `app/tutor/answer_check.py`, `representation.py`, `tmu.py`, `pedagogy.py`, `engine.py`, `evals/bench/run.py` |
 | `checkin-papers-test-prep.md` | Sign-up check-in (MCQ over every topic), real past papers marked against the memo, test prep from the learner and the ATP, study squads | `app/tutor/diagnostic.py`, `papers.py`, `test_prep.py`, `app/orchestrator/practice.py`, `seed/diagnostic`, `seed/papers` |
+| `guardian-consent-findings.md` | Guardian consent research (POPIA, WhatsApp rules), the questions for a privacy lawyer, and the build record for consent records, school codes, guardian confirmation and withdrawal | `app/orchestrator/consent.py`, `app/orchestrator/session.py`, `app/worker.py`, `app/db.py` |
 | `technical-blueprint-reconciliation.md` | CTO blueprint vs MVP roadmap: scope, router tiers, infra, safety layers | `app/db.py`, `app/tutor/rag.py` |
 
 Some notes mention other project notes that are not in this folder

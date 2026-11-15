@@ -60,6 +60,27 @@ def assert_tutored(reply: str) -> None:
 MOCKWA = os.environ.get("MOCKWA_URL", "http://localhost:8001").rstrip("/")
 
 
+# The guardian's agreement message. Kept in one place because sign-up is
+# scripted in many test files and this step changes with the consent flow.
+AGREE = "AGREE"
+
+
+def db(sql: str, *args) -> list[dict]:
+    """Rows from the app database, for asserting on what was stored."""
+    import asyncio
+
+    import asyncpg
+
+    async def q():
+        conn = await asyncpg.connect(os.environ["DATABASE_URL"])
+        try:
+            return [dict(r) for r in await conn.fetch(sql, *args)]
+        finally:
+            await conn.close()
+
+    return asyncio.run(q())
+
+
 def fresh_phone() -> str:
     return "2782" + str(int(uuid.uuid4().int % 10**7)).zfill(7)
 
@@ -147,7 +168,7 @@ def onboarded_chat() -> Chat:
     c = Chat()
     c.send_text("hi")
     assert "POPIA" in c.wait_for_reply()
-    c.send_text("AGREE")
+    c.send_text(AGREE)
     assert "call you" in c.wait_for_reply().lower()
     c.send_text("Thabo")
     assert "grade" in c.wait_for_reply().lower()

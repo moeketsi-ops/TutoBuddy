@@ -180,7 +180,8 @@ async def run() -> Path:
     steps.check("PREP answers (Grade 8 has no papers yet, so it says so)", bool(r.strip()), r[:120])
 
     # 7. sibling on Grade 10: papers
-    steps.check("ADD LEARNER asks for a name", "call you" in a.say("ADD LEARNER").lower())
+    steps.check("ADD LEARNER asks a guardian to agree for the sibling", "AGREE" in a.say("ADD LEARNER"))
+    steps.check("AGREE then name prompt", "call you" in a.say("AGREE").lower())
     a.say("Kabelo")
     r = a.say("10")
     steps.check("sibling gets their own Grade 10 check-in", "Check-in 1/13" in r)

@@ -1,12 +1,12 @@
 """Pilot grade: a Grade 8 learner gets Grade 8 CAPS-grounded tutoring."""
 
-from tests.conftest import REAL_LLM, assert_tutored
+from tests.conftest import AGREE, REAL_LLM, assert_tutored
 
 
 def test_grade8_homework_question_is_grounded_in_grade8_content(chat):
     chat.send_text("hi")
     chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     chat.wait_for_reply()  # name prompt
     chat.send_text("Lerato")
     chat.wait_for_reply()  # grade prompt

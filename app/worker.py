@@ -23,7 +23,7 @@ import redis.asyncio as aioredis
 from app.adapters import ledger, llm, router, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
-from app.orchestrator import practice, safeguarding, safety, session
+from app.orchestrator import consent, practice, safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
 from app.tutor import diagnostic, memory
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
@@ -226,9 +226,10 @@ async def handle_active(
         await session.reset(phone)
         return "Okay, starting fresh! Say hi to begin again. 👋", "admin"
     if command == "ADD LEARNER":
-        sess.data.update(state="awaiting_name", onboarding_reason="add_learner")
+        # Consent is per learner: a sibling needs the guardian to agree again.
+        sess.data.update(state="awaiting_consent", onboarding_reason="add_learner")
         await session.save(sess)
-        return session.NAME_PROMPT, "admin"
+        return consent.notice("add_learner"), "consent_notice"
     if command == "SWITCH":
         learners = await session.list_learners(sess.account_id)
         if len(learners) <= 1:
@@ -381,24 +382,39 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     if sess.state == "":
         sess.data = {"state": "awaiting_consent", "name": name}
         await session.save(sess)
-        reply = session.CONSENT_MESSAGE
+        reply, intent = consent.notice(), "consent_notice"
     elif sess.state == "awaiting_consent":
-        if text.strip().upper() in {"AGREE", "YES", "ACCEPT", "I AGREE"}:
+        reason = sess.data.get("onboarding_reason", "new_household")
+        if consent.agreed(text):
+            # create_household is idempotent: a sibling lands on the same account.
             account_id, guardian_id = await session.create_household(phone)
+            consent_id = await consent.record(
+                account_id, method="typed_agree", level="declared", replied_from=phone,
+                message=message, notice=sess.data.get("notice"), reply_text=text,
+            )
             sess.data.update(
                 state="awaiting_name",
                 account_id=account_id,
                 guardian_id=guardian_id,
-                onboarding_reason="new_household",
+                onboarding_reason=reason,
+                consent_id=consent_id,
             )
             await session.save(sess)
             reply = session.NAME_PROMPT
+        elif reason == "add_learner" and text.strip().upper() == "CANCEL":
+            # Back to the learner who was studying; nobody was added.
+            sess.data.pop("onboarding_reason", None)
+            sess.data["state"] = "active"
+            await session.save(sess)
+            reply = f"Okay, no learner added. Carrying on with {sess.name}. 🎓"
         else:
-            reply = session.CONSENT_REPROMPT
+            reply = consent.reprompt(reason)
     elif sess.state == "awaiting_name":
         cleaned = session.clean_name(text)
         if cleaned:
-            learner_id = await session.add_learner(sess.account_id, sess.guardian_id, cleaned)
+            learner_id = await session.add_learner(
+                sess.account_id, sess.guardian_id, cleaned, sess.data.pop("consent_id", None)
+            )
             sess.data.pop("pending_practice", None)
             sess.data.update(state="awaiting_grade", active_learner_id=learner_id, name=cleaned)
             await session.save(sess)
@@ -452,6 +468,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         else:
             reply, intent = await handle_active(wa, sess, phone, text)
 
+    notice_text = reply if intent == "consent_notice" else None
     raw_reply = transcript_prefix + reply
     output_risk = safety.classify_risk(raw_reply)
     if output_risk is not None:
@@ -462,7 +479,12 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             learner_id=sess.active_learner_id,
         )
     reply = safety.sanitize_output(raw_reply)
-    await wa.send_text(phone, reply)
+    sent = await wa.send_text(phone, reply)
+    if notice_text:
+        # Remember which wording is on screen and its WhatsApp id, so the
+        # consent record can point at exactly what the guardian agreed to.
+        sess.data["notice"] = await consent.notice_sent(safety.sanitize_output(notice_text), sent)
+        await session.save(sess)
     if sess.data.get("household_erased"):
         # DELETE of the last learner just erased the account, learner and
         # every conversation_log row for this phone. Logging the confirmation

@@ -12,11 +12,9 @@ stays synchronous (no DB round-trip needed just to read `sess.grade`).
 
 POPIA §34–35: a "competent person" (parent/guardian) must consent before we
 process a child's personal information — the consent gate runs before any
-profiling or tutoring. Phase-1 simplification, stated explicitly: one
-guardian's consent (given once, at household creation) covers every
-learner they add under that household — there's no separate per-child
-consent capture flow yet, even though guardian_learner has its own
-consent_given_at column ready for that later.
+profiling or tutoring. Consent is per learner: ADD LEARNER asks again, and
+each consent event is a consent_records row (app/orchestrator/consent.py,
+docs/guardian-consent-findings.md).
 """
 
 import json
@@ -25,25 +23,6 @@ from app.db import get_pool
 from app.queue import get_redis
 
 SESSION_TTL_SECONDS = 30 * 24 * 3600
-
-CONSENT_MESSAGE = (
-    "Hi! I'm *Katlego* 🎓 — your CAPS study buddy on WhatsApp.\n\n"
-    "Before we start, South African law (POPIA) requires permission from your "
-    "parent or guardian, because I keep track of your progress to tutor you "
-    "better.\n\n"
-    "📋 *Please show this to your parent/guardian:*\n"
-    "_Katlego stores this phone number, a nickname and grade, plus study "
-    "progress, to personalise tutoring. No data is sold or shared. Send "
-    "DELETE any time to erase a learner; erasing the last learner removes "
-    "the whole household record._\n\n"
-    "If your parent or guardian agrees, ask them to reply *AGREE* to continue."
-)
-
-CONSENT_REPROMPT = (
-    "I can only start tutoring once a parent or guardian replies *AGREE* — "
-    "that's the law for learners' data (POPIA). 🙏\n\n"
-    "Show them the message above, and reply *AGREE* when they say it's okay."
-)
 
 NAME_PROMPT = (
     "Thank you! Consent noted. ✅\n\n"
@@ -217,22 +196,34 @@ async def account_for_phone(phone: str) -> int | None:
         )
 
 
-async def add_learner(account_id: int, guardian_id: int, nickname: str) -> int:
-    """Creates a learner under an existing household and links guardian
-    consent to it (see the phase-1 simplification in the module docstring).
-    Returns the new learner_id."""
+async def add_learner(
+    account_id: int, guardian_id: int, nickname: str, consent_id: int | None = None
+) -> int:
+    """Creates a learner under an existing household and ties the consent
+    event that covers them (consent_records) to the new profile. The
+    guardian link carries the time the guardian agreed, not the time the
+    profile was created. Returns the new learner_id."""
     pool = await get_pool()
     async with pool.acquire() as conn:
-        learner_id = await conn.fetchval(
-            "INSERT INTO learners (account_id, nickname) VALUES ($1, $2) RETURNING id",
-            account_id,
-            nickname,
-        )
-        await conn.execute(
-            "INSERT INTO guardian_learner (guardian_id, learner_id) VALUES ($1, $2)",
-            guardian_id,
-            learner_id,
-        )
+        async with conn.transaction():
+            learner_id = await conn.fetchval(
+                "INSERT INTO learners (account_id, nickname) VALUES ($1, $2) RETURNING id",
+                account_id,
+                nickname,
+            )
+            await conn.execute(
+                "INSERT INTO guardian_learner (guardian_id, learner_id, consent_given_at) "
+                "VALUES ($1, $2, COALESCE("
+                "(SELECT consent_at FROM consent_records WHERE id = $3), now()))",
+                guardian_id,
+                learner_id,
+                consent_id,
+            )
+            await conn.execute(
+                "UPDATE consent_records SET learner_id = $2 WHERE id = $1",
+                consent_id,
+                learner_id,
+            )
     return learner_id
 
 
