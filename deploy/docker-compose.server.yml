@@ -1,0 +1,82 @@
+# Katlego on katlego-server (Lightsail $12: 2 GB RAM + 2 GB swap).
+# No gateway, mockwa, stt or Ollama: the AWS Lambda receives Meta webhooks and
+# the bridge pulls them from SQS, so the server needs NO open web ports.
+#   sudo bash deploy/up.sh        (build, seed once, start)
+name: katlego
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+x-app-env: &app-env
+  - server.env                      # non-secret settings (in git)
+  - /opt/katlego/secrets.env        # tokens + DB url (written by set-secrets.sh, 600)
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "effective_cache_size=512MB",
+              "-c", "work_mem=8MB", "-c", "max_connections=30"]
+    environment: { POSTGRES_USER: katlego, POSTGRES_DB: katlego }
+    env_file: [/opt/katlego/db.env]     # POSTGRES_PASSWORD only
+    volumes: [pgdata:/var/lib/postgresql/data]
+    mem_limit: 512m
+    restart: unless-stopped
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U katlego"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    # noeviction: the job stream must never be silently evicted
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb",
+              "--maxmemory-policy", "noeviction"]
+    volumes: [redisdata:/data]
+    mem_limit: 192m
+    restart: unless-stopped
+    logging: *logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  worker:
+    build: { context: .., dockerfile: Dockerfile }
+    image: katlego-app:latest
+    command: python -m app.worker
+    env_file: *app-env
+    mem_limit: 768m
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  bridge:
+    build: { context: .., dockerfile: deploy/Dockerfile.bridge }
+    image: katlego-bridge:latest
+    env_file:
+      - server.env
+      - /opt/katlego/aws.env          # katlego-worker IAM key (queue-only), 600
+    mem_limit: 128m
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      redis: { condition: service_healthy }
+
+  # One-off: sudo docker compose -f deploy/docker-compose.server.yml run --rm seed
+  seed:
+    image: katlego-app:latest
+    command: python -m seed.seed
+    env_file: *app-env
+    profiles: ["tools"]
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  redisdata:

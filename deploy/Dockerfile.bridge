@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+RUN pip install --no-cache-dir "boto3>=1.35" "redis>=5.0"
+WORKDIR /srv
+COPY deploy/sqs_bridge.py ./
+CMD ["python", "-u", "sqs_bridge.py"]
