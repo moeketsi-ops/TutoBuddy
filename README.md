@@ -23,7 +23,7 @@ docker compose run --rm seed python -m seed.load_past_papers  # OCR'd past paper
 open http://localhost:8000/demo                        # WhatsApp-style demo simulator
 ```
 
-Say **hi** in the simulator, then onboard: a guardian replies **AGREE**, you
+Say **hi** in the simulator, then onboard: a guardian replies **AGREE** with their name (like *AGREE Nomsa Dlamini, mother*), you
 give a **name**, then a **grade** (the pilot grade is **8**). Then ask
 something like *"How do I collect like terms?"* — or click 🎤 and ask out
 loud (local Whisper transcribes it, no key needed). Say **quiz me** for a

@@ -131,6 +131,12 @@ CREATE TABLE IF NOT EXISTS consent_records (
 CREATE INDEX IF NOT EXISTS idx_consent_records_learner ON consent_records(learner_id);
 CREATE INDEX IF NOT EXISTS idx_consent_records_account ON consent_records(account_id);
 
+-- Follow-up on consents that no second account or school backs up: when the
+-- guardian was last shown a reminder, and their CONFIRM a week or so later.
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS last_notice_at timestamptz;
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirmed_at timestamptz;
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirm_message_id text;
+
 -- School route (seed/load_enrolment_codes.py): the school collects a signed
 -- slip from each parent and keeps it; each returned slip earns one sign-up
 -- code. The row holds the school's own reference for the learner, never a

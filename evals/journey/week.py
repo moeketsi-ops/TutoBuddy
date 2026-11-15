@@ -154,7 +154,7 @@ async def run(mode: str, learner_model: str) -> Path:
         raise SystemExit(1)
 
     # Day 0: sign-up + baseline check-in
-    for m in ("hi", "AGREE", spec["name"]):
+    for m in ("hi", "AGREE Nomsa Dlamini, mother", spec["name"]):
         phone.say(m)
     r = phone.say(str(spec["grade"]))
     weak = set(spec["checkin"]["baseline_wrong"])

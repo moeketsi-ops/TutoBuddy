@@ -62,7 +62,7 @@ MOCKWA = os.environ.get("MOCKWA_URL", "http://localhost:8001").rstrip("/")
 
 # The guardian's agreement message. Kept in one place because sign-up is
 # scripted in many test files and this step changes with the consent flow.
-AGREE = "AGREE"
+AGREE = "AGREE Nomsa Dlamini, mother"
 
 
 def db(sql: str, *args) -> list[dict]:

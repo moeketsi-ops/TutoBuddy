@@ -110,6 +110,12 @@ class Settings(BaseSettings):
     # persisted to safeguarding_flags, but nothing is pushed to anyone.
     safeguarding_alert_phone: str = PLACEHOLDER
 
+    # Guardian consent follow-up (app/orchestrator/consent.py). A sign-up
+    # that rests on a typed AGREE is asked to confirm once after this many
+    # days, then reminded how to withdraw at the longer interval.
+    consent_reconfirm_days: int = 7
+    consent_reminder_days: int = 30
+
     # Infra
     database_url: str = "postgresql://katlego:katlego@db:5432/katlego"
     redis_url: str = "redis://redis:6379/0"

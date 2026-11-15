@@ -46,7 +46,8 @@ HELP_MESSAGE = (
     "• *SWITCH* — change who's studying\n"
     "• *HELP* — this message\n"
     "• *RESET* — start onboarding again\n"
-    "• *DELETE* — erase the active learner's data (POPIA right to deletion)\n\n"
+    "• *DELETE* — erase the active learner's data (POPIA right to deletion)\n"
+    "• *WITHDRAW* — for a parent or guardian: withdraw consent (same as DELETE)\n\n"
     "Tip: I coach you step by step instead of just giving answers."
 )
 
@@ -205,7 +206,7 @@ async def handle_active(
         return diagnostic.report(sess.name, last["grade"], last, last["focus"]), "admin"
     st = sess.data.get("diagnostic")
     if st and not st.get("paused") and command not in ("HELP", "RESET", "ADD LEARNER", "SWITCH",
-                                                        "DELETE", "PROGRESS", "SKIP"):
+                                                        "DELETE", "WITHDRAW", "PROGRESS", "SKIP"):
         reply = await handle_checkin(sess, text)
         if reply is not None:
             return reply, "checkin"
@@ -237,7 +238,7 @@ async def handle_active(
         sess.data["state"] = "choosing_learner"
         await session.save(sess)
         return session.switch_prompt(learners), "admin"
-    if command == "DELETE":
+    if command in ("DELETE", "WITHDRAW"):  # WITHDRAW: the guardian's word for it
         deleted_name = sess.name
         await memory.forget(sess.active_learner_id)
         await session.delete_active_learner(sess.active_learner_id)
@@ -387,7 +388,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         reason = sess.data.get("onboarding_reason", "new_household")
         code = consent.school_code(text)
         school = await consent.redeem_school_code(code) if code else None
-        if consent.agreed(text) or school:
+        guardian = consent.agreement(text)  # the name typed after AGREE; "" if left out
+        if school or guardian:
             # create_household is idempotent: a sibling lands on the same account.
             account_id, guardian_id = await session.create_household(phone)
             if school:
@@ -401,6 +403,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
                 consent_id = await consent.record(
                     account_id, method="typed_agree", level="declared", replied_from=phone,
                     message=message, notice=sess.data.get("notice"), reply_text=text,
+                    guardian_name=guardian,
                 )
             sess.data.update(
                 state="awaiting_name",
@@ -419,6 +422,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             reply = f"Okay, no learner added. Carrying on with {sess.name}. 🎓"
         elif code:
             reply = consent.BAD_SCHOOL_CODE
+        elif guardian == "":
+            reply = consent.NAME_NEEDED
         else:
             reply = consent.reprompt(reason)
     elif sess.state == "awaiting_name":
@@ -477,8 +482,17 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         if image_bytes is not None:
             reply = await llm.photo_reply(image_bytes, image_mime, text, sess.grade)
             intent = "homework"
+        elif text.strip().upper() == "CONFIRM":
+            # The guardian's answer to the follow-up note. Handled here, ahead
+            # of a check-in or paper that would read it as an answer.
+            done = await consent.confirm(sess.active_learner_id, message.get("id"))
+            reply, intent = (consent.CONFIRMED if done else consent.NOTHING_TO_CONFIRM), "admin"
         else:
             reply, intent = await handle_active(wa, sess, phone, text)
+        if sess.state == "active" and not sess.data.get("household_erased"):
+            note = await consent.follow_up(sess.active_learner_id, sess.name)
+            if note:
+                reply += "\n\n" + note
 
     notice_text = reply if intent == "consent_notice" else None
     raw_reply = transcript_prefix + reply

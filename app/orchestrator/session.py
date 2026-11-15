@@ -36,7 +36,7 @@ NAME_REPROMPT = (
 )
 
 _RESERVED_NAMES = {"HELP", "RESET", "DELETE", "AGREE", "YES", "ACCEPT", "I AGREE",
-                   "ADD LEARNER", "SWITCH"}
+                   "ADD LEARNER", "SWITCH", "WITHDRAW", "CONFIRM", "CANCEL"}
 _NAME_MAX_LEN = 40
 
 

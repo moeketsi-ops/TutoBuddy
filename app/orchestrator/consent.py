@@ -13,23 +13,29 @@ docs/guardian-consent-findings.md.
 
 import hashlib
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
+from app.config import settings
 from app.db import get_pool
 
 # The wording a guardian agrees to. Any edit changes the stored version hash,
 # so old records keep pointing at the text that was actually shown. Wording
-# changes need sign-off (findings note, question 8).
+# changes need sign-off (findings note, section 8).
 DATA_STATEMENT = (
     "📋 *Please show this to your parent/guardian:*\n"
     "_Katlego stores this phone number, a nickname and grade, plus study "
-    "progress, to personalise tutoring. No data is sold or shared. Send "
-    "DELETE any time to erase a learner; erasing the last learner removes "
-    "the whole household record._"
+    "progress, to personalise tutoring. It also keeps a record of this "
+    "agreement, including the parent or guardian's name. No data is sold or "
+    "shared. Send WITHDRAW or DELETE any time to erase a learner; erasing the "
+    "last learner removes the whole household record._"
 )
 
-
+EXAMPLE = "_AGREE Nomsa Dlamini, mother_"
 SCHOOL_CODE_LINE = "Got a Katlego code from your school? Send it instead, like _SCH-K7M2QX_."
+HOW_TO_AGREE = (
+    "*Parent or guardian:* to agree, reply *AGREE* with your full name and how "
+    f"you are related to the learner, like {EXAMPLE}.\n\n{SCHOOL_CODE_LINE}"
+)
 
 # School sign-up codes (seed/load_enrolment_codes.py). The SCH prefix keeps an
 # ordinary word from being mistaken for a code.
@@ -39,6 +45,19 @@ BAD_SCHOOL_CODE = (
     "Check it against the slip from your school, or ask your teacher for help."
 )
 
+NAME_NEEDED = (
+    "Thank you. To keep a proper record I need the parent or guardian's name "
+    "too. 🙏 Please reply *AGREE* with your full name and how you are related "
+    f"to the learner, like {EXAMPLE}."
+)
+CONFIRMED = (
+    "Thank you, that's confirmed. ✅ Send *WITHDRAW* any time to stop Katlego "
+    "and erase the learner's data."
+)
+NOTHING_TO_CONFIRM = "Thanks! Nothing needs confirming right now. 🙂"
+
+SAST = timezone(timedelta(hours=2))  # South Africa has no daylight saving
+
 
 def notice(reason: str = "new_household") -> str:
     """The consent notice for a first sign-up, or for a sibling being added."""
@@ -46,36 +65,41 @@ def notice(reason: str = "new_household") -> str:
         return (
             "Adding another learner needs permission from a parent or guardian "
             "for that learner too (POPIA).\n\n"
-            f"{DATA_STATEMENT}\n\n"
-            "If your parent or guardian agrees, ask them to reply *AGREE* to "
-            f"continue. {SCHOOL_CODE_LINE}\n\nSend *CANCEL* to go back."
+            f"{DATA_STATEMENT}\n\n{HOW_TO_AGREE}\n\nSend *CANCEL* to go back."
         )
     return (
         "Hi! I'm *Katlego* 🎓 — your CAPS study buddy on WhatsApp.\n\n"
         "Before we start, South African law (POPIA) requires permission from your "
         "parent or guardian, because I keep track of your progress to tutor you "
         "better.\n\n"
-        f"{DATA_STATEMENT}\n\n"
-        "If your parent or guardian agrees, ask them to reply *AGREE* to continue. "
-        f"{SCHOOL_CODE_LINE}"
+        f"{DATA_STATEMENT}\n\n{HOW_TO_AGREE}"
     )
 
 
 def reprompt(reason: str = "new_household") -> str:
     text = (
-        "I can only start tutoring once a parent or guardian replies *AGREE* — "
-        "that's the law for learners' data (POPIA). 🙏\n\n"
-        "Show them the message above, and reply *AGREE* when they say it's okay."
+        "I can only start tutoring once a parent or guardian agrees — that's "
+        "the law for learners' data (POPIA). 🙏\n\n"
+        "Show them the message above. They reply *AGREE* with their full name, "
+        f"like {EXAMPLE}."
     )
     if reason == "add_learner":
         text += "\n\nSend *CANCEL* to go back without adding a learner."
     return text
 
 
-def agreed(text: str) -> bool:
-    """A bare YES or ACCEPT no longer counts: it is too easy to send without
-    reading the notice."""
-    return text.strip().strip(".!").upper() in {"AGREE", "I AGREE"}
+_AGREE = re.compile(r"(?:I\s+)?AGREE\b[\s,.:;!\-]*(.*)", re.I)
+
+
+def agreement(text: str) -> str | None:
+    """None when the message is not an agreement. Otherwise the guardian's
+    name and relationship as typed, or "" when they left it out. A bare YES
+    or ACCEPT never counts: too easy to send without reading the notice."""
+    m = _AGREE.fullmatch(" ".join(text.split()))
+    if not m:
+        return None
+    name = m.group(1).strip(" .,!")[:120]
+    return name if sum(ch.isalpha() for ch in name) >= 3 else ""
 
 
 def school_code(text: str) -> str | None:
@@ -146,3 +170,51 @@ async def record(
                 "UPDATE enrolment_codes SET consent_record_id = $2 WHERE code = $1",
                 school_code, consent_id)
     return consent_id
+
+
+async def follow_up(learner_id: int, learner: str) -> str | None:
+    """A short note for the guardian, when one is due, to add to a reply.
+
+    Only for consents that rest on what was typed or sent from the learner's
+    own chat. About a week after sign-up it asks the guardian to CONFIRM;
+    after that it reminds them, at a longer interval, how to withdraw. Sent
+    inside a reply to the learner so it costs no extra message."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            UPDATE consent_records SET last_notice_at = now()
+            WHERE id = (SELECT max(id) FROM consent_records WHERE learner_id = $1)
+              AND level NOT IN ('school', 'second_account')
+              AND COALESCE(last_notice_at, consent_at) < now() - make_interval(
+                    days => CASE WHEN last_notice_at IS NULL THEN $2::int ELSE $3::int END)
+            RETURNING guardian_name, consent_at, reconfirmed_at
+            """,
+            learner_id, settings.consent_reconfirm_days, settings.consent_reminder_days,
+        )
+    if not row:
+        return None
+    who = row["guardian_name"] or "A parent or guardian"
+    on = row["consent_at"].astimezone(SAST).strftime("%-d %B %Y")
+    if row["reconfirmed_at"] is None:
+        return (
+            f"📋 *For {learner}'s parent or guardian:* {who} agreed on {on} that "
+            f"Katlego may keep {learner}'s study progress. Please reply *CONFIRM* "
+            f"if that is still okay, or *WITHDRAW* to stop Katlego and erase "
+            f"{learner}'s data."
+        )
+    return (
+        f"📋 *Reminder for {learner}'s parent or guardian:* {who} agreed to "
+        f"Katlego on {on}. Send *WITHDRAW* any time to stop Katlego and erase "
+        f"{learner}'s data."
+    )
+
+
+async def confirm(learner_id: int, message_id: str | None) -> bool:
+    """Record the guardian's CONFIRM. False when there was nothing to confirm."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        return bool(await conn.fetchval(
+            "UPDATE consent_records SET reconfirmed_at = now(), reconfirm_message_id = $2 "
+            "WHERE id = (SELECT max(id) FROM consent_records WHERE learner_id = $1) "
+            "AND reconfirmed_at IS NULL RETURNING id", learner_id, message_id))

@@ -43,6 +43,14 @@ def test_school_code_signs_a_learner_up_without_agree(chat):
     assert rec["body"] == SLIP                                    # the wording the parent signed
     assert (rec["school"], rec["learner_ref"], rec["nickname"]) == (school, "8B-07", "Zanele")
 
+    # A school-backed consent needs no follow-up note in the learner's chat.
+    chat.send_text("8")
+    chat.wait_for_reply()
+    db("UPDATE consent_records SET consent_at = now() - interval '40 days' WHERE replied_from = $1",
+       chat.phone)
+    chat.send_text("HELP")
+    assert "CONFIRM" not in chat.wait_for_reply()
+
     other = Chat()                                                # a code works once
     other.send_text("hi")
     other.wait_for_reply()
