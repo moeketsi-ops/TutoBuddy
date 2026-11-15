@@ -13,12 +13,22 @@ from app.config import settings
 STUB_TRANSCRIPT = "How do I factorise x squared plus five x plus six?"
 
 
+def _language() -> dict:
+    """STT_LANGUAGE=en forces English (the default); auto lets Whisper detect."""
+    lang = settings.stt_language.strip().lower()
+    out = {} if lang in ("", "auto") else {"language": lang}
+    if settings.stt_prompt.strip():
+        out["prompt"] = settings.stt_prompt.strip()
+    return out
+
+
 async def transcribe(audio: bytes, mime: str) -> str:
     if settings.stt_provider == "local":
         async with httpx.AsyncClient(timeout=120) as client:
             resp = await client.post(
                 f"{settings.stt_base_url.rstrip('/')}/transcribe",
                 files={"file": ("voice-note", audio, mime)},
+                data={"language": settings.stt_language.strip().lower() or "auto"},
             )
             resp.raise_for_status()
             return resp.json()["text"].strip()
@@ -31,7 +41,8 @@ async def transcribe(audio: bytes, mime: str) -> str:
                 "https://api.openai.com/v1/audio/transcriptions",
                 headers={"Authorization": f"Bearer {settings.openai_api_key}"},
                 files={"file": ("voice-note.ogg", audio, mime)},
-                data={"model": "whisper-1"},
+                data={"model": "whisper-1", **({"prompt": settings.stt_prompt.strip()}
+                                               if settings.stt_prompt.strip() else {})},
             )
             resp.raise_for_status()
             return resp.json()["text"].strip()
@@ -44,7 +55,7 @@ async def transcribe(audio: bytes, mime: str) -> str:
                 "https://api.groq.com/openai/v1/audio/transcriptions",
                 headers={"Authorization": f"Bearer {settings.groq_api_key}"},
                 files={"file": ("voice-note.ogg", audio, mime)},
-                data={"model": settings.groq_stt_model, "language": "en"},
+                data={"model": settings.groq_stt_model, **_language()},
             )
             resp.raise_for_status()
             return resp.json()["text"].strip()

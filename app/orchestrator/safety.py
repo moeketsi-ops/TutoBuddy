@@ -110,6 +110,9 @@ def redact_pii(text: str) -> str:
 _URL = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 
 
+_CONTROL = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")  # terminal codes, then stray controls
+
+
 def sanitize_output(text: str) -> str:
     """Runs on every LLM-generated reply before it reaches the learner.
 
@@ -125,4 +128,8 @@ def sanitize_output(text: str) -> str:
     """
     if classify_risk(text) is not None:
         return REFERRAL_MESSAGE
+    # Models now and then emit control characters (GPT-6 Luna: \x00 and \x1b
+    # where it meant code formatting). Postgres rejects \x00, so logging the
+    # reply crashed and the learner got "something went wrong".
+    text = _CONTROL.sub("", text)
     return _URL.sub("[link removed]", text)

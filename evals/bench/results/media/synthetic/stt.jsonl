@@ -1,0 +1,560 @@
+{"id": "v01", "engine": "local-base", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.633, "seconds": 2.42}
+{"id": "v01n", "engine": "local-base", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.535, "seconds": 2.42}
+{"id": "v02", "engine": "local-base", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.501, "seconds": 5.01}
+{"id": "v02n", "engine": "local-base", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.551, "seconds": 5.01}
+{"id": "v03", "engine": "local-base", "lang": "en", "transcript": "solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.423, "seconds": 4.27}
+{"id": "v03n", "engine": "local-base", "lang": "en", "transcript": "sold for X2 to the power of X plus 3 equals 32.", "latency_s": 0.453, "seconds": 4.27}
+{"id": "v04", "engine": "local-base", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.4, "seconds": 2.58}
+{"id": "v04n", "engine": "local-base", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.362, "seconds": 2.58}
+{"id": "v05", "engine": "local-base", "lang": "en", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.424, "seconds": 2.64}
+{"id": "v05n", "engine": "local-base", "lang": "en", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.379, "seconds": 2.64}
+{"id": "v06", "engine": "local-base", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.413, "seconds": 3.03}
+{"id": "v06n", "engine": "local-base", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.376, "seconds": 3.03}
+{"id": "v07", "engine": "local-base", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.335, "seconds": 2.28}
+{"id": "v07n", "engine": "local-base", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.436, "seconds": 2.28}
+{"id": "v08", "engine": "local-base", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.442, "seconds": 2.05}
+{"id": "v08n", "engine": "local-base", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.405, "seconds": 2.05}
+{"id": "v09", "engine": "local-base", "lang": "en", "transcript": "calculate minus 6 times minus 7.", "latency_s": 0.401, "seconds": 2.83}
+{"id": "v09n", "engine": "local-base", "lang": "en", "transcript": "calculate minus 6 times minus 7.", "latency_s": 0.359, "seconds": 2.83}
+{"id": "v10", "engine": "local-base", "lang": "en", "transcript": "What is 5-negative 2?", "latency_s": 0.339, "seconds": 2.31}
+{"id": "v10n", "engine": "local-base", "lang": "en", "transcript": "what is 5 minus negative 2?", "latency_s": 0.345, "seconds": 2.31}
+{"id": "v11", "engine": "local-base", "lang": "en", "transcript": "Expand 3, Open Bracket, X plus 4, Close Bracket", "latency_s": 0.42, "seconds": 4.7}
+{"id": "v11n", "engine": "local-base", "lang": "en", "transcript": "Expand three, open bracket, x plus four, close bracket.", "latency_s": 0.572, "seconds": 4.7}
+{"id": "v12", "engine": "local-base", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.464, "seconds": 3.71}
+{"id": "v12n", "engine": "local-base", "lang": "en", "transcript": "So 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.468, "seconds": 3.71}
+{"id": "v13", "engine": "local-base", "lang": "en", "transcript": "simplify 3 a plus 2 b plus 5 a", "latency_s": 0.548, "seconds": 2.97}
+{"id": "v13n", "engine": "local-base", "lang": "en", "transcript": "Simplify 3, it plus 2, V, plus 5, A.", "latency_s": 0.512, "seconds": 2.97}
+{"id": "v14", "engine": "local-base", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.429, "seconds": 3.54}
+{"id": "v14n", "engine": "local-base", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.502, "seconds": 3.54}
+{"id": "v15", "engine": "local-base", "lang": "en", "transcript": "Solve 2x-7 equals 9.", "latency_s": 0.533, "seconds": 2.82}
+{"id": "v15n", "engine": "local-base", "lang": "en", "transcript": "salt 2x-7 equals 9.", "latency_s": 0.536, "seconds": 2.82}
+{"id": "v16", "engine": "local-base", "lang": "en", "transcript": "solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.538, "seconds": 3.89}
+{"id": "v16n", "engine": "local-base", "lang": "en", "transcript": "salt x squared minus 5x plus 6 equals 0.", "latency_s": 0.707, "seconds": 3.89}
+{"id": "v17", "engine": "local-base", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.774, "seconds": 4.42}
+{"id": "v17n", "engine": "local-base", "lang": "en", "transcript": "find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.431, "seconds": 4.42}
+{"id": "v18", "engine": "local-base", "lang": "en", "transcript": "solve x over 3 plus 2 equals 5.", "latency_s": 0.427, "seconds": 2.97}
+{"id": "v18n", "engine": "local-base", "lang": "en", "transcript": "solved x over 3 plus 2 equals 5.", "latency_s": 0.437, "seconds": 2.97}
+{"id": "v19", "engine": "local-base", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.549, "seconds": 5.77}
+{"id": "v19n", "engine": "local-base", "lang": "en", "transcript": "What is the area of a rectangle that is 8 centimeters by 3.5 centimeters?", "latency_s": 0.596, "seconds": 5.77}
+{"id": "v20", "engine": "local-base", "lang": "en", "transcript": "A taxi travels 120 km in one and a half hours, what is its average speed in kilometers per hour?", "latency_s": 0.615, "seconds": 8.11}
+{"id": "v20n", "engine": "local-base", "lang": "en", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.763, "seconds": 8.11}
+{"id": "v21", "engine": "local-base", "lang": "en", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 1.056, "seconds": 4.19}
+{"id": "v21n", "engine": "local-base", "lang": "en", "transcript": "find the perimeter of the square with size of 7.2 meters.", "latency_s": 0.505, "seconds": 4.19}
+{"id": "v22", "engine": "local-base", "lang": "en", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.466, "seconds": 3.55}
+{"id": "v22n", "engine": "local-base", "lang": "en", "transcript": "What is 15% of 240 rend?", "latency_s": 0.48, "seconds": 3.55}
+{"id": "v23", "engine": "local-base", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.371, "seconds": 1.35}
+{"id": "v23n", "engine": "local-base", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.374, "seconds": 1.35}
+{"id": "v24", "engine": "local-base", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.385, "seconds": 1.87}
+{"id": "v24n", "engine": "local-base", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.373, "seconds": 1.87}
+{"id": "v25", "engine": "local-base", "lang": "en", "transcript": "3x equals 15", "latency_s": 0.347, "seconds": 1.87}
+{"id": "v25n", "engine": "local-base", "lang": "en", "transcript": "3x equals 15", "latency_s": 0.356, "seconds": 1.87}
+{"id": "v26", "engine": "local-base", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.378, "seconds": 1.29}
+{"id": "v26n", "engine": "local-base", "lang": "en", "transcript": "X equals seven.", "latency_s": 0.382, "seconds": 1.29}
+{"id": "v27", "engine": "local-base", "lang": "en", "transcript": "Negative 5.", "latency_s": 0.359, "seconds": 1.07}
+{"id": "v27n", "engine": "local-base", "lang": "en", "transcript": "negative 5.", "latency_s": 0.376, "seconds": 1.07}
+{"id": "v28", "engine": "local-base", "lang": "en", "transcript": "minus 11.", "latency_s": 0.503, "seconds": 1.01}
+{"id": "v28n", "engine": "local-base", "lang": "en", "transcript": "minus 11", "latency_s": 0.535, "seconds": 1.01}
+{"id": "v29", "engine": "local-base", "lang": "en", "transcript": "11 over 12", "latency_s": 0.512, "seconds": 1.27}
+{"id": "v29n", "engine": "local-base", "lang": "en", "transcript": "11 over 12", "latency_s": 0.519, "seconds": 1.27}
+{"id": "v30", "engine": "local-base", "lang": "en", "transcript": "28 square centimetres", "latency_s": 0.661, "seconds": 2.13}
+{"id": "v30n", "engine": "local-base", "lang": "en", "transcript": "28-square centimeters", "latency_s": 0.865, "seconds": 2.13}
+{"id": "v31", "engine": "local-base", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 1.146, "seconds": 2.62}
+{"id": "v31n", "engine": "local-base", "lang": "en", "transcript": "x equals 2, x equals 3.", "latency_s": 0.603, "seconds": 2.62}
+{"id": "v32", "engine": "local-base", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.751, "seconds": 1.92}
+{"id": "v32n", "engine": "local-base", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.524, "seconds": 1.92}
+{"id": "v33", "engine": "local-base", "lang": "en", "transcript": "Sarubornaka Flethor, Angisala Angisais, how do I solve 3x plus 4 equals 19?", "latency_s": 0.725, "seconds": 6.91}
+{"id": "v33n", "engine": "local-base", "lang": "en", "transcript": "Saluvona Carrejo, Giselle Angezais, how do I solve 3x plus 4 equals 19?", "latency_s": 1.894, "seconds": 6.91}
+{"id": "v34", "engine": "local-base", "lang": "en", "transcript": "Angikondi Yukafin Genzanila, what is negative 8 plus 3?", "latency_s": 0.67, "seconds": 4.65}
+{"id": "v34n", "engine": "local-base", "lang": "en", "transcript": "and you can't do you could be genuinely last. What is negative 8 plus 3?", "latency_s": 0.661, "seconds": 4.65}
+{"id": "v35", "engine": "local-base", "lang": "en", "transcript": "Do Malakaflifal, kick hope of the soak, how do I add two thirds and one quarter?", "latency_s": 0.887, "seconds": 5.57}
+{"id": "v35n", "engine": "local-base", "lang": "en", "transcript": "Do you want to look up little? Here goes the surf. How do I add two thirds and one quarter?", "latency_s": 0.588, "seconds": 5.57}
+{"id": "v36", "engine": "local-base", "lang": "en", "transcript": "H r k a t w i s, solve 2 x minus 7 equals 9.", "latency_s": 0.646, "seconds": 4.43}
+{"id": "v36n", "engine": "local-base", "lang": "en", "transcript": "Hard care at the resides, sold to X minus 7 equals 9.", "latency_s": 0.498, "seconds": 4.43}
+{"id": "v37", "engine": "local-base", "lang": "en", "transcript": "Hello Khafliffor, Eggverston I hear the Somnai, Solve 2 bracket X minus 1 bracket equals 10.", "latency_s": 0.577, "seconds": 7.43}
+{"id": "v37n", "engine": "local-base", "lang": "en", "transcript": "the low cuff little, F first and I hear the song 9, sold to graphic X minus 1 graphic", "latency_s": 0.953, "seconds": 7.43}
+{"id": "v38", "engine": "local-base", "lang": "en", "transcript": "Exuckle met brook, what is 3 over 4 divided by 1 half?", "latency_s": 0.668, "seconds": 4.55}
+{"id": "v38n", "engine": "local-base", "lang": "en", "transcript": "example network, what is 304 divided by 1 half?", "latency_s": 4.609, "seconds": 4.55}
+{"id": "v39", "engine": "local-base", "lang": "en", "transcript": "and the cabanga uc of the x equals 5.", "latency_s": 0.977, "seconds": 2.71}
+{"id": "v39n", "engine": "local-base", "lang": "en", "transcript": "and determine the u2tx equals 5.", "latency_s": 0.894, "seconds": 2.71}
+{"id": "v40", "engine": "local-base", "lang": "en", "transcript": "in the Hannah Hawke in negative five.", "latency_s": 6.508, "seconds": 2.26}
+{"id": "v40n", "engine": "local-base", "lang": "en", "transcript": "in the hand of all can negative 5", "latency_s": 0.519, "seconds": 2.26}
+{"id": "v01", "engine": "local-base", "lang": "auto", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.754, "seconds": 2.42}
+{"id": "v01n", "engine": "local-base", "lang": "auto", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.574, "seconds": 2.42}
+{"id": "v02", "engine": "local-base", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.629, "seconds": 5.01}
+{"id": "v02n", "engine": "local-base", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.601, "seconds": 5.01}
+{"id": "v03", "engine": "local-base", "lang": "auto", "transcript": "solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.937, "seconds": 4.27}
+{"id": "v03n", "engine": "local-base", "lang": "auto", "transcript": "sold for X2 to the power of X plus 3 equals 32.", "latency_s": 0.949, "seconds": 4.27}
+{"id": "v04", "engine": "local-base", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.834, "seconds": 2.58}
+{"id": "v04n", "engine": "local-base", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.891, "seconds": 2.58}
+{"id": "v05", "engine": "local-base", "lang": "auto", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.913, "seconds": 2.64}
+{"id": "v05n", "engine": "local-base", "lang": "auto", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.942, "seconds": 2.64}
+{"id": "v06", "engine": "local-base", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.954, "seconds": 3.03}
+{"id": "v06n", "engine": "local-base", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 1.042, "seconds": 3.03}
+{"id": "v07", "engine": "local-base", "lang": "auto", "transcript": "Simplify 12 over 18.", "latency_s": 0.817, "seconds": 2.28}
+{"id": "v07n", "engine": "local-base", "lang": "auto", "transcript": "Simplify 12 over 18.", "latency_s": 0.831, "seconds": 2.28}
+{"id": "v08", "engine": "local-base", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.777, "seconds": 2.05}
+{"id": "v08n", "engine": "local-base", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.825, "seconds": 2.05}
+{"id": "v09", "engine": "local-base", "lang": "auto", "transcript": "calculate minus 6 times minus 7.", "latency_s": 0.952, "seconds": 2.83}
+{"id": "v09n", "engine": "local-base", "lang": "auto", "transcript": "calculate minus 6 times minus 7.", "latency_s": 0.984, "seconds": 2.83}
+{"id": "v10", "engine": "local-base", "lang": "auto", "transcript": "What is 5-negative 2?", "latency_s": 0.941, "seconds": 2.31}
+{"id": "v10n", "engine": "local-base", "lang": "auto", "transcript": "what is 5 minus negative 2?", "latency_s": 0.98, "seconds": 2.31}
+{"id": "v11", "engine": "local-base", "lang": "auto", "transcript": "Expand 3, Open Bracket, X plus 4, Close Bracket", "latency_s": 1.024, "seconds": 4.7}
+{"id": "v11n", "engine": "local-base", "lang": "auto", "transcript": "Expand three, open bracket, x plus four, close bracket.", "latency_s": 0.688, "seconds": 4.7}
+{"id": "v12", "engine": "local-base", "lang": "auto", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.613, "seconds": 3.71}
+{"id": "v12n", "engine": "local-base", "lang": "auto", "transcript": "So 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.596, "seconds": 3.71}
+{"id": "v13", "engine": "local-base", "lang": "auto", "transcript": "simplify 3 a plus 2 b plus 5 a", "latency_s": 0.597, "seconds": 2.97}
+{"id": "v13n", "engine": "local-base", "lang": "auto", "transcript": "Simplify 3, it plus 2, V, plus 5, A.", "latency_s": 0.673, "seconds": 2.97}
+{"id": "v14", "engine": "local-base", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.659, "seconds": 3.54}
+{"id": "v14n", "engine": "local-base", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.588, "seconds": 3.54}
+{"id": "v15", "engine": "local-base", "lang": "auto", "transcript": "Solve 2x-7 equals 9.", "latency_s": 0.58, "seconds": 2.82}
+{"id": "v15n", "engine": "local-base", "lang": "auto", "transcript": "salt 2x-7 equals 9.", "latency_s": 0.598, "seconds": 2.82}
+{"id": "v16", "engine": "local-base", "lang": "auto", "transcript": "solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.595, "seconds": 3.89}
+{"id": "v16n", "engine": "local-base", "lang": "auto", "transcript": "salt x squared minus 5x plus 6 equals 0.", "latency_s": 0.59, "seconds": 3.89}
+{"id": "v17", "engine": "local-base", "lang": "auto", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.601, "seconds": 4.42}
+{"id": "v17n", "engine": "local-base", "lang": "auto", "transcript": "find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.599, "seconds": 4.42}
+{"id": "v18", "engine": "local-base", "lang": "auto", "transcript": "solve x over 3 plus 2 equals 5.", "latency_s": 0.597, "seconds": 2.97}
+{"id": "v18n", "engine": "local-base", "lang": "auto", "transcript": "solved x over 3 plus 2 equals 5.", "latency_s": 0.588, "seconds": 2.97}
+{"id": "v19", "engine": "local-base", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.623, "seconds": 5.77}
+{"id": "v19n", "engine": "local-base", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 centimeters by 3.5 centimeters?", "latency_s": 0.702, "seconds": 5.77}
+{"id": "v20", "engine": "local-base", "lang": "auto", "transcript": "A taxi travels 120 km in one and a half hours, what is its average speed in kilometers per hour?", "latency_s": 0.664, "seconds": 8.11}
+{"id": "v20n", "engine": "local-base", "lang": "auto", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.653, "seconds": 8.11}
+{"id": "v21", "engine": "local-base", "lang": "auto", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.618, "seconds": 4.19}
+{"id": "v21n", "engine": "local-base", "lang": "auto", "transcript": "find the perimeter of the square with size of 7.2 meters.", "latency_s": 0.601, "seconds": 4.19}
+{"id": "v22", "engine": "local-base", "lang": "auto", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.633, "seconds": 3.55}
+{"id": "v22n", "engine": "local-base", "lang": "auto", "transcript": "What is 15% of 240 rend?", "latency_s": 0.588, "seconds": 3.55}
+{"id": "v23", "engine": "local-base", "lang": "auto", "transcript": "x equals 5.", "latency_s": 0.507, "seconds": 1.35}
+{"id": "v23n", "engine": "local-base", "lang": "auto", "transcript": "x equals 5.", "latency_s": 0.523, "seconds": 1.35}
+{"id": "v24", "engine": "local-base", "lang": "auto", "transcript": "x equals negative 5.", "latency_s": 0.529, "seconds": 1.87}
+{"id": "v24n", "engine": "local-base", "lang": "auto", "transcript": "x equals negative 5.", "latency_s": 0.513, "seconds": 1.87}
+{"id": "v25", "engine": "local-base", "lang": "auto", "transcript": "3x equals 15", "latency_s": 0.505, "seconds": 1.87}
+{"id": "v25n", "engine": "local-base", "lang": "auto", "transcript": "3x equals 15", "latency_s": 0.507, "seconds": 1.87}
+{"id": "v26", "engine": "local-base", "lang": "auto", "transcript": "x equals 7.", "latency_s": 0.494, "seconds": 1.29}
+{"id": "v26n", "engine": "local-base", "lang": "auto", "transcript": "X equals seven.", "latency_s": 0.501, "seconds": 1.29}
+{"id": "v27", "engine": "local-base", "lang": "auto", "transcript": "Negative 5.", "latency_s": 0.501, "seconds": 1.07}
+{"id": "v27n", "engine": "local-base", "lang": "auto", "transcript": "negative 5.", "latency_s": 0.532, "seconds": 1.07}
+{"id": "v28", "engine": "local-base", "lang": "auto", "transcript": "minus 11.", "latency_s": 0.529, "seconds": 1.01}
+{"id": "v28n", "engine": "local-base", "lang": "auto", "transcript": "minus 11", "latency_s": 0.505, "seconds": 1.01}
+{"id": "v29", "engine": "local-base", "lang": "auto", "transcript": "11 over 12", "latency_s": 0.507, "seconds": 1.27}
+{"id": "v29n", "engine": "local-base", "lang": "auto", "transcript": "11 over 12", "latency_s": 0.538, "seconds": 1.27}
+{"id": "v30", "engine": "local-base", "lang": "auto", "transcript": "28 square centimetres", "latency_s": 0.558, "seconds": 2.13}
+{"id": "v30n", "engine": "local-base", "lang": "auto", "transcript": "28-square centimeters", "latency_s": 0.533, "seconds": 2.13}
+{"id": "v31", "engine": "local-base", "lang": "auto", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.599, "seconds": 2.62}
+{"id": "v31n", "engine": "local-base", "lang": "auto", "transcript": "x equals 2, x equals 3.", "latency_s": 0.587, "seconds": 2.62}
+{"id": "v32", "engine": "local-base", "lang": "auto", "transcript": "3x squared minus 6.", "latency_s": 0.518, "seconds": 1.92}
+{"id": "v32n", "engine": "local-base", "lang": "auto", "transcript": "3x squared minus 6.", "latency_s": 0.51, "seconds": 1.92}
+{"id": "v33", "engine": "local-base", "lang": "auto", "transcript": "Sarubornaka Flethor, Angisala Angisais, how do I solve 3x plus 4 equals 19?", "latency_s": 0.692, "seconds": 6.91}
+{"id": "v33n", "engine": "local-base", "lang": "auto", "transcript": "סלבון הכחליכו, גסול ואנג'סייאס, חדוי סוג 3X plus 4 equals 19.", "latency_s": 3.904, "seconds": 6.91}
+{"id": "v34", "engine": "local-base", "lang": "auto", "transcript": "Angikondi Yukafin Genzanila, what is negative 8 plus 3?", "latency_s": 0.643, "seconds": 4.65}
+{"id": "v34n", "engine": "local-base", "lang": "auto", "transcript": "and you can't do you could be genuinely last. What is negative 8 plus 3?", "latency_s": 0.631, "seconds": 4.65}
+{"id": "v35", "engine": "local-base", "lang": "auto", "transcript": "Do Malakaflifal, kick hope of the soak, how do I add two thirds and one quarter?", "latency_s": 0.655, "seconds": 5.57}
+{"id": "v35n", "engine": "local-base", "lang": "auto", "transcript": "Do you want to look up little? Here goes the surf. How do I add two thirds and one quarter?", "latency_s": 0.668, "seconds": 5.57}
+{"id": "v36", "engine": "local-base", "lang": "auto", "transcript": "H r k a t w i s, solve 2 x minus 7 equals 9.", "latency_s": 0.688, "seconds": 4.43}
+{"id": "v36n", "engine": "local-base", "lang": "auto", "transcript": "Hard care at the resides, sold to X minus 7 equals 9.", "latency_s": 0.646, "seconds": 4.43}
+{"id": "v37", "engine": "local-base", "lang": "auto", "transcript": "Hello Khafliffor, Eggverston I hear the Somnai, Solve 2 bracket X minus 1 bracket equals 10.", "latency_s": 0.666, "seconds": 7.43}
+{"id": "v37n", "engine": "local-base", "lang": "auto", "transcript": "the low cuff little, F first and I hear the song 9, sold to graphic X minus 1 graphic", "latency_s": 0.936, "seconds": 7.43}
+{"id": "v38", "engine": "local-base", "lang": "auto", "transcript": "Exuckle met brook, what is 3 over 4 divided by 1 half?", "latency_s": 0.64, "seconds": 4.55}
+{"id": "v38n", "engine": "local-base", "lang": "auto", "transcript": "example network, what is 304 divided by 1 half?", "latency_s": 0.611, "seconds": 4.55}
+{"id": "v39", "engine": "local-base", "lang": "auto", "transcript": "and the cabanga uc of the x equals 5.", "latency_s": 0.611, "seconds": 2.71}
+{"id": "v39n", "engine": "local-base", "lang": "auto", "transcript": "and determine the u2tx equals 5.", "latency_s": 0.579, "seconds": 2.71}
+{"id": "v40", "engine": "local-base", "lang": "auto", "transcript": "in the Hannah Hawke in negative five.", "latency_s": 1.038, "seconds": 2.26}
+{"id": "v40n", "engine": "local-base", "lang": "auto", "transcript": "in the hand of all can negative 5", "latency_s": 0.57, "seconds": 2.26}
+{"id": "v01", "engine": "groq-turbo", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.61, "seconds": 2.42}
+{"id": "v01n", "engine": "groq-turbo", "lang": "en", "transcript": "What is three squared plus four squared?", "latency_s": 0.399, "seconds": 2.42}
+{"id": "v02", "engine": "groq-turbo", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.321, "seconds": 5.01}
+{"id": "v02n", "engine": "groq-turbo", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.393, "seconds": 5.01}
+{"id": "v03", "engine": "groq-turbo", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.474, "seconds": 4.27}
+{"id": "v03n", "engine": "groq-turbo", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.639, "seconds": 4.27}
+{"id": "v04", "engine": "groq-turbo", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.413, "seconds": 2.58}
+{"id": "v04n", "engine": "groq-turbo", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.704, "seconds": 2.58}
+{"id": "v05", "engine": "groq-turbo", "lang": "en", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.45, "seconds": 2.64}
+{"id": "v05n", "engine": "groq-turbo", "lang": "en", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.322, "seconds": 2.64}
+{"id": "v06", "engine": "groq-turbo", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.425, "seconds": 3.03}
+{"id": "v06n", "engine": "groq-turbo", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.412, "seconds": 3.03}
+{"id": "v07", "engine": "groq-turbo", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.373, "seconds": 2.28}
+{"id": "v07n", "engine": "groq-turbo", "lang": "en", "transcript": "Simplify 12 over 18", "latency_s": 0.5, "seconds": 2.28}
+{"id": "v08", "engine": "groq-turbo", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.414, "seconds": 2.05}
+{"id": "v08n", "engine": "groq-turbo", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.444, "seconds": 2.05}
+{"id": "v09", "engine": "groq-turbo", "lang": "en", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.534, "seconds": 2.83}
+{"id": "v09n", "engine": "groq-turbo", "lang": "en", "transcript": "Calculate minus 6 times minus 7", "latency_s": 0.468, "seconds": 2.83}
+{"id": "v10", "engine": "groq-turbo", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.384, "seconds": 2.31}
+{"id": "v10n", "engine": "groq-turbo", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.426, "seconds": 2.31}
+{"id": "v11", "engine": "groq-turbo", "lang": "en", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.42, "seconds": 4.7}
+{"id": "v11n", "engine": "groq-turbo", "lang": "en", "transcript": "expand 3, open bracket, X plus 4, close bracket.", "latency_s": 0.511, "seconds": 4.7}
+{"id": "v12", "engine": "groq-turbo", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.501, "seconds": 3.71}
+{"id": "v12n", "engine": "groq-turbo", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.394, "seconds": 3.71}
+{"id": "v13", "engine": "groq-turbo", "lang": "en", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.484, "seconds": 2.97}
+{"id": "v13n", "engine": "groq-turbo", "lang": "en", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.538, "seconds": 2.97}
+{"id": "v14", "engine": "groq-turbo", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.406, "seconds": 3.54}
+{"id": "v14n", "engine": "groq-turbo", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.359, "seconds": 3.54}
+{"id": "v15", "engine": "groq-turbo", "lang": "en", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.457, "seconds": 2.82}
+{"id": "v15n", "engine": "groq-turbo", "lang": "en", "transcript": "Solve 2x minus 7 equals 9", "latency_s": 0.358, "seconds": 2.82}
+{"id": "v16", "engine": "groq-turbo", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.574, "seconds": 3.89}
+{"id": "v16n", "engine": "groq-turbo", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.601, "seconds": 3.89}
+{"id": "v17", "engine": "groq-turbo", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.408, "seconds": 4.42}
+{"id": "v17n", "engine": "groq-turbo", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.481, "seconds": 4.42}
+{"id": "v18", "engine": "groq-turbo", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.437, "seconds": 2.97}
+{"id": "v18n", "engine": "groq-turbo", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5", "latency_s": 0.398, "seconds": 2.97}
+{"id": "v19", "engine": "groq-turbo", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.396, "seconds": 5.77}
+{"id": "v19n", "engine": "groq-turbo", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.399, "seconds": 5.77}
+{"id": "v20", "engine": "groq-turbo", "lang": "en", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.491, "seconds": 8.11}
+{"id": "v20n", "engine": "groq-turbo", "lang": "en", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.52, "seconds": 8.11}
+{"id": "v21", "engine": "groq-turbo", "lang": "en", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.431, "seconds": 4.19}
+{"id": "v21n", "engine": "groq-turbo", "lang": "en", "transcript": "Find the perimeter of a square with size of 7.2 meters", "latency_s": 0.688, "seconds": 4.19}
+{"id": "v22", "engine": "groq-turbo", "lang": "en", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.562, "seconds": 3.55}
+{"id": "v22n", "engine": "groq-turbo", "lang": "en", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.424, "seconds": 3.55}
+{"id": "v23", "engine": "groq-turbo", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.402, "seconds": 1.35}
+{"id": "v23n", "engine": "groq-turbo", "lang": "en", "transcript": "x equals 5", "latency_s": 0.33, "seconds": 1.35}
+{"id": "v24", "engine": "groq-turbo", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.419, "seconds": 1.87}
+{"id": "v24n", "engine": "groq-turbo", "lang": "en", "transcript": "X equals negative 5.", "latency_s": 0.55, "seconds": 1.87}
+{"id": "v25", "engine": "groq-turbo", "lang": "en", "transcript": "3x equals 15", "latency_s": 0.331, "seconds": 1.87}
+{"id": "v25n", "engine": "groq-turbo", "lang": "en", "transcript": "3x equals 15", "latency_s": 0.428, "seconds": 1.87}
+{"id": "v26", "engine": "groq-turbo", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.413, "seconds": 1.29}
+{"id": "v26n", "engine": "groq-turbo", "lang": "en", "transcript": "X equals 7", "latency_s": 0.385, "seconds": 1.29}
+{"id": "v27", "engine": "groq-turbo", "lang": "en", "transcript": "Negative 5", "latency_s": 0.398, "seconds": 1.07}
+{"id": "v27n", "engine": "groq-turbo", "lang": "en", "transcript": "Negative 5", "latency_s": 0.449, "seconds": 1.07}
+{"id": "v28", "engine": "groq-turbo", "lang": "en", "transcript": "Minus 11.", "latency_s": 0.463, "seconds": 1.01}
+{"id": "v28n", "engine": "groq-turbo", "lang": "en", "transcript": "Minus 11", "latency_s": 0.37, "seconds": 1.01}
+{"id": "v29", "engine": "groq-turbo", "lang": "en", "transcript": "11 over 12.", "latency_s": 0.497, "seconds": 1.27}
+{"id": "v29n", "engine": "groq-turbo", "lang": "en", "transcript": "11 over 12.", "latency_s": 0.308, "seconds": 1.27}
+{"id": "v30", "engine": "groq-turbo", "lang": "en", "transcript": "28 square centimeters", "latency_s": 0.496, "seconds": 2.13}
+{"id": "v30n", "engine": "groq-turbo", "lang": "en", "transcript": "28 square centimeters.", "latency_s": 0.827, "seconds": 2.13}
+{"id": "v31", "engine": "groq-turbo", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.404, "seconds": 2.62}
+{"id": "v31n", "engine": "groq-turbo", "lang": "en", "transcript": "x equals 2 or x equals 3", "latency_s": 0.435, "seconds": 2.62}
+{"id": "v32", "engine": "groq-turbo", "lang": "en", "transcript": "3x squared minus 6", "latency_s": 0.331, "seconds": 1.92}
+{"id": "v32n", "engine": "groq-turbo", "lang": "en", "transcript": "3x squared minus 6", "latency_s": 0.421, "seconds": 1.92}
+{"id": "v33", "engine": "groq-turbo", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.648, "seconds": 6.91}
+{"id": "v33n", "engine": "groq-turbo", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.422, "seconds": 6.91}
+{"id": "v34", "engine": "groq-turbo", "lang": "en", "transcript": "Angicondi-eucathene-gensony lab. What is negative 8 plus 3?", "latency_s": 0.51, "seconds": 4.65}
+{"id": "v34n", "engine": "groq-turbo", "lang": "en", "transcript": "Angakondi-eucopin-jenzanila, what is negative 8 plus 3?", "latency_s": 0.404, "seconds": 4.65}
+{"id": "v35", "engine": "groq-turbo", "lang": "en", "transcript": "Duma le kakhlechor, ke kope the so. How do I add two thirds and one quarter?", "latency_s": 0.418, "seconds": 5.57}
+{"id": "v35n", "engine": "groq-turbo", "lang": "en", "transcript": "Doomalikahlechaw, kikofa feso. How do I add two thirds and one quarter?", "latency_s": 0.325, "seconds": 5.57}
+{"id": "v36", "engine": "groq-turbo", "lang": "en", "transcript": "Ha ke atawizai's. Solve 2x minus 7 equals 9.", "latency_s": 0.313, "seconds": 4.43}
+{"id": "v36n", "engine": "groq-turbo", "lang": "en", "transcript": "Hakeakewezai's, solve 2x minus 7 equals 9", "latency_s": 0.397, "seconds": 4.43}
+{"id": "v37", "engine": "groq-turbo", "lang": "en", "transcript": "Hello, Kahlilho, Ek-Würsten-Ni-Hirdy-Som-Ni. Solve 2 bracket X minus 1 bracket equals 10.", "latency_s": 0.418, "seconds": 7.43}
+{"id": "v37n", "engine": "groq-turbo", "lang": "en", "transcript": "For lo kakhleho, ek burst in nahe heege song nahe. Sol 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.581, "seconds": 7.43}
+{"id": "v38", "engine": "groq-turbo", "lang": "en", "transcript": "Ex-Suckel-Metbrook. What is 3 over 4 divided by 1 half?", "latency_s": 0.773, "seconds": 4.55}
+{"id": "v38n", "engine": "groq-turbo", "lang": "en", "transcript": "X-Succle Met Group, what is 3 over 4 divided by 1 half?", "latency_s": 0.492, "seconds": 4.55}
+{"id": "v39", "engine": "groq-turbo", "lang": "en", "transcript": "Ndkabanga yukafi x equals 5.", "latency_s": 0.637, "seconds": 2.71}
+{"id": "v39n", "engine": "groq-turbo", "lang": "en", "transcript": "And the cabanga u could be x equals 5.", "latency_s": 0.563, "seconds": 2.71}
+{"id": "v40", "engine": "groq-turbo", "lang": "en", "transcript": "Kinna Hana Hawkeye negative 5.", "latency_s": 0.403, "seconds": 2.26}
+{"id": "v40n", "engine": "groq-turbo", "lang": "en", "transcript": "Hannah Hawke, negative 5.", "latency_s": 0.38, "seconds": 2.26}
+{"id": "v01", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.374, "seconds": 2.42}
+{"id": "v01n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is three squared plus four squared?", "latency_s": 0.421, "seconds": 2.42}
+{"id": "v02", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.441, "seconds": 5.01}
+{"id": "v02n", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.657, "seconds": 5.01}
+{"id": "v03", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.333, "seconds": 4.27}
+{"id": "v03n", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.413, "seconds": 4.27}
+{"id": "v04", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.559, "seconds": 2.58}
+{"id": "v04n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.56, "seconds": 2.58}
+{"id": "v05", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.425, "seconds": 2.64}
+{"id": "v05n", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.334, "seconds": 2.64}
+{"id": "v06", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.415, "seconds": 3.03}
+{"id": "v06n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.367, "seconds": 3.03}
+{"id": "v07", "engine": "groq-turbo", "lang": "auto", "transcript": "Simplify 12 over 18.", "latency_s": 0.398, "seconds": 2.28}
+{"id": "v07n", "engine": "groq-turbo", "lang": "auto", "transcript": "Simplify 12 over 18", "latency_s": 0.45, "seconds": 2.28}
+{"id": "v08", "engine": "groq-turbo", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.498, "seconds": 2.05}
+{"id": "v08n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.463, "seconds": 2.05}
+{"id": "v09", "engine": "groq-turbo", "lang": "auto", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.507, "seconds": 2.83}
+{"id": "v09n", "engine": "groq-turbo", "lang": "auto", "transcript": "Calculate minus 6 times minus 7", "latency_s": 0.395, "seconds": 2.83}
+{"id": "v10", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 5 minus negative 2?", "latency_s": 0.417, "seconds": 2.31}
+{"id": "v10n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 5 minus negative 2?", "latency_s": 0.407, "seconds": 2.31}
+{"id": "v11", "engine": "groq-turbo", "lang": "auto", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.541, "seconds": 4.7}
+{"id": "v11n", "engine": "groq-turbo", "lang": "auto", "transcript": "expand 3, open bracket, X plus 4, close bracket.", "latency_s": 0.686, "seconds": 4.7}
+{"id": "v12", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.551, "seconds": 3.71}
+{"id": "v12n", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.564, "seconds": 3.71}
+{"id": "v13", "engine": "groq-turbo", "lang": "auto", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.622, "seconds": 2.97}
+{"id": "v13n", "engine": "groq-turbo", "lang": "auto", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.326, "seconds": 2.97}
+{"id": "v14", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.573, "seconds": 3.54}
+{"id": "v14n", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.395, "seconds": 3.54}
+{"id": "v15", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.473, "seconds": 2.82}
+{"id": "v15n", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve 2x minus 7 equals 9", "latency_s": 0.462, "seconds": 2.82}
+{"id": "v16", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.398, "seconds": 3.89}
+{"id": "v16n", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.346, "seconds": 3.89}
+{"id": "v17", "engine": "groq-turbo", "lang": "auto", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.416, "seconds": 4.42}
+{"id": "v17n", "engine": "groq-turbo", "lang": "auto", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.602, "seconds": 4.42}
+{"id": "v18", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.395, "seconds": 2.97}
+{"id": "v18n", "engine": "groq-turbo", "lang": "auto", "transcript": "Solve x over 3 plus 2 equals 5", "latency_s": 0.361, "seconds": 2.97}
+{"id": "v19", "engine": "groq-turbo", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.419, "seconds": 5.77}
+{"id": "v19n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.487, "seconds": 5.77}
+{"id": "v20", "engine": "groq-turbo", "lang": "auto", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.348, "seconds": 8.11}
+{"id": "v20n", "engine": "groq-turbo", "lang": "auto", "transcript": "A taxi travels 120 kilometers in one and a half hours. What is its average speed in kilometers per hour?", "latency_s": 0.457, "seconds": 8.11}
+{"id": "v21", "engine": "groq-turbo", "lang": "auto", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.406, "seconds": 4.19}
+{"id": "v21n", "engine": "groq-turbo", "lang": "auto", "transcript": "Find the perimeter of a square with size of 7.2 meters", "latency_s": 0.501, "seconds": 4.19}
+{"id": "v22", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.558, "seconds": 3.55}
+{"id": "v22n", "engine": "groq-turbo", "lang": "auto", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.422, "seconds": 3.55}
+{"id": "v23", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals 5.", "latency_s": 0.397, "seconds": 1.35}
+{"id": "v23n", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals 5", "latency_s": 0.397, "seconds": 1.35}
+{"id": "v24", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals negative 5.", "latency_s": 0.507, "seconds": 1.87}
+{"id": "v24n", "engine": "groq-turbo", "lang": "auto", "transcript": "X equals negative 5.", "latency_s": 0.557, "seconds": 1.87}
+{"id": "v25", "engine": "groq-turbo", "lang": "auto", "transcript": "3x equals 15", "latency_s": 0.559, "seconds": 1.87}
+{"id": "v25n", "engine": "groq-turbo", "lang": "auto", "transcript": "3x equals 15", "latency_s": 0.34, "seconds": 1.87}
+{"id": "v26", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals 7.", "latency_s": 0.566, "seconds": 1.29}
+{"id": "v26n", "engine": "groq-turbo", "lang": "auto", "transcript": "X equals 7", "latency_s": 0.378, "seconds": 1.29}
+{"id": "v27", "engine": "groq-turbo", "lang": "auto", "transcript": "Negative 5", "latency_s": 0.511, "seconds": 1.07}
+{"id": "v27n", "engine": "groq-turbo", "lang": "auto", "transcript": "Negative 5", "latency_s": 0.395, "seconds": 1.07}
+{"id": "v28", "engine": "groq-turbo", "lang": "auto", "transcript": "Minus 11.", "latency_s": 0.644, "seconds": 1.01}
+{"id": "v28n", "engine": "groq-turbo", "lang": "auto", "transcript": "Minus 11", "latency_s": 0.56, "seconds": 1.01}
+{"id": "v29", "engine": "groq-turbo", "lang": "auto", "transcript": "11 over 12.", "latency_s": 0.557, "seconds": 1.27}
+{"id": "v29n", "engine": "groq-turbo", "lang": "auto", "transcript": "11 over 12.", "latency_s": 0.623, "seconds": 1.27}
+{"id": "v30", "engine": "groq-turbo", "lang": "auto", "transcript": "28 square centimeters", "latency_s": 0.424, "seconds": 2.13}
+{"id": "v30n", "engine": "groq-turbo", "lang": "auto", "transcript": "28 square centimeters.", "latency_s": 0.392, "seconds": 2.13}
+{"id": "v31", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.495, "seconds": 2.62}
+{"id": "v31n", "engine": "groq-turbo", "lang": "auto", "transcript": "x equals 2 or x equals 3", "latency_s": 0.405, "seconds": 2.62}
+{"id": "v32", "engine": "groq-turbo", "lang": "auto", "transcript": "3x squared minus 6", "latency_s": 0.458, "seconds": 1.92}
+{"id": "v32n", "engine": "groq-turbo", "lang": "auto", "transcript": "3x squared minus 6", "latency_s": 0.598, "seconds": 1.92}
+{"id": "v33", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.557, "seconds": 6.91}
+{"id": "v33n", "engine": "groq-turbo", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.563, "seconds": 6.91}
+{"id": "v34", "engine": "groq-turbo", "lang": "auto", "transcript": "Angicondi-eucathene-gensony lab. What is negative 8 plus 3?", "latency_s": 0.354, "seconds": 4.65}
+{"id": "v34n", "engine": "groq-turbo", "lang": "auto", "transcript": "Angakondi-eucopin-jenzanila, what is negative 8 plus 3?", "latency_s": 0.422, "seconds": 4.65}
+{"id": "v35", "engine": "groq-turbo", "lang": "auto", "transcript": "Duma le kakhlechor, ke kope the so. How do I add two thirds and one quarter?", "latency_s": 0.44, "seconds": 5.57}
+{"id": "v35n", "engine": "groq-turbo", "lang": "auto", "transcript": "Doomalikahlechaw, kikofa feso. How do I add two thirds and one quarter?", "latency_s": 0.497, "seconds": 5.57}
+{"id": "v36", "engine": "groq-turbo", "lang": "auto", "transcript": "Ha ke atawizai's. Solve 2x minus 7 equals 9.", "latency_s": 0.344, "seconds": 4.43}
+{"id": "v36n", "engine": "groq-turbo", "lang": "auto", "transcript": "Hakeakewezai's, solve 2x minus 7 equals 9", "latency_s": 0.392, "seconds": 4.43}
+{"id": "v37", "engine": "groq-turbo", "lang": "auto", "transcript": "Hello, Kahlilho, Ek-Würsten-Ni-Hirdy-Som-Ni. Solve 2 bracket X minus 1 bracket equals 10.", "latency_s": 0.417, "seconds": 7.43}
+{"id": "v37n", "engine": "groq-turbo", "lang": "auto", "transcript": "For lo kakhlechor, ek burstin nahe hirgi song nahe. Sol 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.561, "seconds": 7.43}
+{"id": "v38", "engine": "groq-turbo", "lang": "auto", "transcript": "Ex-Suckel-Metbrook. What is 3 over 4 divided by 1 half?", "latency_s": 0.348, "seconds": 4.55}
+{"id": "v38n", "engine": "groq-turbo", "lang": "auto", "transcript": "X-Succle Met Group, what is 3 over 4 divided by 1 half?", "latency_s": 0.466, "seconds": 4.55}
+{"id": "v39", "engine": "groq-turbo", "lang": "auto", "transcript": "Ndkabanga yukafi x equals 5.", "latency_s": 0.391, "seconds": 2.71}
+{"id": "v39n", "engine": "groq-turbo", "lang": "auto", "transcript": "And the cabanga u could be x equals 5.", "latency_s": 0.317, "seconds": 2.71}
+{"id": "v40", "engine": "groq-turbo", "lang": "auto", "transcript": "Kinna Hana Hawkeye negative 5.", "latency_s": 0.377, "seconds": 2.26}
+{"id": "v40n", "engine": "groq-turbo", "lang": "auto", "transcript": "Hannah Hawke, negative 5.", "latency_s": 0.425, "seconds": 2.26}
+{"id": "v01", "engine": "groq-v3", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.375, "seconds": 2.42}
+{"id": "v01n", "engine": "groq-v3", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.343, "seconds": 2.42}
+{"id": "v02", "engine": "groq-v3", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.483, "seconds": 5.01}
+{"id": "v02n", "engine": "groq-v3", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.558, "seconds": 5.01}
+{"id": "v03", "engine": "groq-v3", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.523, "seconds": 4.27}
+{"id": "v03n", "engine": "groq-v3", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.562, "seconds": 4.27}
+{"id": "v04", "engine": "groq-v3", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.438, "seconds": 2.58}
+{"id": "v04n", "engine": "groq-v3", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.36, "seconds": 2.58}
+{"id": "v05", "engine": "groq-v3", "lang": "en", "transcript": "How do I add 2 thirds and 1 quarter?", "latency_s": 0.372, "seconds": 2.64}
+{"id": "v05n", "engine": "groq-v3", "lang": "en", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.547, "seconds": 2.64}
+{"id": "v06", "engine": "groq-v3", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.368, "seconds": 3.03}
+{"id": "v06n", "engine": "groq-v3", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.419, "seconds": 3.03}
+{"id": "v07", "engine": "groq-v3", "lang": "en", "transcript": "simplify 12 over 18", "latency_s": 0.445, "seconds": 2.28}
+{"id": "v07n", "engine": "groq-v3", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.475, "seconds": 2.28}
+{"id": "v08", "engine": "groq-v3", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.369, "seconds": 2.05}
+{"id": "v08n", "engine": "groq-v3", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.331, "seconds": 2.05}
+{"id": "v09", "engine": "groq-v3", "lang": "en", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.462, "seconds": 2.83}
+{"id": "v09n", "engine": "groq-v3", "lang": "en", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.373, "seconds": 2.83}
+{"id": "v10", "engine": "groq-v3", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.564, "seconds": 2.31}
+{"id": "v10n", "engine": "groq-v3", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.431, "seconds": 2.31}
+{"id": "v11", "engine": "groq-v3", "lang": "en", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.421, "seconds": 4.7}
+{"id": "v11n", "engine": "groq-v3", "lang": "en", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.495, "seconds": 4.7}
+{"id": "v12", "engine": "groq-v3", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.564, "seconds": 3.71}
+{"id": "v12n", "engine": "groq-v3", "lang": "en", "transcript": "solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.361, "seconds": 3.71}
+{"id": "v13", "engine": "groq-v3", "lang": "en", "transcript": "Simplify 3a plus 2b plus 5a.", "latency_s": 0.431, "seconds": 2.97}
+{"id": "v13n", "engine": "groq-v3", "lang": "en", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.358, "seconds": 2.97}
+{"id": "v14", "engine": "groq-v3", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.434, "seconds": 3.54}
+{"id": "v14n", "engine": "groq-v3", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.681, "seconds": 3.54}
+{"id": "v15", "engine": "groq-v3", "lang": "en", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.439, "seconds": 2.82}
+{"id": "v15n", "engine": "groq-v3", "lang": "en", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.476, "seconds": 2.82}
+{"id": "v16", "engine": "groq-v3", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.77, "seconds": 3.89}
+{"id": "v16n", "engine": "groq-v3", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.454, "seconds": 3.89}
+{"id": "v17", "engine": "groq-v3", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.362, "seconds": 4.42}
+{"id": "v17n", "engine": "groq-v3", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.364, "seconds": 4.42}
+{"id": "v18", "engine": "groq-v3", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.361, "seconds": 2.97}
+{"id": "v18n", "engine": "groq-v3", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.456, "seconds": 2.97}
+{"id": "v19", "engine": "groq-v3", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.472, "seconds": 5.77}
+{"id": "v19n", "engine": "groq-v3", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.512, "seconds": 5.77}
+{"id": "v20", "engine": "groq-v3", "lang": "en", "transcript": "A taxi travels 120 km in 1.5 hours. What is its average speed in km per hour?", "latency_s": 0.511, "seconds": 8.11}
+{"id": "v20n", "engine": "groq-v3", "lang": "en", "transcript": "A taxi travels 120 km in 1.5 hours. What is its average speed in km per hour?", "latency_s": 0.398, "seconds": 8.11}
+{"id": "v21", "engine": "groq-v3", "lang": "en", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.485, "seconds": 4.19}
+{"id": "v21n", "engine": "groq-v3", "lang": "en", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.429, "seconds": 4.19}
+{"id": "v22", "engine": "groq-v3", "lang": "en", "transcript": "What is 15% of 240 rand?", "latency_s": 0.387, "seconds": 3.55}
+{"id": "v22n", "engine": "groq-v3", "lang": "en", "transcript": "What is 15% of 240 rand?", "latency_s": 0.457, "seconds": 3.55}
+{"id": "v23", "engine": "groq-v3", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.576, "seconds": 1.35}
+{"id": "v23n", "engine": "groq-v3", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.445, "seconds": 1.35}
+{"id": "v24", "engine": "groq-v3", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.418, "seconds": 1.87}
+{"id": "v24n", "engine": "groq-v3", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.471, "seconds": 1.87}
+{"id": "v25", "engine": "groq-v3", "lang": "en", "transcript": "3x equals 15.", "latency_s": 0.493, "seconds": 1.87}
+{"id": "v25n", "engine": "groq-v3", "lang": "en", "transcript": "3x equals 15.", "latency_s": 0.455, "seconds": 1.87}
+{"id": "v26", "engine": "groq-v3", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.329, "seconds": 1.29}
+{"id": "v26n", "engine": "groq-v3", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.411, "seconds": 1.29}
+{"id": "v27", "engine": "groq-v3", "lang": "en", "transcript": "Negative 5.", "latency_s": 0.537, "seconds": 1.07}
+{"id": "v27n", "engine": "groq-v3", "lang": "en", "transcript": "negative 5.", "latency_s": 0.435, "seconds": 1.07}
+{"id": "v28", "engine": "groq-v3", "lang": "en", "transcript": "minus 11.", "latency_s": 0.48, "seconds": 1.01}
+{"id": "v28n", "engine": "groq-v3", "lang": "en", "transcript": "Minus 11.", "latency_s": 0.446, "seconds": 1.01}
+{"id": "v29", "engine": "groq-v3", "lang": "en", "transcript": "11 over 12.", "latency_s": 0.365, "seconds": 1.27}
+{"id": "v29n", "engine": "groq-v3", "lang": "en", "transcript": "11 over 12.", "latency_s": 0.356, "seconds": 1.27}
+{"id": "v30", "engine": "groq-v3", "lang": "en", "transcript": "28 square centimeters", "latency_s": 0.438, "seconds": 2.13}
+{"id": "v30n", "engine": "groq-v3", "lang": "en", "transcript": "28 square centimeters.", "latency_s": 1.558, "seconds": 2.13}
+{"id": "v31", "engine": "groq-v3", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.458, "seconds": 2.62}
+{"id": "v31n", "engine": "groq-v3", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.434, "seconds": 2.62}
+{"id": "v32", "engine": "groq-v3", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.578, "seconds": 1.92}
+{"id": "v32n", "engine": "groq-v3", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.502, "seconds": 1.92}
+{"id": "v33", "engine": "groq-v3", "lang": "en", "transcript": "Sawubona kachlecho, ngisilo anjizize. How do I solve 3x plus 4 equals 19?", "latency_s": 0.451, "seconds": 6.91}
+{"id": "v33n", "engine": "groq-v3", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.489, "seconds": 6.91}
+{"id": "v34", "engine": "groq-v3", "lang": "en", "transcript": "Angikondi-Eucathine-Genzani Lab. What is negative 8 plus 3?", "latency_s": 0.374, "seconds": 4.65}
+{"id": "v34n", "engine": "groq-v3", "lang": "en", "transcript": "Angakondi Yukapin Jensanula, what is negative 8 plus 3?", "latency_s": 0.582, "seconds": 4.65}
+{"id": "v35", "engine": "groq-v3", "lang": "en", "transcript": "Dumalikaflechor, Kekopethasor. How do I add two-thirds and one-quarter?", "latency_s": 0.544, "seconds": 5.57}
+{"id": "v35n", "engine": "groq-v3", "lang": "en", "transcript": "Dumala kukhlicho, kikho fathaso, how do I add two thirds and one quarter?", "latency_s": 0.423, "seconds": 5.57}
+{"id": "v36", "engine": "groq-v3", "lang": "en", "transcript": "Ha-ke-at-wis-is. Solve 2x minus 7 equals 9.", "latency_s": 0.487, "seconds": 4.43}
+{"id": "v36n", "engine": "groq-v3", "lang": "en", "transcript": "Harker Akawizai's, Sol 2x-7 equals 9.", "latency_s": 0.38, "seconds": 4.43}
+{"id": "v37", "engine": "groq-v3", "lang": "en", "transcript": "Hello Kahlil for Ekversten Nihirdi Som Nih. Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.516, "seconds": 7.43}
+{"id": "v37n", "engine": "groq-v3", "lang": "en", "transcript": "for lo kakhlekhul, f versed in nai heri som nai, sol 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.607, "seconds": 7.43}
+{"id": "v38", "engine": "groq-v3", "lang": "en", "transcript": "xsql met brook. What is 3 over 4 divided by 1 half?", "latency_s": 0.457, "seconds": 4.55}
+{"id": "v38n", "engine": "groq-v3", "lang": "en", "transcript": "x-subtl-net-group, what is 3 over 4 divided by 1 half.", "latency_s": 0.461, "seconds": 4.55}
+{"id": "v39", "engine": "groq-v3", "lang": "en", "transcript": "and ikabanga ukafi x equals 5.", "latency_s": 0.36, "seconds": 2.71}
+{"id": "v39n", "engine": "groq-v3", "lang": "en", "transcript": "And if you bang the ukipy x equals 5.", "latency_s": 0.418, "seconds": 2.71}
+{"id": "v40", "engine": "groq-v3", "lang": "en", "transcript": "Kena hana ho kena negative 5.", "latency_s": 0.495, "seconds": 2.26}
+{"id": "v40n", "engine": "groq-v3", "lang": "en", "transcript": "Kenna Hannah Hawken edited 5.", "latency_s": 0.384, "seconds": 2.26}
+{"id": "v01", "engine": "groq-v3", "lang": "auto", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.412, "seconds": 2.42}
+{"id": "v01n", "engine": "groq-v3", "lang": "auto", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.39, "seconds": 2.42}
+{"id": "v02", "engine": "groq-v3", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.541, "seconds": 5.01}
+{"id": "v02n", "engine": "groq-v3", "lang": "auto", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.586, "seconds": 5.01}
+{"id": "v03", "engine": "groq-v3", "lang": "auto", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.428, "seconds": 4.27}
+{"id": "v03n", "engine": "groq-v3", "lang": "auto", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.353, "seconds": 4.27}
+{"id": "v04", "engine": "groq-v3", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.363, "seconds": 2.58}
+{"id": "v04n", "engine": "groq-v3", "lang": "auto", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.655, "seconds": 2.58}
+{"id": "v05", "engine": "groq-v3", "lang": "auto", "transcript": "How do I add 2 thirds and 1 quarter?", "latency_s": 0.476, "seconds": 2.64}
+{"id": "v05n", "engine": "groq-v3", "lang": "auto", "transcript": "How do I add two thirds and one quarter?", "latency_s": 0.474, "seconds": 2.64}
+{"id": "v06", "engine": "groq-v3", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.442, "seconds": 3.03}
+{"id": "v06n", "engine": "groq-v3", "lang": "auto", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.428, "seconds": 3.03}
+{"id": "v07", "engine": "groq-v3", "lang": "auto", "transcript": "simplify 12 over 18", "latency_s": 0.416, "seconds": 2.28}
+{"id": "v07n", "engine": "groq-v3", "lang": "auto", "transcript": "Simplify 12 over 18.", "latency_s": 0.425, "seconds": 2.28}
+{"id": "v08", "engine": "groq-v3", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.395, "seconds": 2.05}
+{"id": "v08n", "engine": "groq-v3", "lang": "auto", "transcript": "What is negative 8 plus 3?", "latency_s": 0.452, "seconds": 2.05}
+{"id": "v09", "engine": "groq-v3", "lang": "auto", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.417, "seconds": 2.83}
+{"id": "v09n", "engine": "groq-v3", "lang": "auto", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.434, "seconds": 2.83}
+{"id": "v10", "engine": "groq-v3", "lang": "auto", "transcript": "What is 5 minus negative 2?", "latency_s": 0.342, "seconds": 2.31}
+{"id": "v10n", "engine": "groq-v3", "lang": "auto", "transcript": "What is 5 minus negative 2?", "latency_s": 0.393, "seconds": 2.31}
+{"id": "v11", "engine": "groq-v3", "lang": "auto", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.389, "seconds": 4.7}
+{"id": "v11n", "engine": "groq-v3", "lang": "auto", "transcript": "expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.448, "seconds": 4.7}
+{"id": "v12", "engine": "groq-v3", "lang": "auto", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.428, "seconds": 3.71}
+{"id": "v12n", "engine": "groq-v3", "lang": "auto", "transcript": "solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.379, "seconds": 3.71}
+{"id": "v13", "engine": "groq-v3", "lang": "auto", "transcript": "Simplify 3a plus 2b plus 5a.", "latency_s": 0.446, "seconds": 2.97}
+{"id": "v13n", "engine": "groq-v3", "lang": "auto", "transcript": "simplify 3a plus 2b plus 5a", "latency_s": 0.466, "seconds": 2.97}
+{"id": "v14", "engine": "groq-v3", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.417, "seconds": 3.54}
+{"id": "v14n", "engine": "groq-v3", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.55, "seconds": 3.54}
+{"id": "v15", "engine": "groq-v3", "lang": "auto", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.499, "seconds": 2.82}
+{"id": "v15n", "engine": "groq-v3", "lang": "auto", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 1.796, "seconds": 2.82}
+{"id": "v16", "engine": "groq-v3", "lang": "auto", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.438, "seconds": 3.89}
+{"id": "v16n", "engine": "groq-v3", "lang": "auto", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.511, "seconds": 3.89}
+{"id": "v17", "engine": "groq-v3", "lang": "auto", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.554, "seconds": 4.42}
+{"id": "v17n", "engine": "groq-v3", "lang": "auto", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.564, "seconds": 4.42}
+{"id": "v18", "engine": "groq-v3", "lang": "auto", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.562, "seconds": 2.97}
+{"id": "v18n", "engine": "groq-v3", "lang": "auto", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.562, "seconds": 2.97}
+{"id": "v19", "engine": "groq-v3", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.447, "seconds": 5.77}
+{"id": "v19n", "engine": "groq-v3", "lang": "auto", "transcript": "What is the area of a rectangle that is 8 cm by 3.5 cm?", "latency_s": 0.443, "seconds": 5.77}
+{"id": "v20", "engine": "groq-v3", "lang": "auto", "transcript": "A taxi travels 120 km in 1.5 hours. What is its average speed in km per hour?", "latency_s": 0.424, "seconds": 8.11}
+{"id": "v20n", "engine": "groq-v3", "lang": "auto", "transcript": "A taxi travels 120 km in 1.5 hours. What is its average speed in km per hour?", "latency_s": 2.82, "seconds": 8.11}
+{"id": "v21", "engine": "groq-v3", "lang": "auto", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.445, "seconds": 4.19}
+{"id": "v21n", "engine": "groq-v3", "lang": "auto", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.411, "seconds": 4.19}
+{"id": "v22", "engine": "groq-v3", "lang": "auto", "transcript": "What is 15% of 240 rand?", "latency_s": 0.416, "seconds": 3.55}
+{"id": "v22n", "engine": "groq-v3", "lang": "auto", "transcript": "What is 15% of 240 rand?", "latency_s": 0.677, "seconds": 3.55}
+{"id": "v23", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 5.", "latency_s": 0.572, "seconds": 1.35}
+{"id": "v23n", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 5.", "latency_s": 0.561, "seconds": 1.35}
+{"id": "v24", "engine": "groq-v3", "lang": "auto", "transcript": "x equals negative 5.", "latency_s": 0.412, "seconds": 1.87}
+{"id": "v24n", "engine": "groq-v3", "lang": "auto", "transcript": "x equals negative 5.", "latency_s": 0.413, "seconds": 1.87}
+{"id": "v25", "engine": "groq-v3", "lang": "auto", "transcript": "3x equals 15.", "latency_s": 0.651, "seconds": 1.87}
+{"id": "v25n", "engine": "groq-v3", "lang": "auto", "transcript": "3x equals 15.", "latency_s": 0.556, "seconds": 1.87}
+{"id": "v26", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 7.", "latency_s": 0.418, "seconds": 1.29}
+{"id": "v26n", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 7.", "latency_s": 0.42, "seconds": 1.29}
+{"id": "v27", "engine": "groq-v3", "lang": "auto", "transcript": "Negative 5.", "latency_s": 0.552, "seconds": 1.07}
+{"id": "v27n", "engine": "groq-v3", "lang": "auto", "transcript": "negative 5.", "latency_s": 0.432, "seconds": 1.07}
+{"id": "v28", "engine": "groq-v3", "lang": "auto", "transcript": "minus 11.", "latency_s": 0.416, "seconds": 1.01}
+{"id": "v28n", "engine": "groq-v3", "lang": "auto", "transcript": "Minus 11.", "latency_s": 0.482, "seconds": 1.01}
+{"id": "v29", "engine": "groq-v3", "lang": "auto", "transcript": "11 over 12.", "latency_s": 0.533, "seconds": 1.27}
+{"id": "v29n", "engine": "groq-v3", "lang": "auto", "transcript": "11 over 12.", "latency_s": 0.549, "seconds": 1.27}
+{"id": "v30", "engine": "groq-v3", "lang": "auto", "transcript": "28 square centimeters", "latency_s": 0.486, "seconds": 2.13}
+{"id": "v30n", "engine": "groq-v3", "lang": "auto", "transcript": "28 square centimeters.", "latency_s": 0.402, "seconds": 2.13}
+{"id": "v31", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.685, "seconds": 2.62}
+{"id": "v31n", "engine": "groq-v3", "lang": "auto", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.437, "seconds": 2.62}
+{"id": "v32", "engine": "groq-v3", "lang": "auto", "transcript": "3x squared minus 6.", "latency_s": 0.34, "seconds": 1.92}
+{"id": "v32n", "engine": "groq-v3", "lang": "auto", "transcript": "3x squared minus 6.", "latency_s": 0.422, "seconds": 1.92}
+{"id": "v33", "engine": "groq-v3", "lang": "auto", "transcript": "Sawubona kachlecho, ngisilo anjizize. How do I solve 3x plus 4 equals 19?", "latency_s": 0.393, "seconds": 6.91}
+{"id": "v33n", "engine": "groq-v3", "lang": "auto", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.448, "seconds": 6.91}
+{"id": "v34", "engine": "groq-v3", "lang": "auto", "transcript": "Angikondi-Eucathine-Genzani Lab. What is negative 8 plus 3?", "latency_s": 0.596, "seconds": 4.65}
+{"id": "v34n", "engine": "groq-v3", "lang": "auto", "transcript": "Angakondi Yukapin Jensanula, what is negative 8 plus 3?", "latency_s": 0.46, "seconds": 4.65}
+{"id": "v35", "engine": "groq-v3", "lang": "auto", "transcript": "Dumalikaflechor, Kekopethasor. How do I add two-thirds and one-quarter?", "latency_s": 0.403, "seconds": 5.57}
+{"id": "v35n", "engine": "groq-v3", "lang": "auto", "transcript": "Dumala kukhlicho, kikho fathaso, how do I add two thirds and one quarter?", "latency_s": 0.52, "seconds": 5.57}
+{"id": "v36", "engine": "groq-v3", "lang": "auto", "transcript": "Ha-ke-at-wis-is. Solve 2x minus 7 equals 9.", "latency_s": 0.381, "seconds": 4.43}
+{"id": "v36n", "engine": "groq-v3", "lang": "auto", "transcript": "Harker Akawizai's, Sol 2x-7 equals 9.", "latency_s": 0.422, "seconds": 4.43}
+{"id": "v37", "engine": "groq-v3", "lang": "auto", "transcript": "Hello Kahlil for Ekversten Nihirdi Som Nih. Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.46, "seconds": 7.43}
+{"id": "v37n", "engine": "groq-v3", "lang": "auto", "transcript": "for lo kakhlekhul, f versed in nai heri som nai, sol 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.464, "seconds": 7.43}
+{"id": "v38", "engine": "groq-v3", "lang": "auto", "transcript": "xsql met brook. What is 3 over 4 divided by 1 half?", "latency_s": 0.838, "seconds": 4.55}
+{"id": "v38n", "engine": "groq-v3", "lang": "auto", "transcript": "x-subtl-net-group, what is 3 over 4 divided by 1 half.", "latency_s": 0.465, "seconds": 4.55}
+{"id": "v39", "engine": "groq-v3", "lang": "auto", "transcript": "and ikabanga ukafi x equals 5.", "latency_s": 0.402, "seconds": 2.71}
+{"id": "v39n", "engine": "groq-v3", "lang": "auto", "transcript": "And if you bang the ukipy x equals 5.", "latency_s": 0.604, "seconds": 2.71}
+{"id": "v40", "engine": "groq-v3", "lang": "auto", "transcript": "Kena hana ho kena negative 5.", "latency_s": 0.406, "seconds": 2.26}
+{"id": "v40n", "engine": "groq-v3", "lang": "auto", "transcript": "Kenna Hannah Hawken edited 5.", "latency_s": 0.354, "seconds": 2.26}
+{"id": "v01", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.463, "seconds": 2.42}
+{"id": "v01n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 3 squared plus 4 squared?", "latency_s": 0.404, "seconds": 2.42}
+{"id": "v02", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.406, "seconds": 5.01}
+{"id": "v02n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I simplify x to the power of 5 times x to the power of 3?", "latency_s": 0.492, "seconds": 5.01}
+{"id": "v03", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.362, "seconds": 4.27}
+{"id": "v03n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve for x2 to the power of x plus 3 equals 32.", "latency_s": 0.366, "seconds": 4.27}
+{"id": "v04", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.463, "seconds": 2.58}
+{"id": "v04n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 2 to the power of negative 3?", "latency_s": 0.398, "seconds": 2.58}
+{"id": "v05", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I add 2 thirds and 1 quarter?", "latency_s": 0.339, "seconds": 2.64}
+{"id": "v05n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I add 2 thirds and 1 quarter?", "latency_s": 0.405, "seconds": 2.64}
+{"id": "v06", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.449, "seconds": 3.03}
+{"id": "v06n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 3 over 4 divided by 1 half?", "latency_s": 0.414, "seconds": 3.03}
+{"id": "v07", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.452, "seconds": 2.28}
+{"id": "v07n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Simplify 12 over 18.", "latency_s": 0.432, "seconds": 2.28}
+{"id": "v08", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.332, "seconds": 2.05}
+{"id": "v08n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is negative 8 plus 3?", "latency_s": 0.421, "seconds": 2.05}
+{"id": "v09", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.465, "seconds": 2.83}
+{"id": "v09n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Calculate minus 6 times minus 7.", "latency_s": 0.321, "seconds": 2.83}
+{"id": "v10", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.394, "seconds": 2.31}
+{"id": "v10n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 5 minus negative 2?", "latency_s": 0.401, "seconds": 2.31}
+{"id": "v11", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.402, "seconds": 4.7}
+{"id": "v11n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Expand 3, open bracket, x plus 4, close bracket.", "latency_s": 0.669, "seconds": 4.7}
+{"id": "v12", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.547, "seconds": 3.71}
+{"id": "v12n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.359, "seconds": 3.71}
+{"id": "v13", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Simplify 3a plus 2b plus 5a.", "latency_s": 0.413, "seconds": 2.97}
+{"id": "v13n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Simplify 3a plus 2b plus 5a.", "latency_s": 0.476, "seconds": 2.97}
+{"id": "v14", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.455, "seconds": 3.54}
+{"id": "v14n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.471, "seconds": 3.54}
+{"id": "v15", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve 2x minus 7 equals 9.", "latency_s": 0.4, "seconds": 2.82}
+{"id": "v15n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve 2x-7 equals 9.", "latency_s": 0.604, "seconds": 2.82}
+{"id": "v16", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.396, "seconds": 3.89}
+{"id": "v16n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve x squared minus 5x plus 6 equals 0.", "latency_s": 0.423, "seconds": 3.89}
+{"id": "v17", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.381, "seconds": 4.42}
+{"id": "v17n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Find the derivative of f of x equals x cubed minus 6x.", "latency_s": 0.564, "seconds": 4.42}
+{"id": "v18", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.471, "seconds": 2.97}
+{"id": "v18n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Solve x over 3 plus 2 equals 5.", "latency_s": 0.346, "seconds": 2.97}
+{"id": "v19", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is the area of a rectangle that is 8 cm x 3.5 cm?", "latency_s": 0.498, "seconds": 5.77}
+{"id": "v19n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is the area of a rectangle that is 8cm x 3.5cm?", "latency_s": 0.349, "seconds": 5.77}
+{"id": "v20", "engine": "groq-turbo-hint", "lang": "en", "transcript": "A taxi travels 120 km in 1.5 hours. What is its average speed in km per hour?", "latency_s": 0.493, "seconds": 8.11}
+{"id": "v20n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "A taxi travels 120 km in 1.5 h, what is its average speed in km per hour?", "latency_s": 0.487, "seconds": 8.11}
+{"id": "v21", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Find the perimeter of a square with sides of 7.2 meters.", "latency_s": 0.417, "seconds": 4.19}
+{"id": "v21n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Find the perimeter of a square with size of 7.2 meters.", "latency_s": 0.527, "seconds": 4.19}
+{"id": "v22", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 15% of 240 Rand?", "latency_s": 0.474, "seconds": 3.55}
+{"id": "v22n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "What is 15% of 240 rand?", "latency_s": 0.411, "seconds": 3.55}
+{"id": "v23", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.397, "seconds": 1.35}
+{"id": "v23n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 5.", "latency_s": 0.322, "seconds": 1.35}
+{"id": "v24", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.398, "seconds": 1.87}
+{"id": "v24n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals negative 5.", "latency_s": 0.48, "seconds": 1.87}
+{"id": "v25", "engine": "groq-turbo-hint", "lang": "en", "transcript": "3x equals 15.", "latency_s": 0.426, "seconds": 1.87}
+{"id": "v25n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "3x equals 15.", "latency_s": 0.463, "seconds": 1.87}
+{"id": "v26", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.425, "seconds": 1.29}
+{"id": "v26n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 7.", "latency_s": 0.403, "seconds": 1.29}
+{"id": "v27", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Negative 5.", "latency_s": 0.415, "seconds": 1.07}
+{"id": "v27n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Negative 5", "latency_s": 0.415, "seconds": 1.07}
+{"id": "v28", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Minus 11.", "latency_s": 0.401, "seconds": 1.01}
+{"id": "v28n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Minus 11.", "latency_s": 0.501, "seconds": 1.01}
+{"id": "v29", "engine": "groq-turbo-hint", "lang": "en", "transcript": "11 over 12", "latency_s": 0.406, "seconds": 1.27}
+{"id": "v29n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "11 over 12.", "latency_s": 0.439, "seconds": 1.27}
+{"id": "v30", "engine": "groq-turbo-hint", "lang": "en", "transcript": "28 cm2", "latency_s": 0.504, "seconds": 2.13}
+{"id": "v30n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "28 cm²", "latency_s": 0.422, "seconds": 2.13}
+{"id": "v31", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.369, "seconds": 2.62}
+{"id": "v31n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x equals 2 or x equals 3.", "latency_s": 0.425, "seconds": 2.62}
+{"id": "v32", "engine": "groq-turbo-hint", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.378, "seconds": 1.92}
+{"id": "v32n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "3x squared minus 6.", "latency_s": 0.36, "seconds": 1.92}
+{"id": "v33", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.56, "seconds": 6.91}
+{"id": "v33n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I solve 3x plus 4 equals 19?", "latency_s": 0.431, "seconds": 6.91}
+{"id": "v34", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Angicondi eucathene genzany lab. What is negative 8 plus 3?", "latency_s": 0.337, "seconds": 4.65}
+{"id": "v34n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Angicondi yucupin genzunila, 1 is negative 8 plus 3.", "latency_s": 0.404, "seconds": 4.65}
+{"id": "v35", "engine": "groq-turbo-hint", "lang": "en", "transcript": "How do I add 2 3rds and 1 quarter?", "latency_s": 0.424, "seconds": 5.57}
+{"id": "v35n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Doomalakaklechol, kikofafasoo. How do I add 2 3rds and 1 4th?", "latency_s": 0.406, "seconds": 5.57}
+{"id": "v36", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Ha ke atwizize. Solve 2x minus 7 equals 9.", "latency_s": 0.397, "seconds": 4.43}
+{"id": "v36n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Palk here atuizize, solve 2x-7 equals 9.", "latency_s": 0.404, "seconds": 4.43}
+{"id": "v37", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Hello, kakhleho, ekwursten nae hierdie som nae. Solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.738, "seconds": 7.43}
+{"id": "v37n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "For low-cough-le-for, f-burst and nigh-he-re-song-nigh, solve 2 bracket x minus 1 bracket equals 10.", "latency_s": 0.397, "seconds": 7.43}
+{"id": "v38", "engine": "groq-turbo-hint", "lang": "en", "transcript": "xuckel met brook. Watt is 3 over 4 divided by 1 half.", "latency_s": 0.399, "seconds": 4.55}
+{"id": "v38n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "x Subtle net group, 1 is 3 over 4 divided by 1 half,", "latency_s": 0.42, "seconds": 4.55}
+{"id": "v39", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Ndkabanga yukafi x equals 5.", "latency_s": 0.352, "seconds": 2.71}
+{"id": "v39n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "And if a bang the u could be x equals 5.", "latency_s": 0.417, "seconds": 2.71}
+{"id": "v40", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Keh nah nah ho keh negative 5.", "latency_s": 0.43, "seconds": 2.26}
+{"id": "v40n", "engine": "groq-turbo-hint", "lang": "en", "transcript": "Hannah Hawke, negative 5.", "latency_s": 0.507, "seconds": 2.26}
