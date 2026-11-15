@@ -385,13 +385,23 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         reply, intent = consent.notice(), "consent_notice"
     elif sess.state == "awaiting_consent":
         reason = sess.data.get("onboarding_reason", "new_household")
-        if consent.agreed(text):
+        code = consent.school_code(text)
+        school = await consent.redeem_school_code(code) if code else None
+        if consent.agreed(text) or school:
             # create_household is idempotent: a sibling lands on the same account.
             account_id, guardian_id = await session.create_household(phone)
-            consent_id = await consent.record(
-                account_id, method="typed_agree", level="declared", replied_from=phone,
-                message=message, notice=sess.data.get("notice"), reply_text=text,
-            )
+            if school:
+                # The school holds the signed slip; the code stands for it.
+                consent_id = await consent.record(
+                    account_id, method="school_code", level="school", replied_from=phone,
+                    message=message, notice={"version": school["slip_version"]},
+                    reply_text=code, school_code=code,
+                )
+            else:
+                consent_id = await consent.record(
+                    account_id, method="typed_agree", level="declared", replied_from=phone,
+                    message=message, notice=sess.data.get("notice"), reply_text=text,
+                )
             sess.data.update(
                 state="awaiting_name",
                 account_id=account_id,
@@ -407,6 +417,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             sess.data["state"] = "active"
             await session.save(sess)
             reply = f"Okay, no learner added. Carrying on with {sess.name}. 🎓"
+        elif code:
+            reply = consent.BAD_SCHOOL_CODE
         else:
             reply = consent.reprompt(reason)
     elif sess.state == "awaiting_name":

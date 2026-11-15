@@ -12,6 +12,7 @@ docs/guardian-consent-findings.md.
 """
 
 import hashlib
+import re
 from datetime import datetime, timezone
 
 from app.db import get_pool
@@ -28,6 +29,17 @@ DATA_STATEMENT = (
 )
 
 
+SCHOOL_CODE_LINE = "Got a Katlego code from your school? Send it instead, like _SCH-K7M2QX_."
+
+# School sign-up codes (seed/load_enrolment_codes.py). The SCH prefix keeps an
+# ordinary word from being mistaken for a code.
+_SCHOOL_CODE = re.compile(r"SCH[- ]?([A-Z0-9]{6})")
+BAD_SCHOOL_CODE = (
+    "That school code isn't one I know, or it has already been used. 🙏 "
+    "Check it against the slip from your school, or ask your teacher for help."
+)
+
+
 def notice(reason: str = "new_household") -> str:
     """The consent notice for a first sign-up, or for a sibling being added."""
     if reason == "add_learner":
@@ -36,7 +48,7 @@ def notice(reason: str = "new_household") -> str:
             "for that learner too (POPIA).\n\n"
             f"{DATA_STATEMENT}\n\n"
             "If your parent or guardian agrees, ask them to reply *AGREE* to "
-            "continue. Send *CANCEL* to go back."
+            f"continue. {SCHOOL_CODE_LINE}\n\nSend *CANCEL* to go back."
         )
     return (
         "Hi! I'm *Katlego* 🎓 — your CAPS study buddy on WhatsApp.\n\n"
@@ -44,7 +56,8 @@ def notice(reason: str = "new_household") -> str:
         "parent or guardian, because I keep track of your progress to tutor you "
         "better.\n\n"
         f"{DATA_STATEMENT}\n\n"
-        "If your parent or guardian agrees, ask them to reply *AGREE* to continue."
+        "If your parent or guardian agrees, ask them to reply *AGREE* to continue. "
+        f"{SCHOOL_CODE_LINE}"
     )
 
 
@@ -63,6 +76,24 @@ def agreed(text: str) -> bool:
     """A bare YES or ACCEPT no longer counts: it is too easy to send without
     reading the notice."""
     return text.strip().strip(".!").upper() in {"AGREE", "I AGREE"}
+
+
+def school_code(text: str) -> str | None:
+    """The code in its stored form if the message is shaped like one."""
+    m = _SCHOOL_CODE.fullmatch(text.strip().upper())
+    return f"SCH-{m.group(1)}" if m else None
+
+
+async def redeem_school_code(code: str) -> dict | None:
+    """Spend a school code. Returns its row, or None if it is unknown or
+    already used. One statement, so a code can only ever be spent once."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "UPDATE enrolment_codes SET redeemed_at = now() "
+            "WHERE code = $1 AND redeemed_at IS NULL "
+            "RETURNING code, school, learner_ref, slip_version", code)
+    return dict(row) if row else None
 
 
 async def notice_sent(body: str, send_result: dict) -> dict:
@@ -88,6 +119,7 @@ async def record(
     notice: dict | None,
     reply_text: str | None = None,
     guardian_name: str | None = None,
+    school_code: str | None = None,
 ) -> int:
     """Save one consent event and return its id. `message` is the inbound
     WhatsApp message that agreed: its id and its own timestamp are the
@@ -99,7 +131,7 @@ async def record(
     notice = notice or {}
     pool = await get_pool()
     async with pool.acquire() as conn:
-        return await conn.fetchval(
+        consent_id = await conn.fetchval(
             """
             INSERT INTO consent_records
                 (account_id, method, level, notice_version, notice_message_id,
@@ -109,3 +141,8 @@ async def record(
             account_id, method, level, notice.get("version"), notice.get("wamid"),
             message.get("id"), reply_text, replied_from, guardian_name, consent_at,
         )
+        if school_code:
+            await conn.execute(
+                "UPDATE enrolment_codes SET consent_record_id = $2 WHERE code = $1",
+                school_code, consent_id)
+    return consent_id

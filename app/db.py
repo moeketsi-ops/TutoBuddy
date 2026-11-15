@@ -131,6 +131,23 @@ CREATE TABLE IF NOT EXISTS consent_records (
 CREATE INDEX IF NOT EXISTS idx_consent_records_learner ON consent_records(learner_id);
 CREATE INDEX IF NOT EXISTS idx_consent_records_account ON consent_records(account_id);
 
+-- School route (seed/load_enrolment_codes.py): the school collects a signed
+-- slip from each parent and keeps it; each returned slip earns one sign-up
+-- code. The row holds the school's own reference for the learner, never a
+-- name or a phone number. Erasing the learner clears the link but keeps the
+-- code spent, so a withdrawn consent cannot be reused without a new slip.
+CREATE TABLE IF NOT EXISTS enrolment_codes (
+    code              text PRIMARY KEY,
+    school            text NOT NULL,
+    learner_ref       text NOT NULL,
+    slip_version      text NOT NULL REFERENCES consent_notices(version),
+    signed_on         date NOT NULL,
+    created_at        timestamptz NOT NULL DEFAULT now(),
+    redeemed_at       timestamptz,
+    consent_record_id int REFERENCES consent_records(id) ON DELETE SET NULL,
+    UNIQUE (school, learner_ref)
+);
+
 CREATE TABLE IF NOT EXISTS conversation_log (
     id serial PRIMARY KEY,
     phone text NOT NULL,
