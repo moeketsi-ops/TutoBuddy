@@ -357,10 +357,13 @@ async def drop_link(sess: session.Session) -> None:
         await get_redis().delete(f"consent_link:{code}")
 
 
-def guardian_notice(learner_phone: str) -> str:
+def guardian_notice(digits: str = "XXXX") -> str:
+    """The notice on the guardian's phone. `digits` is the end of the
+    learner's number, so the guardian can tell which child asked. The stored
+    wording keeps the placeholder: consent_notices holds no personal data."""
     return (
         "Hello 👋 I'm *Katlego*, a CAPS maths tutor on WhatsApp from TutoBuddy. "
-        f"A learner using the number ending *{learner_phone[-4:]}* has asked to "
+        f"A learner using the number ending *{digits}* has asked to "
         "study with me and gave you this code as their parent or guardian. "
         "South African law (POPIA) requires your permission first.\n\n"
         "_Katlego stores the learner's phone number, a nickname and grade, plus "
@@ -406,9 +409,9 @@ async def guardian_turn(wa, sess: session.Session, phone: str, text: str, messag
         elif learner_phone == phone:
             await wa.send_text(phone, SAME_PHONE)  # not a second account
         else:
-            body = guardian_notice(learner_phone)
-            sent = await wa.send_text(phone, body)
-            sess.data["guardian_for"] = {"code": code, "notice": await notice_sent(body, sent)}
+            sent = await wa.send_text(phone, guardian_notice(learner_phone[-4:]))
+            sess.data["guardian_for"] = {
+                "code": code, "notice": await notice_sent(guardian_notice(), sent)}
             await session.save(sess)
         return True
 

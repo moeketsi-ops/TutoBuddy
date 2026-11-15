@@ -30,6 +30,17 @@ loud (local Whisper transcribes it, no key needed). Say **quiz me** for a
 practice question, **PROGRESS** for your term mastery, **ADD LEARNER** /
 **SWITCH** for siblings on a shared phone.
 
+## Guardian consent
+
+Tutoring starts only after a parent or guardian agrees, and every agreement
+is kept as a record (`consent_records`). Four ways in, strongest first: a
+sign-up code from the learner's school (`seed/load_enrolment_codes.py`), the
+guardian confirming from their own WhatsApp (the learner sends **LINK**), a
+voice note or photo of a signed slip (off unless `CONSENT_MEDIA_ENABLED`),
+and a typed **AGREE** with the guardian's name. **WITHDRAW** erases a
+learner. Research, open legal questions and design:
+[docs/guardian-consent-findings.md](docs/guardian-consent-findings.md).
+
 ## Run the tests
 
 ```bash

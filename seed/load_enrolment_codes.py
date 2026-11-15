@@ -7,7 +7,11 @@ Katlego in place of a typed AGREE (app/orchestrator/consent.py). See
 docs/guardian-consent-findings.md.
 
     docker compose run --rm -T seed python -m seed.load_enrolment_codes \
-        --school "Example High" < class_list.csv > codes.csv
+        --school "Example High" --slip seed/school/approved_slip.md \
+        < class_list.csv > codes.csv
+
+--slip is the exact wording the parents signed. It is stored as the record of
+what they agreed to, so the draft slip is refused.
 
 class_list.csv has a header and two columns: learner_ref (the school's own
 reference, such as a class-list number; not a name) and signed_on (the date
@@ -25,8 +29,6 @@ from pathlib import Path
 
 from app.db import get_pool
 from app.tutor.papers import new_code
-
-SLIP = Path(__file__).parent / "school" / "consent_slip.md"
 
 
 async def load(rows: list[dict], school: str, slip_text: str) -> list[tuple[str, str]]:
@@ -57,10 +59,13 @@ async def load(rows: list[dict], school: str, slip_text: str) -> list[tuple[str,
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--school", required=True)
-    ap.add_argument("--slip", type=Path, default=SLIP, help="the slip wording parents signed")
+    ap.add_argument("--slip", type=Path, required=True, help="the slip wording parents signed")
     args = ap.parse_args()
+    slip_text = args.slip.read_text()
+    if "DRAFT" in slip_text:
+        sys.exit(f"{args.slip} is still marked DRAFT: load the wording parents actually signed.")
     rows = list(csv.DictReader(sys.stdin))
-    issued = asyncio.run(load(rows, args.school, args.slip.read_text()))
+    issued = asyncio.run(load(rows, args.school, slip_text))
     writer = csv.writer(sys.stdout)
     writer.writerow(["learner_ref", "code"])
     writer.writerows(issued)

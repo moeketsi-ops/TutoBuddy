@@ -71,6 +71,7 @@ def test_guardian_agrees_from_their_own_phone(chat):
     assert rec["guardian_name"] == "Nomsa Dlamini, mother"
     assert rec["phone"] == chat.phone and rec["nickname"] == "Thabo"
     assert "this WhatsApp number" in rec["body"]         # the wording the guardian saw
+    assert "XXXX" in rec["body"] and chat.phone[-4:] not in rec["body"]   # no part of a number kept
     # The guardian's phone is left with no chat rows and no session.
     assert db("SELECT 1 FROM conversation_log WHERE phone = $1", guardian.phone) == []
     assert not _session_exists(guardian.phone)
@@ -89,6 +90,27 @@ def test_the_learners_own_phone_cannot_stand_in_for_the_guardian(chat):
     assert "AGREE" in reply and code in reply             # reminded of the waiting code
     assert db("SELECT 1 FROM consent_records r JOIN account_channels c "
               "ON c.account_id = r.account_id WHERE c.phone = $1", chat.phone) == []
+
+
+def _link_key_exists(code: str) -> bool:
+    async def q():
+        r = aioredis.from_url(os.environ["REDIS_URL"], decode_responses=True)
+        try:
+            return bool(await r.exists(f"consent_link:{code}"))
+        finally:
+            await r.aclose()
+    return asyncio.run(q())
+
+
+def test_cancelling_a_sibling_drops_the_waiting_code(onboarded_chat):
+    onboarded_chat.send_text("ADD LEARNER")
+    onboarded_chat.wait_for_reply()
+    onboarded_chat.send_text("LINK")
+    code = re.search(r"CONSENT ([A-Z0-9]{6})", onboarded_chat.wait_for_reply()).group(1)
+    assert _link_key_exists(code)
+    onboarded_chat.send_text("CANCEL")
+    onboarded_chat.wait_for_reply()
+    assert not _link_key_exists(code)                     # it held this phone's number
 
 
 def test_guardian_can_decline(chat):

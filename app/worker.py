@@ -401,6 +401,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         elif reason == "add_learner" and text.strip().upper() == "CANCEL":
             # Back to the learner who was studying; nobody was added.
             sess.data.pop("onboarding_reason", None)
+            sess.data.pop("expect_media", None)
+            await consent.drop_link(sess)
             sess.data["state"] = "active"
             await session.save(sess)
             reply = f"Okay, no learner added. Carrying on with {sess.name}. 🎓"

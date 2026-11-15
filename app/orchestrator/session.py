@@ -143,7 +143,12 @@ async def save(sess: Session) -> None:
 
 
 async def reset(phone: str) -> None:
-    await get_redis().delete(f"sess:{phone}")
+    """Drop the session, and with it any consent code that was waiting on a
+    guardian's phone (consent.py): that key holds this phone number."""
+    r = get_redis()
+    raw = await r.get(f"sess:{phone}")
+    code = json.loads(raw).get("link_code") if raw else None
+    await r.delete(f"sess:{phone}", *([f"consent_link:{code}"] if code else []))
 
 
 # ── Household / learner persistence (Postgres) ──────────────────────────────

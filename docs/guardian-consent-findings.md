@@ -131,21 +131,113 @@ one phone. Those sign-ups are recorded as `declared`, the lowest level.
 ## 7. Build record
 
 Branch `consent/guardian-consent`, cut from `moeketsi/bakeoff-fixes`
-(085ed08). Each milestone was tested before the next began. Status and test
-counts are filled in as each one lands.
+(085ed08). Each milestone was tested before the next began. The baseline was
+368 passing tests on a fresh database. Everything ran against the mock
+WhatsApp API and the stub model; nothing has been tried against Meta's real
+API.
 
-| # | Milestone | Status |
-|---|---|---|
-| 1 | Consent record and wording fixes | pending |
-| 2 | School sign-up codes | pending |
-| 3 | Guardian's name, second confirmation, WITHDRAW | pending |
-| 4 | Guardian confirms from their own WhatsApp | pending |
-| 5 | Voice note and signed-slip photo (switched off by default) | pending |
+| # | Milestone | What it does | Full suite after it |
+|---|---|---|---|
+| 1 | Consent record | Every consent event is a `consent_records` row: the wording shown (stored once per version in `consent_notices`), WhatsApp's ID for the notice and for the reply, the reply as sent, the account it came from, the guardian's message time, the method and the level. A bare YES or ACCEPT no longer passes. ADD LEARNER asks for consent again; CANCEL backs out. | 372 passed |
+| 2 | School sign-up codes | `seed/load_enrolment_codes.py` reads a class list and issues one `SCH-XXXXXX` code per returned slip. A learner sends the code in place of AGREE. Codes work once. A draft slip is in `seed/school/consent_slip.md`; the loader requires `--slip` and refuses wording still marked DRAFT. | 375 passed |
+| 3 | Guardian's name, follow-up, WITHDRAW | AGREE must come with the guardian's name and relationship. About 7 days after a consent that rests on the learner's own chat, Katlego adds a note asking the guardian to CONFIRM, then reminds them every 30 days how to withdraw. WITHDRAW does what DELETE does. | 378 passed |
+| 4 | Guardian's own WhatsApp | The learner sends LINK and gets a 6-character code valid for 48 hours. The guardian sends `CONSENT <code>` from their own phone, reads the notice there and agrees there. The learner's own number is refused. The guardian can WITHDRAW from their own phone. | 385 passed |
+| 5 | Voice note and signed-slip photo | The learner sends VOICE or SLIP, then the guardian's voice note or a photo of a signed note is stored as the record. **Switched off by default** (`CONSENT_MEDIA_ENABLED`) until questions 10 and 11 are answered. | 388 passed with the switch on; 386 passed and 2 skipped with it off |
+
+Moeketsi's full learner journey (`evals/journey/full.py`, stub model) also
+passes after the changes: 43 pass, 0 fail.
+
+A review after milestone 5 led to three fixes, tested with the full suite
+(387 passed, 2 skipped with the voice and slip switch off): the stored
+wording of the guardian's notice no longer contains the last digits of the
+learner's number, the loader refuses the draft slip, and a code waiting on a
+guardian's phone is dropped when the sibling step is cancelled or the
+household is erased.
+
+Consent levels, weakest first: `declared` (typed AGREE with a name on the
+learner's phone), `slip`, `voice`, `second_account` (the guardian's own
+WhatsApp), `school`.
 
 Not built, by design: WhatsApp Flows, reply buttons, a limited mode, the 18+
 self-consent branch, the knowledge check, ID checks and card payments.
 
+### Files
+
+- New: `app/orchestrator/consent.py`, `seed/load_enrolment_codes.py`,
+  `seed/school/consent_slip.md`, `tests/test_consent.py`,
+  `tests/test_school_codes.py`, `tests/test_guardian_link.py`,
+  `tests/test_consent_media.py`.
+- Changed: `app/worker.py` (the consent gate, the guardian's turn, CONFIRM,
+  follow-up notes), `app/orchestrator/session.py` (consent texts moved out,
+  `erase_learner` moved in from the worker), `app/db.py` (four new tables),
+  `app/config.py`, `app/orchestrator/safety.py` (Katlego's own `wa.me` link
+  is no longer stripped), `app/orchestrator/practice.py`, `mockwa/main.py`
+  (a one-shot delivery failure for tests), `.env.example`, `README.md`.
+- Moeketsi's files touched: the sign-up steps in eight test files now use
+  one shared `AGREE` constant from `tests/conftest.py`, and
+  `evals/journey/full.py` and `evals/journey/week.py` send the guardian's
+  name with AGREE.
+
 ## 8. Choices made during the build that need sign-off
 
-Filled in as the build goes. Each line is a choice an engineer made that
-Immanuel, Moeketsi or the lawyer should confirm.
+Each line is a choice an engineer made that Immanuel, Moeketsi or the lawyer
+should confirm.
+
+**Wording (question 8)**
+
+1. The consent notice now adds: "It also keeps a record of this agreement,
+   including the parent or guardian's name", "Send WITHDRAW or DELETE any
+   time", and the list of ways to agree. "No data is sold or shared" was left
+   exactly as it was, pending the lawyer.
+2. The notice a guardian sees on their own phone is new text. It names
+   TutoBuddy and shows the last four digits of the learner's number so the
+   guardian can tell which child asked.
+3. The school slip is a draft with placeholders. Do not send it to parents.
+
+**Behaviour**
+
+0. **The school pilot is not codes-only.** The report says a learner whose
+   slip has not come back should not get in on a typed AGREE. The build
+   accepts a typed AGREE (and LINK) on every number, because the same
+   Katlego number serves both routes. A setting that accepts school codes
+   only is a small addition if the pilot needs it.
+4. The guardian's name is free text and is not checked. "AGREE to nothing"
+   would be stored with "to nothing" as the name.
+5. The one-week CONFIRM is a request, not a gate. If the guardian never
+   confirms, tutoring carries on and the record simply shows no confirmation.
+   Consents backed by a school or a second WhatsApp account get no follow-up
+   notes.
+6. A guardian's WITHDRAW from their own phone erases at once, with no "are
+   you sure" step, like DELETE. It covers only learners that account
+   confirmed.
+7. A guardian whose own phone also has an active learner cannot WITHDRAW
+   there for a child on another phone; they use the child's phone. Marked in
+   the code.
+8. Link codes are 6 characters, last 48 hours and work once.
+
+**What is stored and erased**
+
+9. Consent records are erased with the learner, as the old consent link was
+   (question 7). After erasure TutoBuddy holds no proof that consent existed.
+10. A spent school code keeps its row (school, the school's reference, the
+    date on the slip) after the learner is erased, so a withdrawn consent
+    cannot be reused without a new slip. It holds no name or phone number.
+11. The guardian's WhatsApp number and name are stored on the consent record.
+    Their chat with Katlego is not written to the chat log, and their phone
+    keeps no session, so erasing the learner leaves nothing under the
+    guardian's number.
+12. Voice notes and slip photos (milestone 5) are stored as bytes in
+    Postgres with no retention period, and a voice note is transcribed
+    before the gate like any other voice note. `needs_review` flags every
+    slip and any voice note whose transcript lacks "agree"; there is no
+    review screen yet, only a database query.
+13. Learners who signed up before this branch have no consent record. There
+    is no backfill. A fresh database for the pilot avoids the question.
+
+**Platform**
+
+14. With WhatsApp usernames, the account identifier Katlego receives may not
+    be a phone number. The code stores whatever WhatsApp sends as the sender.
+    Untested against the real API.
+15. The `wa.me` link is only built when `WHATSAPP_PUBLIC_NUMBER` is set.
+    Without it the learner is told to pass on the code by hand.
