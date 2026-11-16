@@ -12,7 +12,8 @@ if [ ! -f /opt/katlego/.seeded ]; then
   echo "First run: loading curriculum content (seed)..."
   $C run --rm seed && touch /opt/katlego/.seeded
 fi
-$C up -d worker bridge
+$C up -d --force-recreate worker bridge
+install -m 644 katlego.cron /etc/cron.d/katlego
 $C ps
 echo; echo "Logs:  sudo $C logs -f --tail 50 bridge worker"
 free -h | sed -n 1,3p

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "access_granted",
+    "language": "en",
+    "category": "UTILITY",
+    "components": [
+      {
+        "type": "BODY",
+        "text": "Hi! Your TutoBuddy pilot access is open until {{1}}. Tap Start or say hi to Katlego to begin practising maths step by step.",
+        "example": { "body_text": [["30 Nov 2026"]] }
+      },
+      { "type": "FOOTER", "text": "TutoBuddy, tutobuddy.africa" },
+      { "type": "BUTTONS", "buttons": [ { "type": "QUICK_REPLY", "text": "Start" } ] }
+    ]
+  },
+  {
+    "name": "access_ending",
+    "language": "en",
+    "category": "UTILITY",
+    "components": [
+      {
+        "type": "BODY",
+        "text": "Your TutoBuddy access ends on {{1}}. Your progress is saved. To keep going, reply with a new access code, or reply JOIN and the TutoBuddy team will help.",
+        "example": { "body_text": [["30 Nov 2026"]] }
+      },
+      { "type": "FOOTER", "text": "TutoBuddy, tutobuddy.africa" }
+    ]
+  },
+  {
+    "name": "study_nudge",
+    "language": "en",
+    "category": "MARKETING",
+    "components": [
+      {
+        "type": "BODY",
+        "text": "Hi {{1}}! Katlego here. It's been a few days since we practised. Want a quick 5-minute warm-up on {{2}}?",
+        "example": { "body_text": [["Thabo", "linear equations"]] }
+      },
+      { "type": "FOOTER", "text": "Reply STOP to turn off study reminders" },
+      {
+        "type": "BUTTONS",
+        "buttons": [
+          { "type": "QUICK_REPLY", "text": "Yes, let's go" },
+          { "type": "QUICK_REPLY", "text": "Not now" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "parent_weekly_report",
+    "language": "en",
+    "category": "UTILITY",
+    "components": [
+      {
+        "type": "BODY",
+        "text": "TutoBuddy weekly update for {{1}}: {{2}} study sessions this week. Strongest topic: {{3}}. Next focus: {{4}}. Reply REPORT for the full summary.",
+        "example": { "body_text": [["Thabo", "4", "algebraic expressions", "linear equations"]] }
+      },
+      { "type": "FOOTER", "text": "TutoBuddy, tutobuddy.africa" }
+    ]
+  }
+]

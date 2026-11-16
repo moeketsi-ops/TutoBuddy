@@ -7,14 +7,28 @@ H=/opt/katlego
 mkdir -p "$H"
 umask 077
 
-ask() { local v; read -r -s -p "$1: " v </dev/tty; echo >&2; printf '%s' "$v"; }
-askv() { local v; read -r -p "$1: " v </dev/tty; printf '%s' "$v"; }
+# Hidden input. Paste works (Ctrl+V / Ctrl+Shift+V / right-click). Stray spaces,
+# quotes and line breaks from copying are stripped.
+ask() { local v; read -r -s -p "$1: " v </dev/tty || { echo >&2; echo "Input closed before Enter (nothing written)." >&2; return 1; }; echo >&2; v=${v//[[:space:]\"\']/}; printf '%s' "$v"; }
+askv() { local v; read -r -p "$1: " v </dev/tty || true; printf '%s' "$v"; }
+trap 'echo; echo "Stopped (nothing written)." >&2' INT
 
-TOKEN=$(ask "Katlego Bot WhatsApp token (the never-expiring one)")
-[ "${#TOKEN}" -ge 100 ] || { echo "That token looks too short (${#TOKEN} chars). Nothing written." >&2; exit 1; }
-OR_KEY=$(ask "OpenRouter API key")
-[ "${#OR_KEY}" -ge 20 ] || { echo "OpenRouter key looks too short. Nothing written." >&2; exit 1; }
-GROQ_KEY=$(ask "Groq API key for voice notes (press Enter to skip)")
+# Each key is tested live, so a bad paste is caught here, not in a learner chat.
+while :; do
+  TOKEN=$(ask "Paste the Katlego Bot WhatsApp token (the never-expiring one)") || exit 1
+  OUT=$(curl -s -m 15 -H @- "https://graph.facebook.com/v25.0/1352337571306417?fields=display_phone_number,verified_name" <<<"Authorization: Bearer $TOKEN" || true)
+  if grep -q display_phone_number <<<"$OUT"; then
+    echo "  OK: token works for $(sed -n 's/.*"display_phone_number":"\([^"]*\)".*/\1/p' <<<"$OUT") (${#TOKEN} chars)"; break
+  fi
+  echo "  That token did not work (${#TOKEN} chars; Meta says: $(sed -n 's/.*"message":"\([^"]*\)".*/\1/p' <<<"$OUT" | cut -c1-80)). Try pasting again." >&2
+done
+while :; do
+  OR_KEY=$(ask "Paste the OpenRouter API key") || exit 1
+  CODE=$(curl -s -m 15 -o /dev/null -w '%{http_code}' -H @- https://openrouter.ai/api/v1/key <<<"Authorization: Bearer $OR_KEY" || true)
+  [ "$CODE" = 200 ] && { echo "  OK: OpenRouter key works (${#OR_KEY} chars)"; break; }
+  echo "  OpenRouter rejected that key (HTTP $CODE, ${#OR_KEY} chars). Try pasting again." >&2
+done
+GROQ_KEY=$(ask "Groq API key for voice notes (press Enter to skip)") || GROQ_KEY=""
 ALERT=$(askv "Safeguarding alert WhatsApp number, digits only e.g. 2778... (Enter to skip)")
 
 # Reuse the DB password if the database was already created with it.
@@ -36,5 +50,5 @@ STT=stub; [ -n "$GROQ_KEY" ] && STT=groq
 } > "$H/secrets.env"
 chmod 600 "$H/secrets.env" "$H/db.env"
 
-echo "Saved $H/secrets.env (token ${#TOKEN} chars, OpenRouter ${#OR_KEY} chars, voice notes: $STT, safeguarding alert: ${ALERT:+set}${ALERT:-not set})."
+echo "Saved $H/secrets.env (token ${#TOKEN} chars, OpenRouter ${#OR_KEY} chars, voice notes: $STT, safeguarding alert: $([ -n "$ALERT" ] && echo set || echo "not set"))."
 [ -f "$H/aws.env" ] && echo "AWS key file present." || echo "Still needed: $H/aws.env (written from CloudShell)."

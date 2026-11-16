@@ -1,0 +1,7 @@
+# Installed by deploy/up.sh to /etc/cron.d/katlego (times are server UTC).
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Erase ended investor-demo data daily (promised in the demo consent message).
+17 0 * * * root bash /opt/katlego/app/deploy/access.sh purge-demo >> /var/log/katlego-access.log 2>&1
+# Access-ending reminders: enable once the "access_ending" template is approved.
+# 23 7 * * * root bash /opt/katlego/app/deploy/access.sh remind --within-days 3 --template access_ending >> /var/log/katlego-access.log 2>&1

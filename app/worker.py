@@ -23,7 +23,7 @@ import redis.asyncio as aioredis
 from app.adapters import ledger, llm, router, stt
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
-from app.orchestrator import practice, safeguarding, safety, session
+from app.orchestrator import access, practice, safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
 from app.tutor import diagnostic, memory
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
@@ -374,14 +374,36 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         )
         return
 
+    # 2b. Access gate: closed-pilot codes and the investor demo code
+    # (app/orchestrator/access.py). After safety, so a learner in distress gets
+    # help even without a code; before consent, so no household is created
+    # for a number without access. A no-op unless ACCESS_GATE=on.
+    gate = await access.check(phone, text)
+    if not gate.allowed:
+        await wa.send_text(phone, gate.reply)
+        await log_message(phone, "outbound", "system", gate.reply, "access")
+        return
+    access_prefix = ""
+    if gate.just_granted:
+        if sess.state != "":
+            # A code from someone already chatting: confirm it, don't tutor it.
+            await wa.send_text(phone, gate.reply)
+            await log_message(phone, "outbound", "system", gate.reply, "access",
+                              learner_id=sess.active_learner_id)
+            return
+        access_prefix = gate.reply + "\n\n"
+
     # 3. POPIA consent gate + household/learner onboarding state machine
     reply = ""
     intent: str | None = None
 
     if sess.state == "":
+        demo = gate.kind == "demo"
         sess.data = {"state": "awaiting_consent", "name": name}
+        if demo:
+            sess.data["demo"] = True
         await session.save(sess)
-        reply = session.CONSENT_MESSAGE
+        reply = access.DEMO_CONSENT_MESSAGE if demo else session.CONSENT_MESSAGE
     elif sess.state == "awaiting_consent":
         if text.strip().upper() in {"AGREE", "YES", "ACCEPT", "I AGREE"}:
             account_id, guardian_id = await session.create_household(phone)
@@ -452,7 +474,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         else:
             reply, intent = await handle_active(wa, sess, phone, text)
 
-    raw_reply = transcript_prefix + reply
+    raw_reply = access_prefix + transcript_prefix + reply
     output_risk = safety.classify_risk(raw_reply)
     if output_risk is not None:
         # Defense-in-depth, not the expected path: the LLM's own generated
@@ -475,6 +497,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
 
 async def main() -> None:
     await ensure_schema()
+    await access.ensure_schema()
     await ensure_group()
     r = get_redis()
     wa = WhatsAppClient()
