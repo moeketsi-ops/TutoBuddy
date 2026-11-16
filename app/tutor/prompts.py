@@ -367,3 +367,21 @@ def practice_feedback_message(correctness: str, feedback: str) -> str:
     itself can't be hallucinated."""
     icon = {"correct": "✅", "partial": "➗", "incorrect": "❌"}[correctness]
     return f"{icon} {feedback}\n\nWant another one? Just say \"quiz me\" 🎯 (or *SKIP* to drop this one)."
+
+
+# ── Homework photo -> text (PHOTO_PIPELINE=read) ──────────────────────────────
+
+READ_PHOTO_SYSTEM = """You read a photo of a South African learner's maths homework so that a tutor who cannot see the photo can help. You transcribe. You do not solve, correct, mark or comment.
+
+Return ONE JSON object and nothing else:
+{"legible": true or false,
+ "problem": "the question on the page, complete and self-contained",
+ "working": ["the learner's own working, one string per written line, in order"],
+ "values": ["every number, label, unit or coordinate written on a diagram, graph or table"]}
+
+Rules:
+- Copy exactly what is written, mistakes included. Never fix, tidy or skip a wrong line.
+- Plain-text maths: x^2 for powers, 2/3 for fractions, sqrt(9) for roots. Keep decimal commas and units as written.
+- "problem": if there is a diagram, graph or table, describe it in words inside "problem" with every label and value on it, so the question can be answered without the picture. If the page shows working with no separate question, "problem" is its first line with the plain instruction in front (Solve, Simplify or Calculate) and "working" is the lines after it.
+- "working" is [] when the page only shows a question. "values" is [] when there is no diagram, graph or table.
+- "legible" is false only if you cannot read the maths at all."""

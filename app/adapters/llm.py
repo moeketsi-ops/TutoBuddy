@@ -763,56 +763,117 @@ async def mark_against_memo(question: str, marks: int, memo: list[dict], learner
 # anthropic or openrouter only (see module docstring). Multimodal message
 # shapes differ per API, so this stays outside _complete().
 
+async def _vision(call: str, system: str, text: str, image: bytes, mime: str,
+                  max_tokens: int) -> str | None:
+    """One image + text turn on the reasoner's vision model. Returns the reply
+    text, or None when the provider can't take images. Emits telemetry like
+    every other call (photo calls used to be missing from the ledger, so the
+    usage report showed homework photos as free)."""
+    provider = _provider("reasoner")
+    b64 = base64.b64encode(image).decode()
+    started = time.perf_counter()
+
+    if provider == "anthropic":
+        model = settings.reasoner_model
+        resp = await _anthropic_client().messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=[{"role": "user", "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": mime, "data": b64}},
+                {"type": "text", "text": text},
+            ]}],
+        )
+        await _emit(call=call, tier="reasoner", provider=provider, requested_model=model,
+                    served_model=resp.model, finish_reason=resp.stop_reason, host="anthropic",
+                    latency_s=round(time.perf_counter() - started, 3), **_usage_dict(resp.usage))
+        return _text_or_empty(_anthropic_text(resp), provider, call)
+
+    if provider == "openrouter":
+        model = settings.openrouter_vision_model
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": [
+                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+                {"type": "text", "text": text},
+            ]},
+        ]
+
+        async def create(effort: str):
+            return await _openrouter_client().chat.completions.create(
+                model=model, max_tokens=max_tokens + EFFORT_HEADROOM[effort], messages=messages,
+                extra_body={"reasoning": {"effort": effort}, "usage": {"include": True}})
+
+        effort = "low" if model in _REASONING_REQUIRED else "none"
+        try:
+            resp = await create(effort)
+        except Exception as exc:
+            # Models that cannot switch reasoning off (GLM-5.x): once more at low.
+            if effort != "none" or not _reasoning_mandatory(exc):
+                raise
+            _REASONING_REQUIRED.add(model)
+            effort = "low"
+            resp = await create(effort)
+        choice = resp.choices[0]
+        await _emit(call=call, tier="reasoner", provider=provider, requested_model=model,
+                    served_model=getattr(resp, "model", model), finish_reason=choice.finish_reason,
+                    host=(getattr(resp, "model_extra", None) or {}).get("provider", provider),
+                    latency_s=round(time.perf_counter() - started, 3), effort=effort,
+                    **_usage_dict(getattr(resp, "usage", None)))
+        return _text_or_empty(choice.message.content, provider, call, choice.finish_reason)
+
+    return None
+
+
 async def photo_reply(image: bytes, mime: str, caption: str, grade: int) -> str:
     prompt_text = (
         caption or "Here is a photo of my homework problem. Help me work through it."
     )
-    provider = _provider("reasoner")
-    b64 = base64.b64encode(image).decode()
-
-    if provider == "anthropic":
-        resp = await _anthropic_client().messages.create(
-            model=settings.reasoner_model,
-            max_tokens=600,
-            system=prompts.socratic_system(grade, []),
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {"type": "base64", "media_type": mime, "data": b64},
-                        },
-                        {"type": "text", "text": prompt_text},
-                    ],
-                }
-            ],
-        )
-        return _text_or_empty(_anthropic_text(resp), provider, "photo_reply").strip()
-
-    if provider == "openrouter":
-        resp = await _openrouter_client().chat.completions.create(
-            model=settings.openrouter_vision_model,
-            max_tokens=600,
-            extra_body={"reasoning": {"effort": "none"}},
-            messages=[
-                {"role": "system", "content": prompts.socratic_system(grade, [])},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
-                        {"type": "text", "text": prompt_text},
-                    ],
-                },
-            ],
-        )
-        choice = resp.choices[0]
-        return _text_or_empty(choice.message.content, provider, "photo_reply",
-                              choice.finish_reason).strip()
-
+    text = await _vision("photo_reply", prompts.socratic_system(grade, []), prompt_text,
+                         image, mime, 600)
+    if text is not None:
+        return text.strip()
     return (
         "I can see you sent a photo of your work 📸 Photo help runs on "
         "the real model.\n\n_(stub LLM — add the Anthropic or OpenRouter key "
         "in .env to enable homework-photo help; groq/ollama don't support "
         "photo help here yet)_"
     )
+
+
+# The last read_photo call's raw model output, for evals (production never reads it).
+last_photo_raw: contextvars.ContextVar[str | None] = contextvars.ContextVar("last_photo_raw", default=None)
+
+
+def parse_photo_read(raw: str | None) -> dict | None:
+    """The JSON object read_photo asked for, or None when it isn't usable
+    (no JSON, illegible, no problem)."""
+    m = re.search(r"\{.*\}", raw or "", re.DOTALL)
+    try:
+        data = json.loads(m.group(0)) if m else None
+    except ValueError:
+        return None
+    if not isinstance(data, dict) or data.get("legible") is False:
+        return None
+    problem = str(data.get("problem") or "").strip()
+    if not problem:
+        return None
+    lines = lambda key: [str(x).strip() for x in (data.get(key) or []) if str(x).strip()]  # noqa: E731
+    return {"problem": problem, "working": lines("working"), "values": lines("values")}
+
+
+async def read_photo(image: bytes, mime: str, caption: str) -> dict | None:
+    """Read a homework photo into text: {"problem", "working", "values"}, or
+    None when it can't be read (then the caller keeps today's photo_reply).
+    Transcription only: judging the working is the tutor engine's job.
+
+    stub: no model can see the photo, so a caption stands in for the page.
+    That keeps PHOTO_PIPELINE=read testable offline; it never pretends to
+    have read the image."""
+    if _provider("reasoner") not in ("anthropic", "openrouter"):
+        return {"problem": caption.strip(), "working": [], "values": []} if caption.strip() else None
+    raw = await _vision("read_photo", prompts.READ_PHOTO_SYSTEM,
+                        f"The learner's caption: {caption}" if caption.strip() else "No caption.",
+                        image, mime, 500)
+    last_photo_raw.set(raw)
+    return parse_photo_read(raw)

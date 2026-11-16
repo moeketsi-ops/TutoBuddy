@@ -8,7 +8,7 @@ and is cached in the whisper-cache volume. faster-whisper decodes OGG/Opus
 import os
 import tempfile
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, Form, UploadFile
 from faster_whisper import WhisperModel
 
 MODEL_NAME = os.environ.get("WHISPER_MODEL", "base")
@@ -29,11 +29,12 @@ def health():
 
 
 @app.post("/transcribe")
-async def transcribe(file: UploadFile):
+async def transcribe(file: UploadFile, language: str = Form("en")):
+    """`language`: "en" (default, as before) or "auto" to let Whisper detect."""
     blob = await file.read()
     with tempfile.NamedTemporaryFile(suffix=".audio") as tmp:
         tmp.write(blob)
         tmp.flush()
-        segments, info = model.transcribe(tmp.name, language="en", beam_size=5)
+        segments, info = model.transcribe(tmp.name, language=None if language == "auto" else language, beam_size=5)
         text = " ".join(s.text.strip() for s in segments)
     return {"text": text, "language": info.language, "duration": info.duration}

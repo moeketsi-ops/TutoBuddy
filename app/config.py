@@ -97,6 +97,22 @@ class Settings(BaseSettings):
     stt_provider: str = "stub"  # stub | local | openai | groq
     groq_stt_model: str = "whisper-large-v3"  # or whisper-large-v3-turbo (faster, cheaper)
     stt_base_url: str = "http://stt:9000"
+    # Language Whisper is told to expect. "en" (today's behaviour) or "auto"
+    # (let it detect; for code-switched notes). See evals/bench/media.
+    stt_language: str = "en"
+    # Optional hint to Whisper (Groq/OpenAI `prompt`): a short sample of the
+    # style wanted, e.g. maths written in symbols. Blank = none (today).
+    stt_prompt: str = ""
+    # Rewrite spoken maths in a transcript as symbols ("x equals negative
+    # five" -> "x = -5") before the tutor sees it, so the code answer check
+    # works on voice notes (app/tutor/spoken.py). false = the transcript as heard.
+    stt_symbols: bool = True
+    # Homework photos. "read" (default since 15 Nov 2026, after the real-photo
+    # test): the photo is read into text (problem, working, diagram) and that
+    # text goes through the normal tutor engine, so memory, the code answer
+    # check, mastery evidence and the leak guard all apply. A photo that can't
+    # be read falls back to "single": one stand-alone vision reply (the old path).
+    photo_pipeline: str = "read"
     openai_api_key: str = PLACEHOLDER
 
     # Embeddings

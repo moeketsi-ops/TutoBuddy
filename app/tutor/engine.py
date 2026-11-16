@@ -37,7 +37,8 @@ last_turn: contextvars.ContextVar[dict | None] = contextvars.ContextVar("last_tu
 
 
 async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
-                      name: str | None = None, *, reference: str | None = None) -> str:
+                      name: str | None = None, *, reference: str | None = None,
+                      problem: str | None = None, working: list[str] | None = None) -> str:
     """One tutoring turn with memory, mastery and pedagogy (spec v0.1,
     steps 1-3). Still exactly ONE LLM call per turn.
 
@@ -55,6 +56,14 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     the learner asked to work through (HELP in a paper). It guides the
     model and the leak guard, and stays with the working problem.
 
+    `problem` / `working`: a homework photo read into text (PHOTO_PIPELINE=
+    read, app.worker). `problem` is the question on the page: it opens a new
+    working problem and is what the code answer check and the leak guard
+    solve, so a line of the learner's working can never be mistaken for the
+    question. `working` is the learner's own lines: code finds the first
+    wrong one (answer_check.check_working) and that verdict is this turn's
+    evidence, exactly as a typed attempt's would be.
+
     `grade` is the active learner's profile grade. Only that grade's CAPS
     extracts reach the model (rag.grade_scoped_context); a question about
     another grade's topic is named, not taught, and records no evidence."""
@@ -69,20 +78,24 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     async with pool.acquire() as conn:
         mem = await memory.load(learner_id, await memory.load_history(conn, learner_id))
     memory.ensure_working(mem)
-    continuing = memory.continues_problem(mem, question)
+    # A photo with a question on it always opens a new problem.
+    continuing = False if problem else memory.continues_problem(mem, question)
     # Code judges what it can before the call (CPA spec section 5), so the
     # model is told, not asked, whether "x = 10" is right.
     check = answer_check.check(mem["working"]["problem"], question) if continuing else None
+    wrong_line = None
+    if problem and working:
+        check, wrong_line = answer_check.check_working(problem, working)
 
     # A reply like "x = 6" retrieves nothing useful on its own; search with
     # the working problem attached so the notes stay on topic.
-    query = f"{mem['working']['problem']} {question}" if continuing else question
+    query = f"{mem['working']['problem']} {question}" if continuing else (problem or question)
     # Mid-problem the notes were already shown on the opening turn: two are
     # enough to stay grounded (~120 fewer prompt tokens a turn).
     ctx = await grade_scoped_context(query, grade, k=2 if continuing else 3)
     hint = None
     if not continuing and not ctx["above"]:
-        hint = topic_hint(question, ctx["grade_topics"])
+        hint = topic_hint(problem or question, ctx["grade_topics"])
         if hint and hint not in [c["topic"] for c in ctx["chunks"]]:
             first = await topic_chunks(grade, hint)
             seen = {c["content"] for c in first}
@@ -162,6 +175,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     ))
     if continuing and w.get("level"):
         level, level_why = w["level"], "same level"
+    elif working:
+        level, level_why = "abstract", "the learner wrote symbols"
     else:
         level, level_why = representation.start_level(score, level_stats)
     verdict = check["verdict"] if check else None
@@ -181,6 +196,12 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
                                   "the working problem. Praise what they did, specifically.")
     else:
         decision["code_check"] = answer_check.prompt_line(check)
+    if wrong_line:
+        decision["code_check"] = (
+            f"CODE CHECK: the learner sent their written working. Line {wrong_line} of it "
+            f"(\"{working[wrong_line - 1]}\") is the FIRST line that is NOT correct; the lines before "
+            "it are fine. Point them to that line and ask what happened there. Do not write the "
+            "corrected line or the final answer.")
     ref = reference if not continuing else w.get("reference")
     if ref:
         decision["code_check"] = "\n".join(filter(None, [
@@ -190,7 +211,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     decision["mid_chat"] = mem["session_turns"] > 0
     if (decision["strategy"] == "MULTIPLE_METHODS" or decision.get("fallback") == "MULTIPLE_METHODS"
             or decision.get("switch") in ("strategy", "worked_example") or new_problem):
-        entry = tmu.find_methods(w["problem"] if continuing else question, grade,
+        entry = tmu.find_methods(w["problem"] if continuing else (problem or question), grade,
                                  (topic or {}).get("name"))
         decision["methods"] = tmu.methods_line(entry)
         decision["methods_id"] = entry["id"] if entry else None
@@ -222,7 +243,7 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # reply that states it is written again once, then masked.
     forms = [] if (decision.get("reveal") or (check or {}).get("verdict") == "correct"
                    or (continuing and w.get("answered"))) \
-        else (answer_check.answer_forms(w["problem"] if continuing else question)
+        else (answer_check.answer_forms(w["problem"] if continuing else (problem or question))
               or (answer_check.forms_from_answer(ref, question) if ref else []))
     reply, body, parsed_as, guard = await _reply_with_guard(call, forms, mid_chat=decision["mid_chat"])
     mode = llm.last_output_mode.get()
@@ -271,6 +292,10 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
     # `ev` judges the learner's message, which answered the PREVIOUS reply:
     # credit that reply's strategy, hint level and topic, not this one's.
     prev_strategy, prev_hint, prev_topic = w["strategy"], w.get("last_hint", 0), w["topic_id"]
+    if working:
+        # Working on a photo was done before Katlego said anything: it is
+        # evidence about the learner, not about the previous reply's strategy.
+        prev_strategy, prev_hint, prev_topic = None, 0, None
     ev_topic_id = prev_topic if (continuing and prev_topic) else (topic["id"] if topic else None)
     # Saying an answer already reached again ("thanks, area = 24 cm²") is not new
     # evidence: counting each restatement took mastery from 20 to 91 on day 1
@@ -332,6 +357,8 @@ async def tutor_reply(question: str, grade: int, learner_id: int | None = None,
         w = mem["working"]
         if new_problem and w["problem"]:
             w["reference"] = reference
+            if problem:
+                w["problem"] = problem[:200]  # the question on the page, not question + working
         if w["problem"] and ev in ("attempt_correct", "explained_back"):
             w["answered"] = True  # the learner has reached it: restating it is fine now
         if w["problem"]:

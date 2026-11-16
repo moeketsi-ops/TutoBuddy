@@ -1,0 +1,7 @@
+{
+ "_note": "Today's single photo replies on the 10 real photos, read by hand (Claude, 15 Nov 2026). found_mistake: points at the learner's actual wrong step (3 working pages with a mistake). correct_working: the one page whose working was right. garbled: the reply repeats itself or contains stray planning text.",
+ "openai/gpt-6-luna": {"found_mistake": "3/3", "correct_working": "sent its own planning notes to the learner", "gave_answer_away": "0/9", "diagram_values_used": "3/3", "garbled": "5/10"},
+ "anthropic/claude-haiku-5.5": {"found_mistake": "2/3", "correct_working": "asked the learner to explain and check", "gave_answer_away": "0/9", "diagram_values_used": "3/3", "garbled": "0/10"},
+ "openai/gpt-5.4-mini": {"found_mistake": "3/3", "correct_working": "confirmed it", "gave_answer_away": "0/9", "diagram_values_used": "3/3", "garbled": "0/10"},
+ "z-ai/glm-5.3-flash": {"found_mistake": "3/3", "correct_working": "asked the learner to check by substituting", "gave_answer_away": "0/9", "diagram_values_used": "3/3", "garbled": "0/10"}
+}

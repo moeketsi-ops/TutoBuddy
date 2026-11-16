@@ -37,6 +37,10 @@ MAX_LEN = 60
 
 def _normalise(text: str) -> str:
     t = text.lower().strip().rstrip("?.!")
+    # "3/4 ÷ 1/2" divides one fraction by the other; as plain "/" it was read
+    # left to right (3/4/1/2 = 3/8), so the right answer 3/2 was marked wrong.
+    t = re.sub(r"(\d+/\d+|\d+(?:\.\d+)?)\s*÷\s*(\d+/\d+)", r"(\1)/(\2)", t)
+    t = re.sub(r"(\d+/\d+)\s*÷\s*(\d+(?:\.\d+)?)", r"(\1)/\2", t)
     t = t.replace("×", "*").replace("÷", "/").replace("−", "-").replace("–", "-")
     t = t.replace("²", "^2").replace("³", "^3")
     t = re.sub(r"(?<=\d),(?=\d)", ".", t)                 # SA decimal comma: 78,5
@@ -60,6 +64,9 @@ def extract_equation(text: str) -> str | None:
     """The longest run of maths-looking words that contains one '='.
     "How do I solve 3x + 4 = 19?" -> "3x + 4 = 19"."""
     t = _normalise(text)
+    # "Solve for x: 3x + 4 = 19": the "x" names the unknown, it is not part of
+    # the equation (it used to be read as x * 3x + 4 = 19, so x = 5 was "wrong").
+    t = re.sub(r"\bfor [a-z]\b\s*[:,]?", " ", t)
     words = t.split()
     best, run = None, []
     for w in words + [""]:
@@ -67,7 +74,9 @@ def extract_equation(text: str) -> str | None:
             run.append(w.strip("?.!,:;"))
             continue
         cand = " ".join(run)
-        if cand.count("=") == 1 and re.search(r"\d", cand):
+        # "x = 1, 2, 3, 4" (a table row, a list of values) is not an equation:
+        # the numbers used to be multiplied together.
+        if cand.count("=") == 1 and re.search(r"\d", cand) and not re.search(r"\d \d", cand):
             if best is None or len(cand) > len(best):
                 best = cand
         run = []
@@ -182,7 +191,7 @@ _NUM = r"-?\d+(?:\.\d+)?(?:/\d+)?"
 _SIMPLE = re.compile(rf"^\(?{_NUM}\)?$")
 _PURE = re.compile(r"^[0-9+\-*/^(). ]+$")
 _ASK = re.compile(r"^(?:how do i |can you help me |help me )?(?:what is|what's|whats|calculate|"
-                  r"work out|evaluate|find the value of|find|simplify|compute)\s+(.+)$")
+                  r"work out|evaluate|find the value of|find|simplify|compute):?\s+(.+)$")
 _UNITS = re.compile(r"\b(?:square|sq|cubic|units?|kg|g|ml|l|rand|degrees|metres|meters|centimetres|"
                     r"centimeters)\b|\b(?:cm|mm|km|m)(?:\^?[23])?(?![a-z])")
 
@@ -474,6 +483,27 @@ def check(problem: str | None, reply: str) -> dict | None:
         return _check_equation(solved, text, reply, base)
     except Exception:  # noqa: BLE001 -- checking is best-effort, never costs a reply
         return None
+
+
+def check_working(problem: str | None, lines: list[str]) -> tuple[dict | None, int | None]:
+    """A learner's written working (from a homework photo), judged line by
+    line against the problem. Returns (verdict as check() gives it, 1-based
+    number of the FIRST wrong line or None).
+
+        "2x + 3 = 11", ["2x = 11 + 3", "2x = 14", "x = 7"] -> wrong, line 1
+        "5x - 4 = 21", ["5x = 25", "x = 5"]                -> correct, None
+
+    (None, None) when code can't judge the problem or meets a line it can't
+    read before finding a wrong one: then the model judges, as before."""
+    last = None
+    for n, line in enumerate(lines, 1):
+        got = check(problem, line.strip().lstrip("=∴ ").strip())
+        if got is None:
+            return None, None
+        if got["verdict"] == "wrong":
+            return got, n
+        last = got
+    return last, None
 
 
 def _check_equation(solved: dict, text: str, reply: str, base: dict) -> dict | None:

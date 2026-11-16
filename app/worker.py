@@ -21,11 +21,12 @@ import httpx
 import redis.asyncio as aioredis
 
 from app.adapters import ledger, llm, router, stt
+from app.config import settings
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
 from app.orchestrator import access, practice, safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
-from app.tutor import diagnostic, memory
+from app.tutor import diagnostic, memory, spoken
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
 
 log = logging.getLogger("katlego.worker")
@@ -68,6 +69,17 @@ def smalltalk_reply(mem: dict, now: float | None = None) -> str:
     turns = mem.get("turns") or []
     recent = bool(turns) and (now or time.time()) - turns[-1].get("at", 0) < memory.IDLE_SECONDS
     return SMALLTALK_MID_CHAT if recent else SMALLTALK_REPLY
+
+
+def photo_message(read: dict, caption: str) -> str:
+    """A photo read into text (llm.read_photo), worded as the learner's
+    message: the question, their working line by line, then their caption."""
+    parts = [read["problem"]]
+    if read["working"]:
+        parts.append("My working:\n" + "\n".join(f"{n}) {line}" for n, line in enumerate(read["working"], 1)))
+    if caption.strip():
+        parts.append(caption.strip())
+    return "\n".join(parts)
 
 
 ADD_LEARNER_NO_SIBLINGS = (
@@ -336,6 +348,8 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     # 1. Extract text (running STT for voice notes first)
     text = ""
     transcript_prefix = ""
+    photo_read: dict | None = None
+    voice_unclear = False
     image_bytes: bytes | None = None
     image_mime = ""
 
@@ -344,10 +358,22 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     elif msg_type == "audio":
         audio_bytes, mime = await wa.get_media(message["audio"]["id"])
         text = await stt.transcribe(audio_bytes, mime)
-        transcript_prefix = f"🎤 I heard: _{text}_\n\n"
+        if settings.stt_symbols:
+            text = spoken.to_symbols(text)
+            voice_unclear = spoken.unclear(text)
+        transcript_prefix = f"🎤 I heard: _{spoken.echo(text)}_\n\n"
     elif msg_type == "image":
         image_bytes, image_mime = await wa.get_media(message["image"]["id"])
         text = message.get("image", {}).get("caption", "")
+        # Trial (PHOTO_PIPELINE=read): read the photo into text first, the
+        # same place a voice note is transcribed, so safety, logging, memory,
+        # the code answer check and mastery all see it like a typed message.
+        # A photo that can't be read keeps today's single vision reply.
+        if settings.photo_pipeline.strip().lower() == "read" and sess.state == "active":
+            photo_read = await llm.read_photo(image_bytes, image_mime, text)
+            if photo_read:
+                text = photo_message(photo_read, text)
+                transcript_prefix = f"📸 I read: _{photo_read['problem']}_\n\n"
     else:
         await wa.send_text(phone, "I can read text, 🎤 voice notes and 📸 photos for now!")
         return
@@ -468,7 +494,16 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         else:
             reply = session.SWITCH_REPROMPT
     else:  # active
-        if image_bytes is not None:
+        if voice_unclear:
+            # Misheard maths: ask again rather than tutor on a problem nobody set.
+            reply, intent = spoken.UNCLEAR_REPLY, "admin"
+        elif photo_read:
+            # ponytail: straight to the tutor (as today's photo reply is), so a
+            # photo sent mid-paper or as a practice answer is not marked there.
+            reply = await tutor_reply(text, sess.grade, sess.active_learner_id, sess.name,
+                                      problem=photo_read["problem"], working=photo_read["working"])
+            intent = "homework"
+        elif image_bytes is not None:
             reply = await llm.photo_reply(image_bytes, image_mime, text, sess.grade)
             intent = "homework"
         else:
