@@ -7,11 +7,13 @@ four terms, so current_term() always finds something to practise. Requires
 `docker compose run --rm seed python -m seed.load_curriculum` to have run.
 """
 
+from tests.conftest import AGREE
+
 
 def _grade8_learner(chat) -> None:
     chat.send_text("hi")
     chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     chat.wait_for_reply()  # name prompt
     chat.send_text("MasteryTest")
     chat.wait_for_reply()  # grade prompt

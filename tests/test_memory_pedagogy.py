@@ -12,6 +12,8 @@ import os
 import asyncpg
 import redis.asyncio as aioredis
 
+from tests.conftest import AGREE
+
 DB = os.environ.get("DATABASE_URL", "")
 REDIS = os.environ.get("REDIS_URL", "")
 
@@ -44,7 +46,7 @@ def _learners(phone):
 
 
 def _onboard(chat, name="Lerato", grade="8"):
-    for msg in ("hi", "AGREE", name, grade):
+    for msg in ("hi", AGREE, name, grade):
         chat.send_text(msg)
         chat.wait_for_reply()
 
@@ -126,6 +128,8 @@ def test_siblings_never_share_memory_and_delete_erases_it(chat):
     chat.wait_for_reply()
 
     chat.send_text("ADD LEARNER")
+    chat.wait_for_reply()  # consent is asked again for a sibling
+    chat.send_text(AGREE)
     chat.wait_for_reply()
     chat.send_text("Naledi")
     chat.wait_for_reply()

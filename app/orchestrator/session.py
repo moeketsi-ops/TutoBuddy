@@ -12,38 +12,18 @@ stays synchronous (no DB round-trip needed just to read `sess.grade`).
 
 POPIA §34–35: a "competent person" (parent/guardian) must consent before we
 process a child's personal information — the consent gate runs before any
-profiling or tutoring. Phase-1 simplification, stated explicitly: one
-guardian's consent (given once, at household creation) covers every
-learner they add under that household — there's no separate per-child
-consent capture flow yet, even though guardian_learner has its own
-consent_given_at column ready for that later.
+profiling or tutoring. Consent is per learner: ADD LEARNER asks again, and
+each consent event is a consent_records row (app/orchestrator/consent.py,
+docs/guardian-consent-findings.md).
 """
 
 import json
 
 from app.db import get_pool
 from app.queue import get_redis
+from app.tutor import memory
 
 SESSION_TTL_SECONDS = 30 * 24 * 3600
-
-CONSENT_MESSAGE = (
-    "Hi! I'm *Katlego* 🎓 — your CAPS study buddy on WhatsApp.\n\n"
-    "Before we start, South African law (POPIA) requires permission from your "
-    "parent or guardian, because I keep track of your progress to tutor you "
-    "better.\n\n"
-    "📋 *Please show this to your parent/guardian:*\n"
-    "_Katlego stores this phone number, a nickname and grade, plus study "
-    "progress, to personalise tutoring. No data is sold or shared. Send "
-    "DELETE any time to erase a learner; erasing the last learner removes "
-    "the whole household record._\n\n"
-    "If your parent or guardian agrees, ask them to reply *AGREE* to continue."
-)
-
-CONSENT_REPROMPT = (
-    "I can only start tutoring once a parent or guardian replies *AGREE* — "
-    "that's the law for learners' data (POPIA). 🙏\n\n"
-    "Show them the message above, and reply *AGREE* when they say it's okay."
-)
 
 NAME_PROMPT = (
     "Thank you! Consent noted. ✅\n\n"
@@ -57,7 +37,7 @@ NAME_REPROMPT = (
 )
 
 _RESERVED_NAMES = {"HELP", "RESET", "DELETE", "AGREE", "YES", "ACCEPT", "I AGREE",
-                   "ADD LEARNER", "SWITCH"}
+                   "ADD LEARNER", "SWITCH", "WITHDRAW", "CONFIRM", "CANCEL"}
 _NAME_MAX_LEN = 40
 
 
@@ -163,7 +143,12 @@ async def save(sess: Session) -> None:
 
 
 async def reset(phone: str) -> None:
-    await get_redis().delete(f"sess:{phone}")
+    """Drop the session, and with it any consent code that was waiting on a
+    guardian's phone (consent.py): that key holds this phone number."""
+    r = get_redis()
+    raw = await r.get(f"sess:{phone}")
+    code = json.loads(raw).get("link_code") if raw else None
+    await r.delete(f"sess:{phone}", *([f"consent_link:{code}"] if code else []))
 
 
 # ── Household / learner persistence (Postgres) ──────────────────────────────
@@ -217,22 +202,34 @@ async def account_for_phone(phone: str) -> int | None:
         )
 
 
-async def add_learner(account_id: int, guardian_id: int, nickname: str) -> int:
-    """Creates a learner under an existing household and links guardian
-    consent to it (see the phase-1 simplification in the module docstring).
-    Returns the new learner_id."""
+async def add_learner(
+    account_id: int, guardian_id: int, nickname: str, consent_id: int | None = None
+) -> int:
+    """Creates a learner under an existing household and ties the consent
+    event that covers them (consent_records) to the new profile. The
+    guardian link carries the time the guardian agreed, not the time the
+    profile was created. Returns the new learner_id."""
     pool = await get_pool()
     async with pool.acquire() as conn:
-        learner_id = await conn.fetchval(
-            "INSERT INTO learners (account_id, nickname) VALUES ($1, $2) RETURNING id",
-            account_id,
-            nickname,
-        )
-        await conn.execute(
-            "INSERT INTO guardian_learner (guardian_id, learner_id) VALUES ($1, $2)",
-            guardian_id,
-            learner_id,
-        )
+        async with conn.transaction():
+            learner_id = await conn.fetchval(
+                "INSERT INTO learners (account_id, nickname) VALUES ($1, $2) RETURNING id",
+                account_id,
+                nickname,
+            )
+            await conn.execute(
+                "INSERT INTO guardian_learner (guardian_id, learner_id, consent_given_at) "
+                "VALUES ($1, $2, COALESCE("
+                "(SELECT consent_at FROM consent_records WHERE id = $3), now()))",
+                guardian_id,
+                learner_id,
+                consent_id,
+            )
+            await conn.execute(
+                "UPDATE consent_records SET learner_id = $2 WHERE id = $1",
+                consent_id,
+                learner_id,
+            )
     return learner_id
 
 
@@ -308,3 +305,58 @@ async def delete_household(account_id: int | None, phone: str) -> None:
             if account_id is not None:
                 await conn.execute("DELETE FROM accounts WHERE id = $1", account_id)
     await reset(phone)
+
+
+def activate_without_grade(sess: Session, learner: dict) -> None:
+    """Make `learner` active but ask for their grade first. Grade rule
+    (app.tutor.rag.grade_scoped_context): every reply is pitched at the
+    active learner's profile grade, so a profile with no grade must never
+    fall back to a default (it used to be silently treated as Grade 11)."""
+    sess.data.update(
+        state="awaiting_grade",
+        active_learner_id=learner["id"],
+        grade=None,
+        name=learner["nickname"],
+        onboarding_reason="add_learner",
+    )
+
+
+async def erase_learner(
+    sess: Session, phone: str, account_id: int, learner_id: int, name: str
+) -> str:
+    """Erase one learner (DELETE or WITHDRAW in their chat, or a guardian
+    withdrawing from their own phone) and return the message for the chat on
+    `phone`, whose session is `sess`. If that learner was the one studying,
+    the session moves to a sibling; with no learners left the whole
+    household goes (POPIA: "erase everything" must mean everything, incl.
+    the phone number, consent records and pre-consent chat rows).
+    Safeguarding flags are kept by design."""
+    await memory.forget(learner_id)
+    await delete_active_learner(learner_id)
+    remaining = await list_learners(account_id)
+    if not remaining:
+        await delete_household(account_id, phone)
+        sess.data["household_erased"] = True  # in-memory only; Redis was reset
+        return (
+            f"{name}'s profile was deleted, and with no learners left "
+            f"everything else has been erased too — phone number, consent and "
+            f"chat history. ✅\n\nIf you ever want to study together again, just "
+            f"say hi; a parent or guardian will need to AGREE again."
+        )
+    if sess.active_learner_id != learner_id:
+        return f"{name}'s profile was deleted. ✅"
+    sess.data.pop("pending_practice", None)
+    nxt = remaining[0]
+    if not nxt["grade"]:
+        # Grade rule: never guess a grade. Ask for it before tutoring.
+        activate_without_grade(sess, nxt)
+        await save(sess)
+        return (
+            f"{name}'s profile was deleted. ✅ Switched to "
+            f"{nxt['nickname']}.\n\n{grade_prompt(nxt['nickname'])}"
+        )
+    sess.data.update(
+        state="active", active_learner_id=nxt["id"], grade=nxt["grade"], name=nxt["nickname"]
+    )
+    await save(sess)
+    return f"{name}'s profile was deleted. ✅ Switched to {nxt['nickname']} (Grade {nxt['grade']})."

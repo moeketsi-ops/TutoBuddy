@@ -24,7 +24,7 @@ from app.adapters import ledger, llm, router, stt
 from app.config import settings
 from app.adapters.whatsapp import WhatsAppClient
 from app.db import ensure_schema, get_pool
-from app.orchestrator import access, practice, safeguarding, safety, session
+from app.orchestrator import access, consent, practice, safeguarding, safety, session
 from app.queue import GROUP, STREAM, ensure_group, get_redis
 from app.tutor import diagnostic, memory, spoken
 from app.tutor.engine import grade_practice_reply, practice_reply, progress_reply, tutor_reply
@@ -47,7 +47,8 @@ HELP_MESSAGE = (
     "• *SWITCH* — change who's studying\n"
     "• *HELP* — this message\n"
     "• *RESET* — start onboarding again\n"
-    "• *DELETE* — erase the active learner's data (POPIA right to deletion)\n\n"
+    "• *DELETE* — erase the active learner's data (POPIA right to deletion)\n"
+    "• *WITHDRAW* — for a parent or guardian: withdraw consent (same as DELETE)\n\n"
     "Tip: I coach you step by step instead of just giving answers."
 )
 
@@ -90,20 +91,6 @@ ADD_LEARNER_NO_SIBLINGS = (
 ERROR_REPLY = (
     "Eish, something went wrong on my side. 🙈 Please try that again in a moment."
 )
-
-
-def _activate_without_grade(sess, learner: dict) -> None:
-    """Make `learner` active but ask for their grade first. Grade rule
-    (app.tutor.rag.grade_scoped_context): every reply is pitched at the
-    active learner's profile grade, so a profile with no grade must never
-    fall back to a default (it used to be silently treated as Grade 11)."""
-    sess.data.update(
-        state="awaiting_grade",
-        active_learner_id=learner["id"],
-        grade=None,
-        name=learner["nickname"],
-        onboarding_reason="add_learner",
-    )
 
 
 async def _send_with_retry(wa: WhatsAppClient, phone: str, body: str) -> None:
@@ -217,7 +204,7 @@ async def handle_active(
         return diagnostic.report(sess.name, last["grade"], last, last["focus"]), "admin"
     st = sess.data.get("diagnostic")
     if st and not st.get("paused") and command not in ("HELP", "RESET", "ADD LEARNER", "SWITCH",
-                                                        "DELETE", "PROGRESS", "SKIP"):
+                                                        "DELETE", "WITHDRAW", "PROGRESS", "SKIP"):
         reply = await handle_checkin(sess, text)
         if reply is not None:
             return reply, "checkin"
@@ -238,9 +225,10 @@ async def handle_active(
         await session.reset(phone)
         return "Okay, starting fresh! Say hi to begin again. 👋", "admin"
     if command == "ADD LEARNER":
-        sess.data.update(state="awaiting_name", onboarding_reason="add_learner")
+        # Consent is per learner: a sibling needs the guardian to agree again.
+        sess.data.update(state="awaiting_consent", onboarding_reason="add_learner")
         await session.save(sess)
-        return session.NAME_PROMPT, "admin"
+        return consent.notice("add_learner"), "consent_notice"
     if command == "SWITCH":
         learners = await session.list_learners(sess.account_id)
         if len(learners) <= 1:
@@ -248,47 +236,11 @@ async def handle_active(
         sess.data["state"] = "choosing_learner"
         await session.save(sess)
         return session.switch_prompt(learners), "admin"
-    if command == "DELETE":
-        deleted_name = sess.name
-        await memory.forget(sess.active_learner_id)
-        await session.delete_active_learner(sess.active_learner_id)
-        sess.data.pop("pending_practice", None)
-        remaining = await session.list_learners(sess.account_id)
-        if remaining:
-            nxt = remaining[0]
-            if not nxt["grade"]:
-                # Grade rule: never guess a grade. Ask for it before tutoring.
-                _activate_without_grade(sess, nxt)
-                await session.save(sess)
-                return (
-                    f"{deleted_name}'s profile was deleted. ✅ Switched to "
-                    f"{nxt['nickname']}.\n\n{session.grade_prompt(nxt['nickname'])}",
-                    "admin",
-                )
-            sess.data.update(
-                state="active",
-                active_learner_id=nxt["id"],
-                grade=nxt["grade"],
-                name=nxt["nickname"],
-            )
-            await session.save(sess)
-            return (
-                f"{deleted_name}'s profile was deleted. ✅ Switched to "
-                f"{nxt['nickname']} (Grade {nxt['grade']}).",
-                "admin",
-            )
-        # Last learner gone → the whole household record goes too (POPIA:
-        # "erase everything" must mean everything, incl. the phone number and
-        # pre-consent chat rows). Safeguarding flags are kept by design.
-        await session.delete_household(sess.account_id, phone)
-        sess.data["household_erased"] = True  # in-memory only; Redis was reset
-        return (
-            f"{deleted_name}'s profile was deleted, and with no learners left "
-            f"everything else has been erased too — phone number, consent and "
-            f"chat history. ✅\n\nIf you ever want to study together again, just "
-            f"say hi; a parent or guardian will need to AGREE again.",
-            "admin",
+    if command in ("DELETE", "WITHDRAW"):  # WITHDRAW: the guardian's word for it
+        reply = await session.erase_learner(
+            sess, phone, sess.account_id, sess.active_learner_id, sess.name
         )
+        return reply, "admin"
     if command == "PROGRESS":
         return await progress_reply(sess.active_learner_id, sess.grade), "admin"
     if command == "SKIP":
@@ -352,12 +304,14 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
     voice_unclear = False
     image_bytes: bytes | None = None
     image_mime = ""
+    audio_bytes: bytes | None = None
+    audio_mime = ""
 
     if msg_type == "text":
         text = message.get("text", {}).get("body", "")
     elif msg_type == "audio":
-        audio_bytes, mime = await wa.get_media(message["audio"]["id"])
-        text = await stt.transcribe(audio_bytes, mime)
+        audio_bytes, audio_mime = await wa.get_media(message["audio"]["id"])
+        text = await stt.transcribe(audio_bytes, audio_mime)
         if settings.stt_symbols:
             text = spoken.to_symbols(text)
             voice_unclear = spoken.unclear(text)
@@ -378,13 +332,22 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         await wa.send_text(phone, "I can read text, 🎤 voice notes and 📸 photos for now!")
         return
 
+    # 2. Safety filter — before consent, before intent, always. Categorised
+    # (not just a bool) so the safeguarding flag records *why*.
+    risk_category = safety.classify_risk(text) if text else None
+
+    # A parent or guardian writing from their own phone (consent.py): their
+    # exchange is answered there and kept out of the chat log, so erasing the
+    # learner later leaves nothing behind under the guardian's number.
+    if risk_category is None and msg_type == "text" and await consent.guardian_turn(
+        wa, sess, phone, text, message
+    ):
+        return
+
     await log_message(
         phone, "inbound", msg_type, safety.redact_pii(text), learner_id=sess.active_learner_id
     )
 
-    # 2. Safety filter — before consent, before intent, always. Categorised
-    # (not just a bool) so the safeguarding flag records *why*.
-    risk_category = safety.classify_risk(text) if text else None
     if risk_category is not None:
         # Record the flag FIRST. It used to be written after the referral was
         # sent, so a failed send (seen in the test suite: a WhatsApp
@@ -429,24 +392,89 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         if demo:
             sess.data["demo"] = True
         await session.save(sess)
-        reply = access.DEMO_CONSENT_MESSAGE if demo else session.CONSENT_MESSAGE
+        # Demo (investor) numbers see adult wording; it is recorded like any notice.
+        reply = access.DEMO_CONSENT_MESSAGE if demo else consent.notice()
+        intent = "consent_notice"
     elif sess.state == "awaiting_consent":
-        if text.strip().upper() in {"AGREE", "YES", "ACCEPT", "I AGREE"}:
+        reason = sess.data.get("onboarding_reason", "new_household")
+        code = consent.school_code(text)
+        school = await consent.redeem_school_code(code) if code else None
+        # The name typed after AGREE; "" if left out. Typed only: a voice note
+        # counts as consent only on the VOICE route below.
+        guardian = consent.agreement(text) if msg_type == "text" else None
+        if guardian == "" and sess.data.get("demo"):
+            guardian = "Demo user, 18+ (self)"
+        # A voice note or slip photo, when the learner chose that route.
+        route = consent.MEDIA.get(sess.data.get("expect_media"))
+        media = None
+        if route and msg_type == route["type"]:
+            media = ((sess.data["expect_media"], audio_bytes, audio_mime) if msg_type == "audio"
+                     else (sess.data["expect_media"], image_bytes, image_mime))
+        if school or guardian or media:
+            # create_household is idempotent: a sibling lands on the same account.
             account_id, guardian_id = await session.create_household(phone)
+            if school:
+                # The school holds the signed slip; the code stands for it.
+                consent_id = await consent.record(
+                    account_id, method="school_code", level="school", replied_from=phone,
+                    message=message, notice={"version": school["slip_version"]},
+                    reply_text=code, school_code=code,
+                )
+            elif media:
+                # The recording or photo is the evidence; `text` is the
+                # transcript or caption.
+                consent_id = await consent.record(
+                    account_id, method=route["method"], level=route["level"], replied_from=phone,
+                    message=message, notice=sess.data.get("notice"), reply_text=text, media=media,
+                )
+            else:
+                consent_id = await consent.record(
+                    account_id, method="typed_agree", level="declared", replied_from=phone,
+                    message=message, notice=sess.data.get("notice"), reply_text=text,
+                    guardian_name=guardian,
+                )
+            await consent.drop_link(sess)  # a code waiting for the guardian's phone is now moot
+            sess.data.pop("expect_media", None)
             sess.data.update(
                 state="awaiting_name",
                 account_id=account_id,
                 guardian_id=guardian_id,
-                onboarding_reason="new_household",
+                onboarding_reason=reason,
+                consent_id=consent_id,
             )
             await session.save(sess)
             reply = session.NAME_PROMPT
+        elif text.strip().upper() == "LINK":
+            reply = await consent.start_link(sess, phone)
+        elif msg_type == "text" and consent.media_choice(text):
+            sess.data["expect_media"] = consent.media_choice(text)
+            await session.save(sess)
+            reply = consent.MEDIA[sess.data["expect_media"]]["ask"]
+        elif reason == "add_learner" and text.strip().upper() == "CANCEL":
+            # Back to the learner who was studying; nobody was added.
+            sess.data.pop("onboarding_reason", None)
+            sess.data.pop("expect_media", None)
+            await consent.drop_link(sess)
+            sess.data["state"] = "active"
+            await session.save(sess)
+            reply = f"Okay, no learner added. Carrying on with {sess.name}. 🎓"
+        elif code:
+            reply = consent.BAD_SCHOOL_CODE
+        elif guardian == "":
+            reply = consent.NAME_NEEDED
         else:
-            reply = session.CONSENT_REPROMPT
+            reply = consent.reprompt(reason, sess.data.get("link_code"))
     elif sess.state == "awaiting_name":
         cleaned = session.clean_name(text)
-        if cleaned:
-            learner_id = await session.add_learner(sess.account_id, sess.guardian_id, cleaned)
+        if sess.data.pop("consent_announce", None):
+            # The guardian agreed from their own phone while WhatsApp would not
+            # let Katlego message this chat; say so before asking for a name.
+            await session.save(sess)
+            reply = consent.GUARDIAN_AGREED
+        elif cleaned:
+            learner_id = await session.add_learner(
+                sess.account_id, sess.guardian_id, cleaned, sess.data.pop("consent_id", None)
+            )
             sess.data.pop("pending_practice", None)
             sess.data.update(state="awaiting_grade", active_learner_id=learner_id, name=cleaned)
             await session.save(sess)
@@ -478,7 +506,7 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         if matched and not matched["grade"]:
             # Grade rule: tutoring follows the profile's grade, never a default.
             sess.data.pop("pending_practice", None)
-            _activate_without_grade(sess, matched)
+            session.activate_without_grade(sess, matched)
             await session.save(sess)
             reply = session.grade_prompt(matched["nickname"])
         elif matched:
@@ -506,9 +534,19 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
         elif image_bytes is not None:
             reply = await llm.photo_reply(image_bytes, image_mime, text, sess.grade)
             intent = "homework"
+        elif text.strip().upper() == "CONFIRM":
+            # The guardian's answer to the follow-up note. Handled here, ahead
+            # of a check-in or paper that would read it as an answer.
+            done = await consent.confirm(sess.active_learner_id, message.get("id"))
+            reply, intent = (consent.CONFIRMED if done else consent.NOTHING_TO_CONFIRM), "admin"
         else:
             reply, intent = await handle_active(wa, sess, phone, text)
+        if sess.state == "active" and not sess.data.get("household_erased"):
+            note = await consent.follow_up(sess.active_learner_id, sess.name)
+            if note:
+                reply += "\n\n" + note
 
+    notice_text = reply if intent == "consent_notice" else None
     raw_reply = access_prefix + transcript_prefix + reply
     output_risk = safety.classify_risk(raw_reply)
     if output_risk is not None:
@@ -519,7 +557,12 @@ async def process_job(wa: WhatsAppClient, job: dict) -> None:
             learner_id=sess.active_learner_id,
         )
     reply = safety.sanitize_output(raw_reply)
-    await wa.send_text(phone, reply)
+    sent = await wa.send_text(phone, reply)
+    if notice_text:
+        # Remember which wording is on screen and its WhatsApp id, so the
+        # consent record can point at exactly what the guardian agreed to.
+        sess.data["notice"] = await consent.notice_sent(safety.sanitize_output(notice_text), sent)
+        await session.save(sess)
     if sess.data.get("household_erased"):
         # DELETE of the last learner just erased the account, learner and
         # every conversation_log row for this phone. Logging the confirmation

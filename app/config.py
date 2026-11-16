@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "katlego-verify-token"
     meta_app_secret: str = PLACEHOLDER
     graph_api_base_url: str = "http://mockwa:8001"
+    # Katlego's own WhatsApp number, digits only in international form (e.g.
+    # 27600000000). Used to build the wa.me link a guardian opens to confirm
+    # consent from their own phone. Empty: the code is shown without a link.
+    whatsapp_public_number: str = ""
 
     # LLM
     llm_provider: str = "stub"  # stub | anthropic | groq | ollama | openrouter
@@ -125,6 +129,17 @@ class Settings(BaseSettings):
     # up. Leave unset (PLACEHOLDER) and alerts are logged at CRITICAL and
     # persisted to safeguarding_flags, but nothing is pushed to anyone.
     safeguarding_alert_phone: str = PLACEHOLDER
+
+    # Guardian consent follow-up (app/orchestrator/consent.py). A sign-up
+    # that rests on a typed AGREE is asked to confirm once after this many
+    # days, then reminded how to withdraw at the longer interval.
+    consent_reconfirm_days: int = 7
+    consent_reminder_days: int = 30
+    # Lets a guardian agree with a voice note or a photo of a signed slip,
+    # for families who share one phone. Katlego then stores the recording or
+    # photo. OFF until a privacy lawyer has settled storage and retention
+    # (docs/guardian-consent-findings.md, questions 10 and 11).
+    consent_media_enabled: bool = False
 
     # Infra
     database_url: str = "postgresql://katlego:katlego@db:5432/katlego"

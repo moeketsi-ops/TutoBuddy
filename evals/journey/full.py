@@ -78,6 +78,9 @@ def answer_checkin(phone: Phone, reply: str, grade: int, pick, *, stop_after: in
     return reply, n
 
 
+GUARDIAN_AGREES = "AGREE Nomsa Dlamini, mother"  # consent needs the guardian's name
+
+
 async def run() -> Path:
     from app.db import get_pool
 
@@ -93,7 +96,8 @@ async def run() -> Path:
     steps.check("consent message first", "POPIA" in r and "AGREE" in r)
     r = a.say("How do I find the area of a rectangle?")
     steps.check("no tutoring before a guardian agrees", "AGREE" in r)
-    steps.check("AGREE then name prompt", "call you" in a.say("AGREE").lower())
+    steps.check("a bare AGREE asks for the guardian's name", "full name" in a.say("AGREE"))
+    steps.check("AGREE with a name then name prompt", "call you" in a.say(GUARDIAN_AGREES).lower())
     steps.check("name then grade prompt", "grade" in a.say("Naledi").lower())
     welcome = a.say("8")
     steps.check("welcome and check-in start straight after the grade",
@@ -180,7 +184,8 @@ async def run() -> Path:
     steps.check("PREP answers (Grade 8 has no papers yet, so it says so)", bool(r.strip()), r[:120])
 
     # 7. sibling on Grade 10: papers
-    steps.check("ADD LEARNER asks for a name", "call you" in a.say("ADD LEARNER").lower())
+    steps.check("ADD LEARNER asks a guardian to agree for the sibling", "AGREE" in a.say("ADD LEARNER"))
+    steps.check("AGREE then name prompt", "call you" in a.say(GUARDIAN_AGREES).lower())
     a.say("Kabelo")
     r = a.say("10")
     steps.check("sibling gets their own Grade 10 check-in", "Check-in 1/13" in r)

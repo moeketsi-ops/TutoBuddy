@@ -3,11 +3,11 @@ marks the final answers it can check)."""
 
 import re
 
-from tests.conftest import Chat
+from tests.conftest import AGREE, Chat
 
 
 def _onboard(chat, name="Ayanda", grade="12"):
-    for msg in ("hi", "AGREE", name, grade):
+    for msg in ("hi", AGREE, name, grade):
         chat.send_text(msg)
         reply = chat.wait_for_reply()
     chat.send_text("PAUSE")                  # park the sign-up check-in

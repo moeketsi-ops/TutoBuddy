@@ -23,12 +23,23 @@ docker compose run --rm seed python -m seed.load_past_papers  # OCR'd past paper
 open http://localhost:8000/demo                        # WhatsApp-style demo simulator
 ```
 
-Say **hi** in the simulator, then onboard: a guardian replies **AGREE**, you
+Say **hi** in the simulator, then onboard: a guardian replies **AGREE** with their name (like *AGREE Nomsa Dlamini, mother*), you
 give a **name**, then a **grade** (the pilot grade is **8**). Then ask
 something like *"How do I collect like terms?"* — or click 🎤 and ask out
 loud (local Whisper transcribes it, no key needed). Say **quiz me** for a
 practice question, **PROGRESS** for your term mastery, **ADD LEARNER** /
 **SWITCH** for siblings on a shared phone.
+
+## Guardian consent
+
+Tutoring starts only after a parent or guardian agrees, and every agreement
+is kept as a record (`consent_records`). Four ways in, strongest first: a
+sign-up code from the learner's school (`seed/load_enrolment_codes.py`), the
+guardian confirming from their own WhatsApp (the learner sends **LINK**), a
+voice note or photo of a signed slip (off unless `CONSENT_MEDIA_ENABLED`),
+and a typed **AGREE** with the guardian's name. **WITHDRAW** erases a
+learner. Research, open legal questions and design:
+[docs/guardian-consent-findings.md](docs/guardian-consent-findings.md).
 
 ## Run the tests
 

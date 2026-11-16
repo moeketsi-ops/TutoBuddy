@@ -92,15 +92,83 @@ CREATE TABLE IF NOT EXISTS learners (
 );
 CREATE INDEX IF NOT EXISTS idx_learners_account ON learners(account_id);
 
--- Per-learner guardian consent. Phase 1 simplification: one guardian's
--- consent (given once, at household creation) covers every learner they
--- add -- there's no separate per-child consent capture flow yet, even
--- though this table is already shaped for it (its own consent_given_at).
+-- Guardian-to-learner link. consent_given_at is the time the guardian
+-- agreed (copied from the consent_records row that covers this learner).
 CREATE TABLE IF NOT EXISTS guardian_learner (
     guardian_id int NOT NULL REFERENCES guardians(id) ON DELETE CASCADE,
     learner_id  int NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
     consent_given_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (guardian_id, learner_id)
+);
+
+-- Guardian consent evidence (app/orchestrator/consent.py,
+-- docs/guardian-consent-findings.md). consent_notices holds each wording
+-- ever shown, keyed by a hash of the text; it holds no personal data.
+-- consent_records is one row per consent event per learner. Both FKs
+-- cascade, so erasing a learner or a household erases its consent record
+-- too -- the existing "erase everything" promise. Whether a minimal proof
+-- may be kept after erasure is an open legal question (findings note, Q7).
+CREATE TABLE IF NOT EXISTS consent_notices (
+    version       text PRIMARY KEY,
+    body          text NOT NULL,
+    first_sent_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS consent_records (
+    id                serial PRIMARY KEY,
+    account_id        int NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    learner_id        int REFERENCES learners(id) ON DELETE CASCADE,  -- set once the profile exists
+    method            text NOT NULL,  -- typed_agree | school_code | guardian_whatsapp | voice_note | signed_slip
+    level             text NOT NULL,  -- declared | voice | slip | second_account | school
+    notice_version    text REFERENCES consent_notices(version),
+    notice_message_id text,           -- WhatsApp id of the notice Katlego sent
+    reply_message_id  text,           -- WhatsApp id of the message that agreed
+    reply_text        text,           -- as sent, not the redacted chat-log copy
+    replied_from      text NOT NULL,  -- WhatsApp account that agreed
+    guardian_name     text,
+    consent_at        timestamptz NOT NULL,
+    created_at        timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_consent_records_learner ON consent_records(learner_id);
+CREATE INDEX IF NOT EXISTS idx_consent_records_account ON consent_records(account_id);
+CREATE INDEX IF NOT EXISTS idx_consent_records_from ON consent_records(replied_from);
+
+-- Follow-up on consents that no second account or school backs up: when the
+-- guardian was last shown a reminder, and their CONFIRM a week or so later.
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS last_notice_at timestamptz;
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirmed_at timestamptz;
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS reconfirm_message_id text;
+
+-- Consent given as a voice note or a photo of a signed slip (only when
+-- CONSENT_MEDIA_ENABLED is on). The recording or photo is the evidence, so
+-- it is kept with the record and erased with it. needs_review marks a
+-- consent nobody has checked: every slip photo, and any voice note whose
+-- transcript does not contain "agree" (the transcript never decides).
+CREATE TABLE IF NOT EXISTS consent_media (
+    consent_record_id int PRIMARY KEY REFERENCES consent_records(id) ON DELETE CASCADE,
+    kind       text NOT NULL,  -- voice | slip
+    mime       text NOT NULL,
+    content    bytea NOT NULL,
+    sha256     text NOT NULL,
+    transcript text,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE consent_records ADD COLUMN IF NOT EXISTS needs_review boolean NOT NULL DEFAULT false;
+
+-- School route (seed/load_enrolment_codes.py): the school collects a signed
+-- slip from each parent and keeps it; each returned slip earns one sign-up
+-- code. The row holds the school's own reference for the learner, never a
+-- name or a phone number. Erasing the learner clears the link but keeps the
+-- code spent, so a withdrawn consent cannot be reused without a new slip.
+CREATE TABLE IF NOT EXISTS enrolment_codes (
+    code              text PRIMARY KEY,
+    school            text NOT NULL,
+    learner_ref       text NOT NULL,
+    slip_version      text NOT NULL REFERENCES consent_notices(version),
+    signed_on         date NOT NULL,
+    created_at        timestamptz NOT NULL DEFAULT now(),
+    redeemed_at       timestamptz,
+    consent_record_id int REFERENCES consent_records(id) ON DELETE SET NULL,
+    UNIQUE (school, learner_ref)
 );
 
 CREATE TABLE IF NOT EXISTS conversation_log (

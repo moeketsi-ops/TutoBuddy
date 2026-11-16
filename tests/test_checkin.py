@@ -4,13 +4,15 @@ question, resumes, finishes with a report, and seeds topic mastery."""
 import json
 from pathlib import Path
 
+from tests.conftest import AGREE
+
 BANK = Path(__file__).resolve().parent.parent / "seed" / "diagnostic"
 
 
 def _onboard(chat, grade: str) -> str:
     chat.send_text("hi")
     chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     chat.wait_for_reply()
     chat.send_text("Lerato")
     chat.wait_for_reply()

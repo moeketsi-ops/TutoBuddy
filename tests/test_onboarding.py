@@ -4,7 +4,7 @@ import time
 
 import httpx
 
-from tests.conftest import MOCKWA
+from tests.conftest import AGREE, MOCKWA, db
 
 
 def test_new_learner_hits_consent_gate_first(chat):
@@ -26,7 +26,7 @@ def test_consent_is_required_not_optional(chat):
 def test_full_onboarding_flow(chat):
     chat.send_text("hello")
     assert "POPIA" in chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     assert "call you" in chat.wait_for_reply().lower()  # profile-creation name prompt
     chat.send_text("Thabo")
     assert "grade" in chat.wait_for_reply().lower()
@@ -41,7 +41,7 @@ def test_full_onboarding_flow(chat):
 def test_name_step_reprompts_on_empty_or_reserved_word(chat):
     chat.send_text("hi")
     chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     chat.wait_for_reply()
     chat.send_text("RESET")  # a command word, not a usable nickname here
     reply = chat.wait_for_reply()
@@ -65,12 +65,15 @@ def test_delete_last_learner_drops_household_and_requires_reconsent(onboarded_ch
     assert not any("went wrong" in m.lower() for m in outbox), outbox
     # Nothing left in the DB for this phone (the POPIA "erase everything" promise).
     assert _rows_for_phone(onboarded_chat.phone) == {"account_channels": 0, "conversation_log": 0}
+    assert db("SELECT 1 FROM consent_records WHERE replied_from = $1", onboarded_chat.phone) == []
     onboarded_chat.send_text("hi again")
     assert "POPIA" in onboarded_chat.wait_for_reply()
 
 
 def test_delete_with_sibling_keeps_household(onboarded_chat):
     onboarded_chat.send_text("ADD LEARNER")
+    onboarded_chat.wait_for_reply()
+    onboarded_chat.send_text(AGREE)
     onboarded_chat.wait_for_reply()
     onboarded_chat.send_text("Naledi")
     onboarded_chat.wait_for_reply()
@@ -103,6 +106,8 @@ def _rows_for_phone(phone: str) -> dict:
 def test_add_learner_creates_sibling_and_switch_moves_between_them(onboarded_chat):
     # onboarded_chat is "Thabo", Grade 11.
     onboarded_chat.send_text("ADD LEARNER")
+    assert "AGREE" in onboarded_chat.wait_for_reply()  # a sibling needs consent too
+    onboarded_chat.send_text(AGREE)
     assert "call you" in onboarded_chat.wait_for_reply().lower()
     onboarded_chat.send_text("Naledi")
     assert "grade" in onboarded_chat.wait_for_reply().lower()

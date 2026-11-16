@@ -22,7 +22,7 @@ from app.db import get_pool
 from app.orchestrator import session
 from app.tutor import papers, test_prep
 
-ADMIN = {"RESET", "DELETE", "SWITCH", "ADD LEARNER", "PROGRESS", "REPORT", "CHECK-IN", "CHECKIN",
+ADMIN = {"RESET", "DELETE", "WITHDRAW", "SWITCH", "ADD LEARNER", "PROGRESS", "REPORT", "CHECK-IN", "CHECKIN",
          "CHECK IN", "PAUSE"}
 PAPER_FOOTER = "\n\n_(Paper paused while we work on this · NEXT = next question · STOP = end)_"
 

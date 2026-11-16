@@ -1,6 +1,6 @@
 """RAG-grounded Socratic tutoring over the seeded CAPS corpus."""
 
-from tests.conftest import REAL_LLM, WORKER_ERROR, assert_tutored, run_with_app_db
+from tests.conftest import AGREE, REAL_LLM, WORKER_ERROR, assert_tutored, run_with_app_db
 
 
 def test_homework_question_gets_grounded_socratic_reply(onboarded_chat):
@@ -23,7 +23,7 @@ def test_grade_filter_never_retrieves_above_learner_grade(chat):
     # Grade 8 learner asks about a Grade 12-only topic.
     chat.send_text("hi")
     chat.wait_for_reply()
-    chat.send_text("AGREE")
+    chat.send_text(AGREE)
     chat.wait_for_reply()  # name prompt
     chat.send_text("Grade8Learner")
     chat.wait_for_reply()  # grade prompt
